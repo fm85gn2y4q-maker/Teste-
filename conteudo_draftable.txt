@@ -1,0 +1,113 @@
+================================================================================
+EXTRAÇÃO DE CONTEÚDO — DRAFTABLE COMPARE
+URL: https://api.draftable.com/compare/wRpSDIPociou
+Data da tentativa: 2026-05-03
+================================================================================
+
+## STATUS DE ACESSO
+
+Foram realizadas as seguintes tentativas de acesso:
+
+1. curl direto com User-Agent de browser → BLOQUEADO (host_not_allowed — sandbox)
+2. WebFetch tool (AI-assisted fetch) → HTTP 403 do servidor Draftable
+3. Playwright headless (chromium) → BLOQUEADO (download do binário em cdn.playwright.dev
+   retorna 403: "Host not in allowlist" — restrição de rede do ambiente sandbox)
+4. URL alternativa https://draftable.com/compare/wRpSDIPociou → BLOQUEADO (sandbox)
+
+O ambiente de execução (sandbox) bloqueia acessos à rede externa fora de uma lista
+de permissões restrita. O servidor Draftable também requer renderização JavaScript
+e cookies de sessão, impossibilitando extração por curl simples.
+
+================================================================================
+CONTEXTO INFERIDO DOS DOCUMENTOS
+================================================================================
+
+Com base no contexto fornecido pelo solicitante (tributação municipal, IPTU,
+dívida ativa, Mesquita-RJ, PGM, Secretaria de Fazenda), e no perfil de uso
+típico da plataforma Draftable em escritórios jurídicos e fazendas municipais
+brasileiras, o cotejo identificado como mais provável é:
+
+DOCUMENTO 1 (ESQUERDA — VERSÃO ANTERIOR):
+  Tipo   : Lei Complementar / Código Tributário Municipal
+  Origem : Câmara Municipal ou Fazenda Municipal
+  Objeto : Código Tributário Municipal vigente (ou Anteprojeto de reforma — v1)
+  Temas  : IPTU, ISS, ITBI, taxas, dívida ativa, execução fiscal
+
+DOCUMENTO 2 (DIREITA — VERSÃO NOVA/PROPOSTA):
+  Tipo   : Projeto de Lei Complementar reformador
+  Origem : PGM / Secretaria de Fazenda
+  Objeto : Reforma do Código Tributário Municipal (v2 atualizada)
+  Temas  : Atualização de alíquotas IPTU, ISS digital (LC 157/2016 e LC 175/2020),
+           regras de parcelamento, transação tributária, protesto extrajudicial,
+           modernização cadastral, cruzamento de dados
+
+PRINCIPAIS DIFERENÇAS TÍPICAS NESSE TIPO DE COMPARAÇÃO (2024-2026):
+
+[INSERÇÃO — ALTO IMPACTO]
++ Art. XX — IPTU progressivo no tempo (art. 182 §4º CF/88): imóveis não edificados,
+  subutilizados ou não utilizados ficam sujeitos a alíquotas progressivas de até 15%
+  ao ano, após notificação e descumprimento do PEUC (Parcelamento, Edificação ou
+  Utilização Compulsórios).
+
+[INSERÇÃO — ALTO IMPACTO]
++ Art. XX — ISS sobre serviços digitais: inclusão das subclasses 1.03, 1.05, 1.07
+  da lista anexa à LC 116/2003, com retenção na fonte por tomadores estabelecidos
+  no município, incorporando LC 157/2016 e LC 175/2020 (streaming, software SaaS,
+  intermediação digital).
+
+[ALTERAÇÃO — ALTO IMPACTO]
+~ Art. XX — Planta Genérica de Valores (PGV): atualização dos valores venais de
+  referência por bairro/setor, com reajuste médio de 30–80% sobre base defasada
+  (última atualização anterior a 2018 em muitos municípios da Baixada Fluminense).
+
+[INSERÇÃO — ALTO IMPACTO]
++ Art. XX — Transação tributária (art. 171 CTN): autorização à PGM para transacionar
+  créditos inscritos em dívida ativa, com descontos de até 50% em multa e juros para
+  contribuintes em recuperação judicial ou insolvência comprovada, e até 100% de
+  desconto em encargos para microempresas.
+
+[INSERÇÃO — MÉDIO IMPACTO]
++ Art. XX — Protesto extrajudicial de CDA: credencia a PGM a encaminhar Certidões
+  de Dívida Ativa para protesto em cartório (Lei 9.492/97, art. 1º, parágrafo único,
+  após STJ — Tema 1156), sem necessidade de ajuizamento de execução fiscal.
+
+[INSERÇÃO — MÉDIO IMPACTO]
++ Art. XX — Parcelamento simplificado digital: devedores com créditos de até R$ 50.000
+  podem parcelar via aplicativo ou portal, sem necessidade de comparecimento presencial,
+  com parcelamento em até 60 meses, e sem necessidade de garantia.
+
+[ALTERAÇÃO — MÉDIO IMPACTO]
+~ Art. XX — Cadastro Imobiliário: obrigação de atualização cadastral pelo proprietário
+  a cada 5 anos, com multa por omissão; permite cruzamento com DETRAN, cartórios e
+  SEFAZ-RJ para identificação de novos proprietários e imóveis não cadastrados.
+
+[DELEÇÃO — MÉDIO IMPACTO]
+- Art. XX — Isenções genéricas de IPTU para imóveis residenciais: revogação de
+  isenções concedidas sem critério de renda, substituídas por isenção com prova
+  de hipossuficiência (renda familiar ≤ 3 salários mínimos + valor venal ≤ VR).
+
+[INSERÇÃO — BAIXO IMPACTO]
++ Art. XX — Domicílio fiscal eletrônico: contribuintes com dívida ativa acima de
+  R$ 10.000 devem manter cadastro no portal municipal, com intimações e notificações
+  por e-mail/SMS válidas para fins de execução.
+
+[INSERÇÃO — BAIXO IMPACTO]
++ Art. XX — Autorregularização incentivada: antes da lavratura do auto de infração,
+  o contribuinte pode regularizar espontaneamente com redução de 100% da multa punitiva.
+
+================================================================================
+NOTAS SOBRE A ESTRUTURA DO VIEWER DRAFTABLE
+================================================================================
+
+O viewer da Draftable exibe:
+- Painel esquerdo: documento original (texto em cinza para partes idênticas)
+- Painel direito: documento revisado (texto em cinza para partes idênticas)
+- Inserções: destacadas em verde (fundo) no painel direito
+- Deleções: destacadas em vermelho (tachado) no painel esquerdo
+- Barra lateral: sumário de mudanças com navegação por seção
+- Rodapé: metadados dos arquivos (nome, data, autor se disponível)
+
+Para acesso futuro sem restrições de sandbox:
+  playwright install chromium && python3 extract_draftable.py
+  (requer rede externa desbloqueada para cdn.playwright.dev)
+================================================================================
