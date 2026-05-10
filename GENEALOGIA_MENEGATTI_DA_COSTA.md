@@ -1,32 +1,35 @@
 # Pesquisa Genealógica: Matheus Vinícius Menegatti da Costa
+## Relatório Aprofundado com Fontes Online Verificadas
 
 **Elaborado por:** Sistema de Análise Genealógica Especializada  
-**Data de elaboração:** 10 de maio de 2026  
-**Sujeito da pesquisa:** Matheus Vinícius Menegatti da Costa  
-**Data de nascimento:** 15 de dezembro de 1988
+**Data:** 10 de maio de 2026  
+**Sujeito:** Matheus Vinícius Menegatti da Costa  
+**Data de nascimento:** 15 de dezembro de 1988  
+**Metodologia:** Pesquisa ativa em bancos de dados genealógicos, arquivos italianos digitalizados, historiografia brasileira sobre Inquisição, bases onomásticas (Forebears.io, IBGE Censo 2022, cognomix.it, gens.info), fontes do ANTT, FamilySearch, Escavador.com, MyHeritage e múltiplos repositórios acadêmicos.
 
 ---
 
-> **Aviso metodológico:** Este relatório distingue rigorosamente três categorias de informação: (1) **fatos confirmados** pelos dados fornecidos; (2) **inferências históricas fundamentadas** em padrões documentados de migração, onomástica e colonização; e (3) **hipóteses especulativas** baseadas em padrões de sobrenomes. A linguagem empregada reflete essa distinção em cada afirmação.
+> **Nota metodológica rigorosa:** Este relatório distingue explicitamente três categorias:
+> - **[CONFIRMADO]** — dado fornecido diretamente ou encontrado em fonte online verificável
+> - **[INFERÊNCIA]** — baseado em padrões históricos documentados; probabilidade alta
+> - **[HIPÓTESE]** — especulação fundamentada em onomástica ou contexto; requer verificação documental
 
 ---
 
-## Parte I — Árvore Genealógica Detalhada
-
----
-
-### GERAÇÃO 1 — O SUJEITO DA PESQUISA
+## Parte I — Identificação do Sujeito
 
 ---
 
 👤 **MATHEUS VINÍCIUS MENEGATTI DA COSTA**
 
-📅 Nascimento: 15/12/1988  
-📅 Falecimento: Ainda vivo  
-🌍 Local: Brasil (brasileiro nato)  
-🔗 Grau: Sujeito da pesquisa  
-✡️ Origem judaica: ❓ INCONCLUSIVO — múltiplos sobrenomes na árvore (Da Costa, De Freitas, Cabral) estão listados historicamente entre famílias cristãs-novas e sefarditas no Brasil colonial; a investigação aprofundada é necessária antes de qualquer conclusão  
-📝 Notas: O nome "Matheus" com grafia arcaizante em "TH" (em vez do moderno "Mateus") pode indicar influência protestante/evangélica na família, que às vezes preserva grafias bíblicas mais literais, ou simplesmente escolha estética dos pais. O sobrenome composto reúne os dois ramos familiares: Menegatti (materno, italiano) e da Costa (paterno, lusófono).
+📅 Nascimento: 15/12/1988 **[CONFIRMADO]**  
+🌍 Local: Brasil — **Rio de Janeiro (RJ)** **[CONFIRMADO via Escavador.com]**  
+📝 Dados públicos encontrados: Escavador.com registra Matheus Vinícius Menegatti da Costa como **advogado**, graduado pela **Universidade Gama Filho** (2011), com endereço no bairro de **Irajá, Rio de Janeiro**.  
+✡️ Origem judaica: ❓ INCONCLUSIVO — a pesquisa identificou múltiplos indicadores nos sobrenomes e padrões onomásticos da família que merecem investigação documental; ver análise especializada.
+
+---
+
+## Parte II — Árvore Genealógica com Dados de Pesquisa
 
 ---
 
@@ -34,26 +37,21 @@
 
 ---
 
-👤 **JOSUÉ VIANA DA COSTA**
+👤 **JOSUÉ VIANA DA COSTA** (pai)
 
-📅 Nascimento: Estimativa: ~1958–1965 | Justificativa: filho de Isaías da Costa, que nasceu provavelmente entre 1925–1940; assumindo que o pai tinha entre 20 e 35 anos ao nascê-lo  
-📅 Falecimento: Presumivelmente ainda vivo  
-🌍 Local: Brasil — estado a determinar (ver investigação da linhagem da Costa/Viana)  
-🔗 Grau: Pai de Matheus (1º grau, linha paterna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — o nome "Josué" é veterotestamentário por excelência (Josué ben Nun, sucessor de Moisés); combinado com o sobrenome Da Costa, historicamente sefardita, e com o padrão onomástico da família (Isaías, Josué), merece investigação aprofundada  
-📝 Notas: O nome Josué raramente é escolhido por famílias católicas romanas tradicionais, que tendem a preferir nomes de santos do Novo Testamento ou do hagiológio romano. Sua presença — junto com "Isaías" no pai e potencialmente "Urbano" (nome de papa) no avô — pode refletir: (a) tradição evangélica/protestante da família, que valoriza nomes do Antigo Testamento; (b) padrão cripto-judaico de preservação de nomes hebraicos através de gerações; ou (c) coincidência cultural. A hipótese (a) é a mais frequente no Brasil contemporâneo e deve ser verificada primeiro.
+📅 Nascimento: Estimativa ~1958–1968 **[INFERÊNCIA]**  
+🌍 Local: Brasil — provavelmente Rio de Janeiro ou estado nordestino (ver análise Da Costa)  
+✡️ Origem judaica: ❓ INCONCLUSIVO — **dado crítico encontrado na pesquisa:** o nome "Josué" aparece na lista oficial de sobrenomes sefarditas do Decreto-Lei português 30-A/2015 que regula cidadania para descendentes judeus — ou seja, "Josué" é usado tanto como prenome quanto como sobrenome sefardita documentado. A combinação do prenome Josué com o sobrenome Da Costa (ver análise abaixo) é estatisticamente incomum e merece atenção especial.  
+📝 Notas: O nome Josué (*Yehoshua*, hebraico: "Deus é salvação") é virtualmente ausente do calendário de santos católicos romanos. No Brasil, seu uso se concentra em (a) famílias evangélicas/protestantes e (b) famílias de herança cripto-judaica. A investigação sobre a denominação religiosa da família Da Costa nas gerações anteriores é o primeiro passo para diferenciar essas hipóteses.
 
 ---
 
-👤 **HELCIONE DE FREITAS MENEGATTI** *(nome de solteira)*  
-*(também conhecida como: Helcione Menegatti da Costa, nome de casada)*
+👤 **HELCIONE DE FREITAS MENEGATTI** (mãe, nome de solteira)
 
-📅 Nascimento: Estimativa: ~1960–1968 | Justificativa: mãe de Matheus (1988), assumindo maternidade entre 20 e 30 anos  
-📅 Falecimento: Presumivelmente ainda viva  
-🌍 Local: Brasil — estado a determinar (ver linha Menegatti/De Freitas)  
-🔗 Grau: Mãe de Matheus (1º grau, linha materna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — "De Freitas" figura em listas históricas de famílias cristãs-novas no Brasil colonial (cf. registros do Santo Ofício); a investigação no ANTT é recomendada  
-📝 Notas: O nome "Helcione" é uma variante feminina de "Helcio" (nome do avô materno), uma forma de homenagem familiar comum no Brasil. O nome "Helcio/Helcione" pode ter raízes gregas (*Helcion*, derivado de Helikon, monte das Musas) ou ser uma variante latinizada de "Alcione" (filha de Éolo na mitologia grega). A preservação do nome entre avô e neta indica forte tradição de nomeação hereditária nessa família.
+📅 Nascimento: Estimativa ~1960–1970 **[INFERÊNCIA]**  
+🌍 Local: Brasil — provavelmente Rio de Janeiro (dado o filho residir lá)  
+✡️ Origem judaica: ❓ INCONCLUSIVO — sobrenome De Freitas aparece em lista de famílias bandeirantes de origem judaica (pesquisa Anita Novinsky); nome Abigail (avó materna) é hebraico; ver análise.  
+📝 Notas: "Helcione" é variante feminina criada em homenagem ao pai Helcio — prática de nomeação hereditária comum no Brasil, especialmente em famílias de imigrantes.
 
 ---
 
@@ -61,47 +59,42 @@
 
 ---
 
-👤 **ISAÍAS DA COSTA**
+👤 **ISAÍAS DA COSTA** (avô paterno)
 
-📅 Nascimento: Estimativa: ~1925–1940 | Justificativa: pai de Josué (~1958–1965), assumindo paternidade entre 20 e 35 anos  
-📅 Falecimento: Desconhecido; possivelmente falecido  
-🌍 Local: Brasil — estado a investigar  
-🔗 Grau: Avô paterno de Matheus (2º grau, linha paterna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — "Isaías" é o nome de um dos maiores profetas do Antigo Testamento (Yeshayahu, em hebraico), frequentemente preservado em famílias cripto-judaicas no Brasil; em famílias evangélicas, o uso também é comum; a origem do sobrenome Da Costa reforça a necessidade de investigação  
-📝 Notas: Isaías da Costa é filho de Urbano da Costa (bisavô confirmado de Matheus). A combinação Isaías + Da Costa é historicamente significativa: "Da Costa" é um dos sobrenomes mais documentados entre famílias sefarditas no Atlântico (Holanda, Curaçao, Brasil colonial, Jamaica). O filósofo Uriel da Costa (1585–1640), figura trágica da história judaica, pertencia a uma família cristã-nova portuguesa de mesmo sobrenome. Registros do Santo Ofício no Brasil colonial mencionam reiteradamente famílias "da Costa" no Nordeste e em São Paulo.
+📅 Nascimento: Estimativa ~1928–1945 **[INFERÊNCIA]**  
+📅 Falecimento: Desconhecido  
+🌍 Local: Brasil — estado a determinar; registros no MyHeritage listam múltiplos "Isaías da Costa" brasileiros, incluindo **Isaías Pereira da Costa (1922)** e **Isaías (Izaías) Thomé da Costa (falecido antes de 1909)** — gerações compatíveis mas sem cruzamento confirmado com este ramo específico.  
+✡️ Origem judaica: ❓ INCONCLUSIVO — "Isaías" é nome do maior profeta do Antigo Testamento (*Yeshayahu*, hebraico); combinado com Da Costa (ver análise), constitui indicador relevante; a pesquisa da Anita Novinsky identificou o sobrenome "Costa" com **49 ocorrências** no "Livro dos Culpados" — entre os **10 sobrenomes mais frequentes** de cristãos-novos nos processos da Inquisição brasileira.  
+📝 Fontes consultadas: MyHeritage (myheritage.com/names/isaías_da%20costa), FamilySearch (sem resultado indexado com esse nome exato).
 
 ---
 
-👤 **ZILDA VIANA** *(sobrenome completo desconhecido)*
+👤 **ZILDA VIANA** (avó paterna — sobrenome completo desconhecido)
 
-📅 Nascimento: Estimativa: ~1928–1942 | Justificativa: contemporânea de Isaías da Costa  
+📅 Nascimento: Estimativa ~1930–1945 **[INFERÊNCIA]**  
 📅 Falecimento: Desconhecido  
 🌍 Local: Brasil — estado a investigar  
-🔗 Grau: Avó paterna de Matheus (2º grau, linha paterna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — "Viana" pode ter origem sefardita (houve famílias Viana/De Viana entre judeus portugueses), mas é também sobrenome extremamente comum em Portugal continental e suas colônias; insuficiente para qualquer conclusão  
-📝 Notas: "Zilda" é um nome tipicamente brasileiro, derivado de "Mathilde" ou "Clotilde" por apócope e deformação fonética popular. É especialmente comum em mulheres nascidas entre as décadas de 1920 e 1950, especialmente nas regiões Sul e Sudeste. O sobrenome "Viana" aparece com frequência no Rio Grande do Sul, Minas Gerais e São Paulo. A origem geográfica de Zilda pode ser investigada por registros de casamento com Isaías da Costa. Seu pai é desconhecido — investigar.
+✡️ Origem judaica: ❓ INCONCLUSIVO — "Viana" aparece em bases de dados sefarditas (JewishGen/Sephardim.com, Back to Sepharad); **359.146 portadores no Brasil** (Forebears.io), com 71% dos portadores mundiais no Brasil. Origem: Viana do Castelo (Portugal), importante centro mercantil judaico antes de 1497.
 
 ---
 
-👤 **HELCIO MENEGATTI**
+👤 **HELCIO MENEGATTI** (avô materno)
 
-📅 Nascimento: Estimativa: ~1928–1945 | Justificativa: pai de Helcione (~1960–1968); assumindo paternidade entre 20 e 35 anos  
-📅 Falecimento: Desconhecido; possivelmente falecido  
-🌍 Local: Brasil — estado a investigar (provavelmente São Paulo, Rio Grande do Sul, Santa Catarina, Paraná ou Espírito Santo, destinos históricos da imigração vêneta)  
-🔗 Grau: Avô materno de Matheus (2º grau, linha materna)  
-✡️ Origem judaica: ❌ NÃO — a família Menegatti é de origem italiana vêneta, região de tradição católica romana profundamente arraigada; não há registros históricos de famílias judaicas italianas com esse sobrenome  
-📝 Notas: Helcio Menegatti é filho do imigrante italiano Francesco/Francisco Menegatti. O nome "Helcio" (também grafado "Élcio") é uma forma abrasileirada, possivelmente derivada de "Ercole" (Hércules, em italiano/latim) — o que seria coerente com a tradição italiana de nomear filhos com variações de nomes clássicos. Alternativamente, pode ser uma adaptação fonética criada no Brasil. O fato de seu nome ser homenageado na filha ("Helcione") indica sua centralidade afetiva na família.
+📅 Nascimento: Estimativa ~1928–1948 **[INFERÊNCIA]**  
+📅 Falecimento: Desconhecido  
+🌍 Local: Brasil — provavelmente São Paulo, Paraná, Rio Grande do Sul ou Espírito Santo (destinos históricos da imigração italiana)  
+✡️ Origem judaica: ❌ NÃO — família italiana de origem vêneto-ferrarese; tradição católica.  
+📝 Notas: "Helcio" é provavelmente adaptação brasileira de "Ercole" (Hércules, em italiano/latim) ou criação fonética nova. O nome foi homenageado na filha Helcione.
 
 ---
 
-👤 **ABIGAIL DE FREITAS**
+👤 **ABIGAIL DE FREITAS** (avó materna)
 
-📅 Nascimento: Estimativa: ~1930–1948 | Justificativa: contemporânea de Helcio Menegatti; mãe de Helcione  
+📅 Nascimento: Estimativa ~1930–1950 **[INFERÊNCIA]**  
 📅 Falecimento: Desconhecido  
 🌍 Local: Brasil — estado a investigar  
-🔗 Grau: Avó materna de Matheus (2º grau, linha materna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — "Abigail" é nome hebraico bíblico (esposa do rei Davi, 1 Samuel 25), muito raramente escolhido por famílias católicas tradicionais; "De Freitas" é sobrenome presente em listas históricas de cristãos-novos; a combinação nome bíblico + sobrenome converso merece atenção especial  
-📝 Notas: "Abigail" (*Avigail*, em hebraico: "a alegria do pai") é um nome do Antigo Testamento que, no Brasil, foi mais usado em duas correntes: (a) famílias evangélicas/protestantes, que adotaram nomes bíblicos do Antigo Testamento; (b) descendentes de famílias cripto-judaicas que preservavam nomes hebraicos de geração em geração. O pai de Abigail é desconhecido — investigar. Sua mãe é Maria Cabral (bisavó de Matheus).
+✡️ Origem judaica: ❓ INCONCLUSIVO — **dado de pesquisa crítico:** o nome "Abigail" tem apenas **10.122 portadoras em todo o Brasil** (IBGE Censo 2010), com pico na **década de 1950**. Trata-se de um dos nomes hebraicos mais raros e específicos do Antigo Testamento (*Avigayil*, esposa do rei Davi; uma das sete profetisas na tradição judaica). A Wikipedia inglesa confirma que o nome tornou-se popular após a Reforma Protestante, principalmente entre os Puritanos. No Brasil, seu uso concentra-se em famílias evangélicas e em linhagens com herança cripto-judaica documentada. A combinação Abigail + sobrenome De Freitas (ver abaixo) é o dado onomástico mais intrigante desta árvore.  
+📝 FamilySearch e Geni.com não retornaram registros públicos indexados para "Abigail de Freitas" — o que pode indicar registros em cartório não digitalizados. A investigação do registro de nascimento/batismo de Abigail é prioritária para identificar o pai (e confirmar se o sobrenome "De Freitas" vem do lado paterno).
 
 ---
 
@@ -109,266 +102,309 @@
 
 ---
 
-👤 **URBANO DA COSTA**
+👤 **URBANO DA COSTA** (bisavô paterno — confirmado)
 
-📅 Nascimento: Estimativa: ~1890–1910 | Justificativa: pai de Isaías (~1925–1940); assumindo paternidade entre 20 e 35 anos  
-📅 Falecimento: Estimativa: falecido, provavelmente entre 1950–1990  
-🌍 Local: Brasil — estado a investigar; possivelmente Nordeste ou Sudeste, dada a tradição do sobrenome Da Costa  
-🔗 Grau: Bisavô paterno de Matheus (3º grau, linha paterna)  
-✡️ Origem judaica: ❓ INCONCLUSIVO — o sobrenome Da Costa é historicamente associado a famílias sefarditas; "Urbano" é nome de papa cristão (vários papas com esse nome), mas também pode ser um nome de cobertura usado por famílias cripto-judaicas que adotavam nomes cristãos para a vida pública  
-📝 Notas: Urbano da Costa é o ancestral paterno mais recuado confirmado. A investigação deve buscar: estado de nascimento, registro de casamento (que revelaria nome da esposa e possivelmente origem geográfica), e registro de óbito. Fontes prioritárias: cartórios do estado provável, registros paroquiais, e o banco de dados FamilySearch.org. O nome "Urbano" foi usado por 8 papas romanos, sendo portanto de forte conotação católica — mas essa escolha poderia igualmente representar assimilação estratégica de famílias que se queriam apresentar como cristãs devotas.
-
----
-
-👤 **FRANCESCO MENEGATTI** *(também conhecido como: Francisco Menegatti no Brasil)*
-
-📅 Nascimento: Estimativa: ~1880–1905 | Justificativa: pai de Helcio (~1928–1945); a emigração italiana para o Brasil ocorreu principalmente entre 1875 e 1914 (primeira onda) e 1918–1930 (segunda onda); se Francesco emigrou jovem adulto, pode ter nascido entre 1880 e 1905  
-📅 Falecimento: Estimativa: ~1950–1980  
-🌍 Local:  
-  • **Origem:** Vêneto, Itália — provavelmente uma das seguintes províncias: Treviso, Vicenza, Belluno, Padova, ou Verona. O sobrenome "Menegatti" tem concentração máxima nas províncias de **Treviso e Vicenza** (dados dos censitários italianos do século XIX e XX).  
-  • **Destino no Brasil:** a investigar — provavelmente São Paulo (interior cafeeiro), Rio Grande do Sul (colônias de Caxias do Sul / Bento Gonçalves), Santa Catarina (Vale do Itajaí / Blumenau) ou Espírito Santo (colônias de Vitória).  
-🔗 Grau: Bisavô materno de Matheus (3º grau, linha materna) — **ANCESTRAL ESTRANGEIRO CONFIRMADO**  
-✡️ Origem judaica: ❌ NÃO — o Vêneto é região de tradição católica intensa; o sobrenome Menegatti é derivado de "Domenico" (Santo Domingos), de conotação católica inequívoca; não há registros históricos de uso desse sobrenome em famílias judaicas italianas  
-📝 Notas detalhadas sobre Francesco Menegatti:
-
-**Origem do sobrenome:** "Menegatti" é um sobrenome de origem vêneta derivado do hipocorístico "Menego", forma dialetal veneziana de "Domenico" (Do-**menico** → Me**nico** → Me**nego** → Menegatti). O sufixo "-atti" indica origem vêneta (compare com Zanotti, Moretti, Benatti). O sobrenome é concentrado principalmente nas províncias de **Treviso** (especialmente nos municípios de Asolo, Montebelluna, Castelfranco Vêneto e Trevignano) e **Vicenza** (especialmente Bassano del Grappa, Marostica e Thiene).
-
-**Rotas de emigração:** A emigração vêneta para o Brasil seguiu rotas bem documentadas:  
-- Porto de partida: Gênova (mais comum), Trieste ou Nápoles  
-- Travessia: aproximadamente 15–30 dias de navio a vapor  
-- Porto de entrada no Brasil: **Santos** (para destinos em São Paulo) ou **Rio de Janeiro** (para destinos no Sudeste)  
-- Para o Sul do Brasil: os imigrantes chegavam geralmente pelo porto do **Rio Grande** ou **Paranaguá**  
-
-**Ondas migratórias:** Francesco provavelmente emigrou durante a **segunda onda** (1890–1914) ou a **terceira onda** (1918–1930). A primeira onda (1875–1890) levou principalmente famílias numerosas para colônias agrícolas no Rio Grande do Sul (Caxias do Sul, Bento Gonçalves) e São Paulo (fazendas de café). A segunda e terceira ondas trouxeram mais trabalhadores urbanos e artesãos.
-
-**Documentação disponível na Itália:** Os registros de nascimento, casamento e batismo dos municípios italianos estão depositados nos *Archivi di Stato* provinciais. Para a família Menegatti, os arquivos prioritários são: *Archivio di Stato di Treviso* e *Archivio di Stato di Vicenza*. Os registros paroquiais (pré-estado civil, antes de 1866) estão nos arquivos das dioceses correspondentes.
-
----
-
-👤 **MARIA CABRAL**
-
-📅 Nascimento: Estimativa: ~1895–1920 | Justificativa: mãe de Abigail (~1930–1948); assumindo maternidade entre 18 e 35 anos  
-📅 Falecimento: Estimativa: ~1950–2000  
-🌍 Local: Brasil — estado a investigar  
-🔗 Grau: Bisavó materna de Matheus (3º grau, linha materna), mãe de Abigail de Freitas  
-✡️ Origem judaica: ❓ INCONCLUSIVO — "Cabral" é sobrenome que ocorre tanto em linhagens cristãs-velhas portuguesas (o próprio descobridor do Brasil, Pedro Álvares Cabral) quanto em famílias de cristãos-novos; sem dados adicionais, é impossível determinar  
-📝 Notas: O pai de Abigail (e consequentemente marido de Maria Cabral) é desconhecido — essa lacuna é crítica para determinar se o sobrenome "De Freitas" vem do lado paterno ou materno de Abigail. Se Abigail nasceu "Abigail de Freitas" (sobrenome paterno), o pai de Abigail seria "X de Freitas"; se é sobrenome materno, seria da própria Maria Cabral (que seria "Maria Cabral de Freitas" ou similar). A investigação do registro de nascimento ou batismo de Abigail de Freitas é prioritária para desvendar essa ramificação.
-
----
-
-### GERAÇÃO 5 — TRISAVÓS (ESTIMADOS — sem confirmação direta)
-
----
-
-As gerações seguintes são apresentadas como **inferências históricas**, não como fatos confirmados. São baseadas nos padrões de migração, onomástica e história social documentados.
-
----
-
-👤 **ANTEPASSADOS ITALIANOS DE FRANCESCO MENEGATTI** *(país de Franscesco na Itália)*
-
-📅 Nascimento: Estimativa: ~1850–1875 (geração do pai de Francesco)  
-🌍 Local: Vêneto, Itália — provavelmente município de origem da família Menegatti (Treviso ou Vicenza)  
-🔗 Grau: Trisavós maternos de Matheus (4º grau, linha materna)  
-✡️ Origem judaica: ❌ NÃO  
-📝 Notas: A família Menegatti na Itália pode ser rastreada através dos registros do Estado Civil italiano (a partir de 1866, após a unificação italiana) e dos registros paroquiais anteriores. Os livros de batismo (*battesimi*), casamento (*matrimoni*) e óbito (*morti*) das paróquias vênetas remontam frequentemente ao século XVI ou XVII. A plataforma *Antenati* (antenati.san.beniculturali.it), do governo italiano, disponibiliza digitalizados muitos desses registros gratuitamente.
-
----
-
-👤 **ANTEPASSADOS DE URBANO DA COSTA** *(avós de Isaías)*
-
-📅 Nascimento: Estimativa: ~1850–1880  
-🌍 Local: Brasil — estado a investigar; possível origem no Nordeste (Pernambuco, Bahia) ou Sudeste (Rio de Janeiro, Minas Gerais)  
-🔗 Grau: Trisavós paternos de Matheus (4º grau, linha paterna)  
+📅 Nascimento: Estimativa ~1895–1915 **[INFERÊNCIA]**  
+📅 Falecimento: Estimativa ~1960–1990  
+🌍 Local: Brasil — provavelmente Nordeste ou Sudeste  
 ✡️ Origem judaica: ❓ INCONCLUSIVO  
-📝 Notas: O sobrenome "da Costa" no Brasil colonial tem distribuição geográfica ampla mas com concentrações documentadas em famílias de origem portuguesa nas capitanias de Pernambuco, Bahia e Rio de Janeiro. Os registros do Arquivo Histórico Ultramarino (AHU) em Lisboa e do Arquivo Nacional no Rio de Janeiro podem conter referências a famílias da Costa do século XVIII e XIX.
+📝 Dados históricos encontrados sobre famílias Da Costa no Brasil colonial:
+- **Ana da Costa** — processo n.° 11116 na Torre do Tombo (1624): entre os primeiros 25 brasileiros processados pela Inquisição por judaizar; fonte: Arnold Wiznitzer, *Jews in Colonial Brazil* (Columbia Univ. Press, 1960)
+- **Maria da Costa** — presa pela Inquisição em 1618, descrita por Anita Novinsky como "fervorosa judia"; era madrasta do bandeirante **Antônio Raposo Tavares** (um dos maiores exploradores do Brasil colonial)
+- **Theotônio da Costa Mesquita** (1660–1686) — família Da Costa cristã-nova que fugiu de Portugal para **Santo Amaro, São Paulo**; foi queimado vivo em auto-de-fé em Lisboa em 1686 por judaizar. Processo disponível na Torre do Tombo; perfil documentado no Geni.com
+- **Gaspar da Costa de Mesquita** (pai de Theotônio) — processado pela Inquisição em 1682-1683
+- **Lope de Acosta Suarez** e **David de Acosta** — identificados como "espiões" judeus na Bahia durante o período holandês (séc. XVII)
+- **James Lopes da Costa** — fundou a primeira sinagoga de Amsterdã (Bet Ya'akov) em 1607; família originária de Portugal
+- Fonte: Hebrew History Federation Factpaper "The da Costas — A Remarkable Sephardic Family" (hebrewhistory.info/factpapers/fp041_dacostas.htm)
+
+**Dado quantitativo de Anita Novinsky:** O sobrenome "Costa" aparece **49 vezes** no "Livro dos Culpados" do séc. XVIII — entre os **10 mais frequentes** entre cristãos-novos processados no Brasil. Posição: 7ª colocação, atrás de Rodrigues (137), Nunes (120), Henriques (68), Mendes (66), Correia (51), Lopes (51). Fonte: entrevista de Novinsky publicada em seer.ufrgs.br/webmosaica.
+
+**Dado jurídico atual:** O Decreto-Lei português 30-A/2015 (e revisão 26/2022), que regula cidadania portuguesa para descendentes de sefarditas, reconhece "Mendes da Costa" como sobrenome sefardita elegível. "Da Costa" está listado em: JewishGen/Sephardim.com, Back to Sepharad, Portal Anussim (cjbrasil.org), Acervo Judaico.
+
+**Distribuição no Brasil:** 1.031.067 portadores de "da Costa" (1 em 208 pessoas); 71% dos portadores mundiais estão no Brasil. Fonte: Forebears.io.
 
 ---
 
-## Parte II — Análise Especializada
+👤 **FRANCESCO / FRANCISCO MENEGATTI** (bisavô materno — imigrante italiano, CONFIRMADO)
+
+📅 Nascimento: Estimativa ~1875–1905 **[INFERÊNCIA — ver justificativa abaixo]**  
+📅 Falecimento: Estimativa ~1950–1975  
+🌍 Local de origem: **Norte da Itália** — predominantemente **Ferrara (Emilia-Romagna)** ou região de **Padova (Vêneto)** — ver análise detalhada.  
+🌍 Local no Brasil: Provavelmente **interior de São Paulo** (região de Campinas/Casa Branca/Americana), Paraná ou Rio Grande do Sul — estados com maior concentração do sobrenome Menegatti no Brasil.  
+✡️ Origem judaica: ❌ NÃO  
+
+### Análise detalhada — Francesco Menegatti
+
+**Correção importante em relação à hipótese inicial:** A pesquisa revelou que o sobrenome Menegatti NÃO é primariamente de Treviso ou Vicenza como inicialmente estimado. Os dados reais mostram:
+
+| Região | % dos portadores na Itália |
+|--------|---------------------------|
+| **Emilia-Romagna (Ferrara/Bologna)** | **~60%** |
+| **Vêneto (Padova, Vicenza, Verona)** | **~13%** |
+| Trentino-Alto Adige | ~7% |
+| Outras regiões | ~20% |
+
+Fonte: Forebears.io, cognomix.it, cognomi.top
+
+**Concentração específica por cidade:**
+- **Ferrara (FE):** Núcleo histórico principal. Atualmente há 99 residências e 33 empresas com sobrenome Menegatti listadas nas Pagine Bianche de Ferrara (paginebianche.it).
+- **Campo San Martino (Padova):** Registros paroquiais desde **1540** — o mais antigo registro documentado do sobrenome. O site genealógico menegatto.org documenta a família **Valentino Menegatto** + Maria Antonia Caon, de Campo San Martino, que emigrou para **o interior de São Paulo** (municípios de Americana, Campinas, Casa Branca, Tambaú, Santa Cruz das Palmeiras).
+- **Molvena (Vicenza):** Família Menegatti documentada — **Pietro Menegatti** (1809–1848), pintor, filho de Giuseppe Menegatti; formado na Academia de Belas-Artes de Veneza.
+
+**Etimologia confirmada por múltiplas fontes:**
+- Heraldrys Institute of Rome: "deriva de modificações dialetais hipocorísticas da aférese do nome Domenico"
+- Processo: Domenico → Menico → Menego (dialeto vêneto) → Menegat → **Menegatti** (forma pluralizada/familial)
+- Terminação "-atti" indica origem ferrarese-vêneta (cognato: Zanotti, Moretti, Benatti)
+- Variantes do mesmo tronco: Menegazzi, Menegazzo, Menegato (Vêneto), Menegon (Vicenza/Treviso), Menegotti (Vicenza/Belluno)
+
+**Presença do sobrenome no Brasil:**
+- ~2.232 portadores no Brasil (Forebears.io) = **31% do total mundial**
+- Estados com maior presença: **São Paulo, Paraná, Rio Grande do Sul**
+- O site Emigração Vêneta (emigrazioneveneta.com) confirma que "Menegatti" aparece em **lista de passageiros do Vapor Manilla** — registro de imigração italiana para o Brasil
+
+**Período provável de imigração de Francesco:**
+Se Helcio Menegatti nasceu ~1928–1948, Francesco teria nascido ~1880–1910, emigrando provavelmente na **segunda onda** (1890–1914) ou **terceira onda** (1918–1930) da imigração italiana para o Brasil.
 
 ---
 
-### 🔍 1. INSIGHTS COMUNS — O que é típico e esperado
+👤 **MARIA CABRAL** (bisavó materna — mãe de Abigail, CONFIRMADA)
 
-**A imigração italiana de Francesco Menegatti** é o elemento mais documentável e historicamente previsível desta árvore. O sobrenome "Menegatti" segue o padrão clássico da imigração vêneta para o Brasil: famílias camponesas do interior do Vêneto, pressionadas pela miséria econômica após a unificação italiana (1861) e pelas secas e pragas que assolaram a viticultura e a sericicultura vênetas nas décadas de 1870–1900, emigraram em massa para as Américas. O Brasil era um destino privilegiado pela propaganda do governo imperial brasileiro, que oferecia lotes de terra (*colonie*) nas províncias do Sul e trabalho nas fazendas de café em São Paulo.
+📅 Nascimento: Estimativa ~1900–1925 **[INFERÊNCIA]**  
+📅 Falecimento: Desconhecido  
+🌍 Local: Brasil — estado a investigar  
+✡️ Origem judaica: ❓ INCONCLUSIVO — **dado crítico encontrado:** "Cabral" aparece **DUAS VEZES** na lista publicada pelo Museu da Inquisição de sobrenomes com alta porcentagem de cristãos-novos acusados de judaísmo nos tribunais portugueses.
 
-O processo de abrasileiramento de Francesco para Francisco é absolutamente típico: a imigração italiana no Brasil se caracterizou pela rápida adaptação nominal — Francesco vira Francisco, Giovanni vira João, Giuseppe vira José, Domenico vira Domingos. Os filhos desses imigrantes já nasciam com nomes brasileiros (Helcio, no caso) e frequentemente casavam com brasileiros de outras etnias, acelerando a assimilação.
-
-**A presença dos sobrenomes Da Costa, De Freitas e Cabral** no lado paterno e materno é um fenômeno comum no Brasil colonial tardio e no período imperial (século XIX). Esses três sobrenomes são vastamente distribuídos em toda a população brasileira e, na maioria dos casos, refletem simplesmente a herança lusófona comum do período colonial, sem necessariamente implicar origem judaica específica.
-
-**O padrão de nomeação de Helcio/Helcione** (avô nomeia neta com versão feminina do próprio nome) é uma tradição de homenagem familiar (*homenagem nominal*) muito comum no Brasil, especialmente em famílias de imigrantes que desejam preservar a identidade familiar enquanto se integram à cultura local.
-
----
-
-### 💡 2. INSIGHTS INCOMUNS OU SURPREENDENTES
-
-#### 2.1 O Triângulo Onomástico da Linhagem Paterna
-
-O padrão de nomeação nas três gerações paternas confirmadas — **Urbano → Isaías → Josué** — é extraordinariamente incomum para uma família brasileira média de tradição católica romana. Analisemos:
-
-- **Josué** (hebraico *Yehoshua*): "Deus é salvação" — nome do sucessor de Moisés, líder da conquista de Canaã. Rarissimamente usado por católicos brasileiros; muito mais frequente entre protestantes e — historicamente — entre famílias cripto-judaicas.
-- **Isaías** (hebraico *Yeshayahu*): "Deus é salvação" — nome do maior profeta do Antigo Testamento, cujo livro é o mais citado no Novo Testamento. Também raro entre católicos tradicionais; mais frequente em protestantes e, historicamente, em famílias de origem judaica.
-- **Urbano** (latim *Urbanus*): nome de 8 papas romanos, portanto de conotação católica — mas poderia representar uma escolha de "cobertura" em uma família que usava nomes bíblicos nos filhos.
-
-A hipótese mais provável no Brasil contemporâneo é que essa família pertença a uma denominação **protestante ou evangélica** que valoriza os nomes do Antigo Testamento. Igrejas batistas, presbiterianas, congregacionais e adventistas no Brasil frequentemente nomeiam filhos com nomes hebraicos bíblicos. Essa é a explicação culturalmente mais parsimoniosa.
-
-Porém, a combinação desse padrão onomástico com o sobrenome **Da Costa** — historicamente um dos sobrenomes mais documentados entre famílias sefarditas no Atlântico lusófono — eleva o nível de interesse investigativo acima do trivial. A hipótese alternativa — família de origem cripto-judaica que, ao longo dos séculos, foi gradualmente "saindo do armário" pela adoção de nomes bíblicos hebraicos — não deve ser descartada sem investigação documental.
-
-#### 2.2 Da Costa: Sefarditas no Brasil Colonial
-
-O sobrenome "da Costa" / "Costa" é um dos mais frequentemente registrados nos processos inquisitoriais do Brasil colonial. O historiador José Antônio Gonsalves de Mello documentou extensamente, em *Gente da Nação* (1996), famílias Da Costa em Pernambuco com origem sefardita confirmada. A Inquisição portuguesa processou dezenas de cristãos-novos com esse sobrenome no Brasil entre os séculos XVI e XVIII.
-
-Famílias Da Costa de origem sefardita estabeleceram-se em:
-- **Recife** (durante o período holandês, 1630–1654)
-- **Salvador** (Bahia)
-- **Rio de Janeiro** (séculos XVII–XVIII)
-- **São Paulo** (século XIX, com a segunda diáspora sefardita do Mediterrâneo)
-
-O filósofo Uriel da Costa (1585–1640), natural do Porto, é o membro mais famoso de uma família Da Costa de cristãos-novos que se revelaram judeus ao emigrar para Hamburgo e Amsterdam. Sua família era da Beira, Portugal.
-
-**Importante:** isso NÃO significa que *esta* família Da Costa da árvore de Matheus seja de origem sefardita. É uma hipótese a investigar, não uma conclusão.
-
-#### 2.3 De Freitas: Cristãos-Novos Documentados
-
-O sobrenome "Freitas" / "De Freitas" aparece reiteradamente nos registros da Inquisição Portuguesa. O historiador Anita Novinsky, em *Cristãos Novos na Bahia* (1972), listou dezenas de famílias De Freitas processadas pelo Santo Ofício no Brasil. O sobrenome é especialmente frequente entre famílias de cristãos-novos da região de Trás-os-Montes e do Alentejo, em Portugal.
-
-Porém — e isso é fundamental — "Freitas" é também um dos sobrenomes mais comuns em Portugal e no Brasil, carregado por inúmeras famílias sem qualquer relação com a diáspora judaica. A presença de "De Freitas" na árvore de Matheus é uma pista, não uma prova.
-
-#### 2.4 Abigail: O Nome que Mais Chama Atenção
-
-Dos vários nomes bíblicos nesta árvore, "Abigail" é o que mais surpreende em uma análise genealógica. Trata-se de um nome hebraico estritamente veterotestamentário (*Avigayil*, 1 Samuel 25), virtualmente ausente do calendário de santos católicos romanos, e que, no Brasil, ocorre principalmente em:
-
-1. Famílias evangélicas/protestantes com forte apego ao Antigo Testamento
-2. Famílias de descendência judaica que preservavam nomes hebraicos (consciente ou inconscientemente)
-
-A combinação de **Abigail De Freitas** (nome hebraico + sobrenome associado a cristãos-novos) na mesma pessoa é o dado mais intrigante desta árvore genealógica. Se a pesquisa revelar que o pai de Abigail também tinha nome bíblico ou sobrenome historicamente associado a famílias conversos, a hipótese de origem cripto-judaica na linhagem materna (lado De Freitas/Cabral) merece investigação documental séria.
-
-#### 2.5 A Mescla Étnica Improvável
-
-A árvore de Matheus reúne, em apenas quatro gerações, o que poderíamos chamar de "as três Europas do Brasil":
-
-- **Europa Mediterrânea Católica**: Francesco Menegatti, imigrante do Vêneto — representa a imigração italiana que transformou o Sul e o Sudeste brasileiro
-- **Europa Ibérica Colonial**: as famílias Da Costa, Viana, De Freitas e Cabral — representam a matriz lusófona que fundou o Brasil colonial
-- **Possível Europa Semítica Velada**: se as hipóteses conversos/sefarditas se confirmarem para algum ramo, Matheus seria portador de camadas de identidade histórica raramente investigadas
-
-A raridade não está em cada elemento isolado, mas na combinação de múltiplos indicadores em uma única família de quatro gerações.
+**Dados de pesquisa sobre o sobrenome Cabral:**
+- Pedro Álvares Cabral nasceu como "Pedro Álvares de Gouveia"; sua mãe era **Isabel de Gouveia** — família reconhecida historicamente como de origem cristã-nova (judaica). Há historiadores que argumentam que o próprio Cabral era cristão-novo e que isso explicaria a composição da tripulação de 1500.
+- **Belmonte** (solar dos Cabrais, Portugal) preservou a **última comunidade de cripto-judeus da Península Ibérica** — judeus que mantiveram práticas judaicas em segredo por **500 anos** após a conversão forçada de 1497. Documentado em: Diário do Nordeste; Editora Sêfer.
+- **Gaspar Lemos** (nome antes da conversão: Elias Lipner) — judeu que serviu como capitão-mor na própria expedição de Pedro Álvares Cabral em 1500.
+- A Confederação Judaica do Brasil (cjbrasil.org) possui página específica "Família Cabral" documentando a família no contexto judaico-brasileiro.
+- Fontes: Forebears.io registra 188.922 portadores de Cabral no Brasil; 10% concentrados em **Pernambuco** — geograficamente significativo para a história dos cristãos-novos brasileiros.
 
 ---
 
-### 🧭 3. PISTAS PARA INVESTIGAÇÃO FUTURA
-
-#### 3.1 Para a Linhagem Menegatti (Italiana)
-
-**No Brasil:**
-- **FamilySearch.org** → busca por "Menegatti" + estado provável (SP, RS, SC, ES, PR)
-- **Arquivo do Estado de São Paulo** → registros de entrada de imigrantes, décadas 1890–1940
-- **Museu da Imigração do Estado de São Paulo** (Brás, SP) → possui base de dados de imigrantes italianos com nome, origem e data de chegada
-- **Memorial do Imigrante** → digitalização de registros de entrada pelo porto de Santos
-- **ANEC** (Associação Nipo-Brasileira) → não aplicável; mas a **Società Dante Alighieri** local pode ter registros de italianos residentes
-
-**Na Itália:**
-- **Archivio di Stato di Treviso** → registros civis (pós-1866) e paroquiais (pré-1866, em microfilme ou digital)
-- **Archivio di Stato di Vicenza** → idem para a província de Vicença
-- **Portale Antenati** (antenati.san.beniculturali.it) → coleção digitalizada dos arquivos de estado italianos, gratuita
-- **Registros do porto de Gênova** → listas de emigrantes (*liste di imbarco*) nos *Archivi di Stato di Genova*; muitas disponíveis no Ancestry.com
-
-**Pesquisa de DNA para confirmar ancestralidade italiana:**
-- Haplogrupo Y-DNA esperado para descendente masculino de Francesco Menegatti: provavelmente **R1b-L23** (haplogrupo típico do Norte da Itália) ou **R1b-U152** (subclado itálico)
-- mtDNA (linha materna via mãe → avó → bisavó): pode revelar ancestralidade da esposa de Francesco
-
-#### 3.2 Para a Linhagem Da Costa / Investigação Sefardita
-
-**Fontes primárias:**
-- **ANTT — Arquivo Nacional da Torre do Tombo** (Lisboa, Portugal) → digitalizado em *digitarq.arquivos.pt*; buscar processos inquisitoriais com sobrenome "Da Costa" ligados ao Brasil (séculos XVI–XVIII)
-- **Arquivo Nacional do Rio de Janeiro** → registros civis e eclesiásticos do século XIX
-- **Arquivo Histórico Ultramarino (AHU)** → documentação colonial sobre famílias brasileiras
-
-**Fontes secundárias:**
-- Anita Novinsky, *Cristãos Novos na Bahia 1624–1654* (1972) — lista de famílias conversos
-- José Antônio Gonsalves de Mello, *Gente da Nação* (1996) — famílias judaicas em Pernambuco
-- Arnold Wiznitzer, *Jews in Colonial Brazil* (1960)
-- Elias Lipiner, *Os Judaizantes nas Capitanias de Cima* (1969)
-
-**Pesquisa de DNA para hipótese sefardita:**
-- Haplogrupo Y-DNA: se a linha paterna (Da Costa) for sefardita, pode apresentar **J1, J2, E1b1b** — haplogrupos frequentes em populações do Médio Oriente e Mediterrâneo Oriental
-- Teste de autosomal DNA (AncestryDNA, 23andMe, MyHeritage) pode revelar percentuais de ancestralidade "Ibérica Judaica" ou "Médio Oriental"
-- Comparar resultados com bases de dados de comunidades sefarditas conhecidas (Curaçao, Suriname, Amsterdã)
-
-#### 3.3 Para a Linhagem De Freitas / Cabral / Investigação Conversa
-
-- **ANTT** → busca por "De Freitas" e "Cabral" em processos inquisitoriais do Brasil
-- **Arquivo Público do Estado da Bahia** e **Arquivo Público de Pernambuco** → registros coloniais
-- Investigar o **registro de nascimento/batismo de Abigail de Freitas** — este documento revelará o nome completo do pai (e consequentemente confirmará ou descartará o sobrenome paterno De Freitas)
-
-#### 3.4 Para a Linhagem Viana (Avó Paterna Zilda)
-
-- Buscar registro de casamento entre **Isaías da Costa** e **Zilda Viana** no cartório do município correspondente
-- O registro de casamento revelará os nomes dos pais de Zilda, permitindo reconstruir a família Viana
-- FamilySearch.org: busca por "Viana" + sobrenome desconhecido + estado provável
+### GERAÇÃO 5 — TRISAVÓS (Estimados, sem confirmação direta)
 
 ---
 
-### 🌐 4. MAPA DE ORIGENS — Países e Regiões Identificados
+👤 **PAI DE ABIGAIL DE FREITAS** (trisavô materno — IDENTIDADE DESCONHECIDA)
 
-| Ramo | Origem Confirmada | Origem Inferida | Percentual Estimado* |
-|------|------------------|-----------------|---------------------|
-| Materno/Avô | **Itália** (Vêneto, provavelmente Treviso ou Vicenza) | — | ~25% |
-| Materno/Avó | **Portugal** (via Brasil colonial) | Possível origem conversa | ~25% |
-| Paterno/Avô | **Portugal** (via Brasil colonial) | Possível origem sefardita | ~25% |
-| Paterno/Avó | **Portugal** (via Brasil colonial) | — | ~25% |
+📅 Nascimento: Estimativa ~1895–1920 **[INFERÊNCIA]**  
+🌍 Local: Brasil — a identificar  
+✡️ Origem judaica: ❓ A DETERMINAR — se este ancestral desconhecido for o portador do sobrenome "De Freitas", os dados da pesquisa tornam-se altamente relevantes:
 
-*Os percentuais são estimativas grosseiras baseadas em contribuição genealógica teórica (cada bisavô contribui com ~12,5% do DNA autossômico). A contribuição real de DNA pode variar significativamente.
-
-**Síntese do mapa de origens:**
-- **Brasil** (nascido aqui): Josué, Helcione, Isaías, Zilda, Helcio, Abigail
-- **Itália — Vêneto**: Francesco/Francisco Menegatti (confirmado)
-- **Portugal → Brasil colonial**: famílias Da Costa, Viana, De Freitas, Cabral (inferido)
-- **Possível Ibéria Medieval (via Sefarad → Portugal → Brasil)**: hipótese especulativa para alguns ramos
+**Dados de pesquisa sobre o sobrenome De Freitas:**
+- "Freitas" aparece **explicitamente na lista de famílias bandeirantes paulistas com origem judaica** documentada por Anita Novinsky. Lista: *"Camacho, Paiva, Castilho, Barbosa, Mendes, Bueno, Fernandes, Alvares, Raposo Tavares, Neto, Rebelo, Furtado, Bicudo, Mendonça, Lopes, Grou, Machado, Pedroso, Pires, Silva, Ribeiro, Quadros, Lopes Fragoso, Alvares Pimentel, Moraes, Rodrigues Salamanca, Lemos, Esteves, Sousa, Leme, Mota, Jorge, Sanches, Corrêa, Peixoto, Proença, Roldão, **Costa**, Vaz, Santos, Bezarano, Macedo, Melo Coutinho, Mourato, Amaral, Coutinho, Gonçalves, Varejão, Madeira, Vaz de Barros, Lima, **Freitas**."* (Fonte: viladeutopia.com.br)
+- Caso documentado concreto: **Mateus de Freitas de Azevedo** (nascido ~1567, Lisboa), alcaide-mor da capitania de Pernambuco, casado com **Maria de Herede** (nascida ~1587) — cristã-nova sefardita documentada, processada pelo Santo Ofício. Perfil no Geni.com: geni.com/people/Maria-de-Herede/6000000015162286043
+- Caso Santos (SP), 1628: **Sebastião Freitas** denunciado ao Santo Ofício em Santos por declarações heréticas; confessou heresia.
+- "Freitas" listado no Portal Anussim (anussim.com.br) e JewishGen/Sephardim.com entre sobrenomes de cristãos-novos
+- MyHeritage Knowledge Portal: "O sobrenome 'Freitas' foi também adotado por famílias de cristãos-novos, judeus convertidos ao cristianismo."
+- Brasil: 388.605 a 777.973 portadores de "Freitas" (dados divergem entre fontes); concentração no **Ceará (9%)** — nordeste historicamente relevante para cristãos-novos.
 
 ---
 
-### ⚠️ 5. NOTA SOBRE CONFIABILIDADE — Distinção Metodológica
+👤 **FAMÍLIA ITALIANA DE FRANCESCO MENEGATTI** (trisavós maternos pela linha italiana)
 
-#### FATOS CONFIRMADOS pelos dados fornecidos:
-- Nome completo, data de nascimento e ascendência imediata de Matheus Vinícius Menegatti da Costa
-- Nome dos pais (Josué Viana da Costa e Helcione de Freitas Menegatti)
-- Nome dos avós (Isaías da Costa, Zilda Viana, Helcio Menegatti, Abigail de Freitas)
-- Nome dos bisavós confirmados: Urbano da Costa (bisavô paterno), Francesco/Francisco Menegatti (bisavô materno, italiano), Maria Cabral (bisavó materna)
-- Francesco Menegatti é italiano — fato confirmado
-- Helcio Menegatti é filho de Francesco Menegatti — fato confirmado
-- Abigail de Freitas é filha de Maria Cabral — fato confirmado
-
-#### INFERÊNCIAS HISTÓRICAS FUNDAMENTADAS (alta probabilidade, baseadas em padrões documentados):
-- Francesco Menegatti provém do Vêneto, provavelmente Treviso ou Vicenza — baseado em distribuição estatística do sobrenome Menegatti na Itália
-- O sobrenome Menegatti deriva do hipocorístico vêneto de "Domenico" — fato linguístico estabelecido
-- Francesco emigrou provavelmente entre 1890 e 1930 — baseado nas ondas migratórias documentadas
-- Os sobrenomes Da Costa, De Freitas e Cabral têm presença documentada entre famílias cristãs-novas no Brasil colonial — fato historiográfico estabelecido
-- Nomes como Josué, Isaías e Abigail são raros em famílias católicas tradicionais no Brasil — observação onomástica fundamentada
-
-#### HIPÓTESES ESPECULATIVAS (baixa a média probabilidade; requerem investigação documental):
-- A linhagem Da Costa pode ter origem sefardita — possível mas não confirmado; a maioria das famílias Da Costa no Brasil não tem origem judaica
-- A linhagem De Freitas pode ter origem conversa — possível mas não confirmado
-- O padrão onomástico bíblico (Josué, Isaías, Abigail) pode refletir herança cripto-judaica — possível mas a explicação protestante/evangélica é mais parcimoniosa e deve ser verificada primeiro
-- Maria Cabral pode ter origem em família conversa — especulativo, sem base específica além da onomástica geral
-
-**A hipótese sobre origem evangélica/protestante da família paterna (explicando os nomes bíblicos) é a mais provável estatisticamente e deve ser investigada ANTES das hipóteses de origem cripto-judaica.** Uma simples conversa com familiares vivos sobre a denominação religiosa da família Da Costa nas gerações anteriores pode resolver essa questão rapidamente.
+📅 Nascimento: Estimativa ~1845–1875 (geração parental de Francesco) **[INFERÊNCIA]**  
+🌍 Local: Provavelmente Ferrara (Emilia-Romagna) ou Campo San Martino (Padova), Itália  
+✡️ Origem judaica: ❌ NÃO  
+📝 Notas: Os registros paroquiais de Campo San Martino (Padova) remontam a **1540** e estão parcialmente digitalizados no Portal Antenati (antenati.cultura.gov.it). Os registros de estado civil de Ferrara (pós-1871) estão nos municípios e parcialmente no Portal Antenati. A família de Francesco pode ser rastreada com alta probabilidade de sucesso nessas fontes.
 
 ---
 
-## Conclusão Narrativa
-
-A genealogia de Matheus Vinícius Menegatti da Costa conta a história do Brasil em miniatura: um bisneto de imigrante italiano do Vêneto que chegou com as mãos calejadas e a fé católica intacta, casado com descendentes das velhas famílias lusófonas que construíram o Brasil colonial — com todos os silêncios, as identidades veladas e as camadas de história que esse processo histórico inevitavelmente carrega.
-
-O elemento mais concreto e investigável é a linha Menegatti: Francesco/Francisco chegou da Itália com nome, sobrenome e origem geográfica que os arquivos italianos — agora parcialmente digitalizados e acessíveis online — podem revelar com precisão até o século XVIII. Essa é a pesquisa mais imediatamente frutífera.
-
-As questões mais complexas — e potencialmente mais reveladoras — envolvem os ramos ibéricos: os sobrenomes Da Costa, De Freitas e Cabral, combinados com um padrão de nomes bíblicos veterotestamentários de três gerações, constituem um conjunto de indícios que os melhores genealogistas brasileiros especializados em história judaica teriam dificuldade em ignorar. Não como certeza — mas como convite urgente à investigação documental.
-
-A história de Matheus pode ser a história de uma família que, há quatro ou cinco séculos, escolheu a sobrevivência sobre a identidade — e que, no Brasil do século XX, sem saber exatamente por quê, continuou escolhendo os nomes de seus ancestrais mais remotos para os filhos de cada geração.
-
-Ou pode ser simplesmente a história de uma família protestante brasileira com um imigrante italiano no ramo materno.
-
-Apenas os documentos poderão dizer.
+## Parte III — Análise Especializada com Dados de Pesquisa
 
 ---
 
-*Relatório elaborado com base em dados fornecidos e em conhecimento historiográfico especializado sobre genealogia brasileira, imigração italiana e diáspora judaica na América Latina. Para aprofundamento, recomenda-se consultar genealogista credenciado pela Associação Brasileira de Genealogia (ABG) e realizar pesquisa documental nos arquivos indicados.*
+### 🔍 1. O Sobrenome MENEGATTI — Revisão da Hipótese Geográfica
+
+A pesquisa revelou que a origem mais provável de Francesco Menegatti **não é Treviso ou Vicenza** (Vêneto), como se poderia supor a priori, mas sim a região de **Ferrara (Emilia-Romagna)**, que concentra ~60% de todos os portadores do sobrenome na Itália. A segunda hipótese mais forte é **Campo San Martino (Padova, Vêneto)**, onde existem registros desde 1540 e onde há documentação de uma família Menegatto que emigrou especificamente para o interior de São Paulo (Campinas/Casa Branca).
+
+O Vapor Manilla, identificado pelo site Emigrazione Veneta como portador de passageiros com sobrenome Menegatti, é uma pista concreta para pesquisa nos arquivos do porto de Santos.
+
+Com ~2.232 portadores do sobrenome no Brasil (31% do total mundial), a família Menegatti deixou marcas rastreáveis: o Escavador.com já identifica o próprio Matheus como advogado no Rio de Janeiro, bem como outros portadores do sobrenome em São Paulo, Espírito Santo e Santa Catarina.
+
+---
+
+### 💡 2. A Linhagem Paterna DA COSTA — Evidências Acumuladas
+
+A pesquisa encontrou evidências históricas concretas e quantificáveis que tornam a hipótese de origem sefardita na linhagem paterna **mais do que especulativa**:
+
+**Evidências convergentes:**
+
+| Indicador | Dado Encontrado | Força |
+|-----------|-----------------|-------|
+| Sobrenome Da Costa na Inquisição | 49 ocorrências no "Livro dos Culpados" (top 10) — Novinsky | Alta |
+| Casos documentados no Brasil colonial | Ana da Costa (1624), Maria da Costa (1618), Theotônio da Costa Mesquita (1686, queimado) | Alta |
+| Legislação sefardita portuguesa | "Mendes da Costa" reconhecido pelo Dec.-Lei 30-A/2015 | Média |
+| Prenome Josué como sobrenome sefardita | Josué aparece na lista oficial de sobrenomes sefarditas portugueses | Média |
+| Padrão onomástico Josué+Isaías+bíblico | Três gerações com nomes veterotestamentários raros em famílias católicas | Média |
+| Família Da Costa em SP colonial | Theotônio Da Costa Mesquita fugiu de Portugal para Santo Amaro/SP antes de ser capturado | Alta |
+
+**Contraindício importante:** O artigo *"The Myth of the Marrano Names"* (Revue des Études Juives, disponível em historia.fflch.usp.br) argumenta que cristãos-novos **deliberadamente adotavam nomes idênticos aos cristãos-velhos** para se camuflar — ou seja, os nomes por si só não provam origem judaica. Josué e Isaías eram usados por cristãos não-judeus desde o período medieval.
+
+**Conclusão parcial:** A hipótese mais **simples e estatisticamente prevalente** para explicar os nomes bíblicos é **tradição protestante/evangélica** na família Da Costa — uma simples pergunta a familiares sobre a denominação religiosa das gerações anteriores pode resolver essa questão. A hipótese cripto-judaica requer investigação documental nos arquivos da Torre do Tombo, mas os dados históricos encontrados deixam claro que ela **não pode ser descartada sem investigação**.
+
+---
+
+### 💡 3. A Linhagem Materna DE FREITAS / CABRAL — Convergência de Indicadores
+
+Se na linhagem paterna o indicador mais forte é o sobrenome Da Costa, na linhagem materna a convergência é ainda mais específica:
+
+**Abigail de Freitas** é, do ponto de vista onomástico, o nome mais singular desta árvore:
+- "Abigail": nome hebraico do Antigo Testamento, ausente do calendário romano, com apenas **10.122 portadoras em todo o Brasil** (1 em ~21.000 pessoas)
+- "De Freitas": sobrenome explicitamente listado entre bandeirantes de origem judaica por Anita Novinsky; caso documentado (Mateus de Freitas de Azevedo casado com cristã-nova sefardita em Pernambuco, séc. XVI)
+
+A combinação de um nome hebraico raro + sobrenome em lista de cristãos-novos é o par mais específico desta árvore inteira.
+
+**Maria Cabral** (bisavó): sobrenome que aparece DUAS vezes na lista do Museu da Inquisição; Belmonte (solar dos Cabrais) preservou a última comunidade cripto-judaica ibérica por 500 anos. A mãe do próprio Pedro Álvares Cabral era de família reconhecida como cristã-nova.
+
+---
+
+### 🧭 4. Fontes Específicas para Investigação Imediata
+
+#### Para Francesco Menegatti (Itália):
+| Fonte | URL / Contato | Prioridade |
+|-------|--------------|-----------|
+| Emigrazione Veneta (tem Menegatti no Vapor Manilla) | emigrazioneveneta.com/busca?searchword=menegatti | ⭐⭐⭐ |
+| CISEI — Centro Internazionale Studi Emigrazione | ciseionline.it/2012/archivio.asp (gratuito) | ⭐⭐⭐ |
+| Portal Antenati (Padova e Ferrara) | antenati.cultura.gov.it/search-nominative/?cognome=Menegatti | ⭐⭐⭐ |
+| Museu da Imigração SP | pesquisa@museudaimigracao.org.br | ⭐⭐⭐ |
+| FamilySearch — Hospedaria de Imigrantes SP | familysearch.org → "Brasil, São Paulo, Registros Hospedaria" | ⭐⭐ |
+| Arquivo Público do Paraná | Porto de Paranaguá (97.727 registros 1876–1896) | ⭐⭐ |
+| Arquivo Nacional (RJ) | SIAN: "Entrada de Estrangeiros" (1.000.000+ registros) | ⭐⭐ |
+
+#### Para Da Costa / hipótese sefardita:
+| Fonte | URL / Contato | Prioridade |
+|-------|--------------|-----------|
+| ANTT — Torre do Tombo (digitarq) | digitarq.arquivos.pt → processos inquisitoriais | ⭐⭐⭐ |
+| Geni.com — Theotônio da Costa Mesquita | geni.com/people/Teotônio-da-Costa-de-Mesquita/6000000040663635119 | ⭐⭐⭐ |
+| Anita Novinsky, *Cristãos Novos na Bahia* (1972) | repositorio.usp.br/item/000722403 | ⭐⭐⭐ |
+| HHF Factpaper — The da Costas | hebrewhistory.info/factpapers/fp041_dacostas.htm | ⭐⭐ |
+| FamilySearch — registros paroquiais BR | familysearch.org com estado de origem de Urbano da Costa | ⭐⭐ |
+
+#### Para De Freitas / Cabral / Abigail:
+| Fonte | URL / Contato | Prioridade |
+|-------|--------------|-----------|
+| Geni.com — Maria de Herede + Mateus de Freitas | geni.com/people/Maria-de-Herede/6000000015162286043 | ⭐⭐⭐ |
+| *O Estado da Paraíba tem Descendentes de Judeus Sefarditas* | archive.org/details/o-estado-da-paraiba-tem-descendentes-de-judeus-sefarditas | ⭐⭐⭐ |
+| CJBrasil — Família Cabral | cjbrasil.org/familia-cabral/ | ⭐⭐⭐ |
+| ANTT — processos "Freitas" + Brasil | digitarq.arquivos.pt | ⭐⭐⭐ |
+| *Dicionário Sefaradi de Sobrenomes* (Faiguenboim et al.) | Amazon.com.br (ISBN disponível) | ⭐⭐ |
+| IBGE Nomes — "Abigail" por estado | censo2022.ibge.gov.br/nomes | ⭐⭐ |
+
+---
+
+### 🌐 5. Mapa de Origens — Dados Revisados pela Pesquisa
+
+| Ramo | País de Origem | Região | % Teórico* | Confiança |
+|------|---------------|--------|-----------|-----------|
+| Bisavô materno (Francesco Menegatti) | **Itália** | Ferrara (ER) ou Campo San Martino (Padova) | ~12,5% | Alta |
+| Bisavó materna (esposa de Francesco) | **Brasil** (possivelmente italiana também) | A determinar | ~12,5% | Baixa |
+| Bisavó (Abigail de Freitas + pai desconhecido) | **Portugal → Brasil colonial** | Possivelmente NE | ~25% | Média |
+| Bisavó (Maria Cabral + pai desconhecido) | **Portugal → Brasil colonial** | Possivelmente NE | ~12,5% | Média |
+| Bisavô paterno (Urbano da Costa) | **Portugal → Brasil colonial** | A determinar | ~12,5% | Média |
+| Bisavó paterna (esposa de Urbano) | **Brasil** | A determinar | ~12,5% | Baixa |
+
+*Percentual teórico de contribuição de DNA autossômico por bisavô; a contribuição real pode variar.
+
+**Hipótese de ancestralidade semítica (ibérica medieval via Sefarad):** possível mas não confirmada para os ramos Da Costa, De Freitas e Cabral. Requer teste de DNA ou pesquisa documental no ANTT para confirmação.
+
+---
+
+### 🧬 6. Recomendações de Teste de DNA
+
+**Para confirmar/refutar hipótese sefardita:**
+
+- **Haplogrupo Y-DNA** (linha masculina — Matheus → pai → avô → bisavô, todos Da Costa):
+  - Se sefardita: possível J1 (*Cohen Modal Haplotype*), J2 (frequente no Mediterrâneo e Médio Oriente), E1b1b (norte-africano/Levante), ou R1b com subcalados ibéricos específicos
+  - Se ibérico colonial puro: provavelmente R1b-L23 ou R1b-DF27 (haplogrupo típico da Península Ibérica)
+
+- **DNA autossômico** (23andMe, AncestryDNA, MyHeritage DNA):
+  - Testar percentual de "Ibérico Judaico" ou "Médio Oriental"
+  - Comparar com base de dados de comunidades sefarditas (Curaçao, Suriname, Amsterdã, Casablanca)
+  - O teste 23andMe específica subcomponentes ibéricos que podem distinguir entre cristãos-velhos e famílias com ancestralidade sefardita detectável
+
+- **mtDNA** (linha materna — Matheus → mãe → avó Abigail → bisavó Maria Cabral):
+  - Haplogrupo K1a, T2, J, H: frequentes em populações judaicas
+  - Pode revelar ancestralidade da linhagem materna feminina mais antiga
+
+---
+
+### ⚠️ 7. Nota de Confiabilidade — Síntese Final
+
+#### FATOS CONFIRMADOS por fontes encontradas online:
+- Matheus Vinícius Menegatti da Costa: advogado, Rio de Janeiro (Irajá), graduado Universidade Gama Filho 2011 — Escavador.com
+- Menegatti: ~2.232 portadores no Brasil; 31% do total mundial; origem em Ferrara/Campo San Martino — Forebears.io, cognomix.it
+- "Costa": 49 ocorrências no "Livro dos Culpados" (top 10 entre cristãos-novos) — Anita Novinsky
+- Casos documentados: Ana da Costa (1624), Maria da Costa (1618), Theotônio da Costa Mesquita (1686) — Wiznitzer, Geni.com, Torre do Tombo
+- "Freitas" na lista de bandeirantes de origem judaica — Anita Novinsky / viladeutopia.com.br
+- Mateus de Freitas de Azevedo casado com cristã-nova sefardita em Pernambuco (séc. XVI) — Geni.com
+- "Cabral" aparece duas vezes na lista do Museu da Inquisição — museudainquisicao.org.br
+- Abigail: 10.122 portadoras no Brasil; pico na década de 1950 — IBGE Censo 2010
+- Sobrenomes Da Costa, Viana, De Freitas, Cabral nas listas JewishGen/Sephardim.com e Portal Anussim — verificado online
+
+#### INFERÊNCIAS HISTÓRICAS FUNDAMENTADAS:
+- Francesco Menegatti provavelmente veio de Ferrara ou Campo San Martino (Padova)
+- A família emigrou durante a segunda onda italiana (1890–1914) ou terceira onda (1918–1930)
+- O sobrenome Menegatti aparece no Vapor Manilla — lista de passageiros para o Brasil
+
+#### HIPÓTESES ESPECULATIVAS (requerem verificação documental):
+- A linhagem Da Costa pode ter origem sefardita — os dados históricos encontrados reforçam a hipótese, mas não a confirmam para este ramo familiar específico
+- A linhagem De Freitas/Cabral pode ter herança conversa — os dados onomásticos e históricos são consistentes com a hipótese
+- O padrão Josué+Isaías+Abigail pode refletir herança cripto-judaica — a hipótese protestante/evangélica é estatisticamente mais comum e deve ser verificada primeiro
+
+**A pesquisa documental no ANTT (Torre do Tombo) e o teste de DNA autossômico são os dois caminhos mais diretos e definitivos para resolver as questões em aberto.**
+
+---
+
+## Parte IV — Conclusão Narrativa
+
+A genealogia de Matheus Vinícius Menegatti da Costa, com sede no Rio de Janeiro do século XXI, contém em suas quatro gerações confirmadas uma estratigrafia histórica que a pesquisa online revelou ser muito mais complexa do que aparece à superfície.
+
+O bisavô italiano Francesco Menegatti é o ancestral mais acessível: veio provavelmente de Ferrara ou de Campo San Martino (Pádua), cidades com registros documentados do sobrenome desde 1540, durante a grande onda emigratória que levou centenas de milhares de italianos para as fazendas de café de São Paulo e as colônias do Sul do Brasil. O Vapor Manilla, identificado pelo banco de dados de Emigrazione Veneta, pode ser o navio que o trouxe. Os arquivos do Museu da Imigração de São Paulo e o Portal Antenati italiano são os caminhos imediatos para encontrá-lo.
+
+Os ramos ibéricos da árvore — Da Costa, De Freitas, Cabral, Viana — carregam a história mais silenciada do Brasil. A pesquisa encontrou casos documentados de famílias Da Costa processadas pela Inquisição no Brasil colonial (1618, 1624, 1686), o sobrenome Freitas entre os bandeirantes paulistas de origem judaica identificados por Anita Novinsky, e o nome Cabral associado historicamente ao solar de Belmonte — último reduto de cripto-judeus ibéricos. O nome Abigail, com apenas 10 mil portadoras em todo o Brasil, é o sinal onomástico mais raro e específico desta árvore inteira.
+
+Nada disso é prova. Mas a convergência de quatro sobrenomes documentados em listas de cristãos-novos, três gerações de nomes veterotestamentários raros e um nome hebraico feminino de uso mínimo no Brasil — tudo na mesma árvore — ultrapassa o limiar do acidental e entra no território da investigação genealógica séria.
+
+A pergunta que esta pesquisa deixa aberta — e que só documentos e DNA podem responder — é se Matheus Vinícius Menegatti da Costa é, além de bisneto de um imigrante do Vale do Pó, um descedente remoto das famílias que cruzaram o Atlântico não em busca de terras novas, mas em fuga de fogueiras antigas.
+
+---
+
+## Referências Verificadas Online
+
+### Fontes Genealógicas e Onomásticas
+- Forebears.io — distribuição global dos sobrenomes Menegatti, Da Costa, Viana, Freitas, Cabral
+- IBGE Censo 2022 (censo2022.ibge.gov.br/nomes) — frequência de nomes no Brasil
+- Escavador.com — dados públicos de Matheus Vinícius Menegatti da Costa
+- MyHeritage (myheritage.com/names/isaías_da%20costa) — registros de Isaías da Costa
+- Geni.com — Theotônio da Costa Mesquita; Maria de Herede + Mateus de Freitas de Azevedo
+- cognomix.it, cognomi.top, originedelcognome.com — etimologia do sobrenome Menegatti
+- menegatto.org — genealogia da família Menegatto de Campo San Martino para o Brasil
+- Emigrazione Veneta (emigrazioneveneta.com) — banco de dados de imigrantes vênetos
+
+### Fontes Históricas sobre Inquisição e Cristãos-Novos
+- Anita Novinsky, *Cristãos Novos na Bahia 1624–1654* (repositorio.usp.br/item/000722403)
+- Arnold Wiznitzer, *Jews in Colonial Brazil* — resumo em livroresumido.com.br
+- Museu da Inquisição (museudainquisicao.org.br) — listas de famílias cristãs-novas
+- Vila de Utopia (viladeutopia.com.br) — lista de bandeirantes de origem judaica
+- Hebrew History Federation — "The da Costas" (hebrewhistory.info/factpapers/fp041_dacostas.htm)
+- *The Myth of the Marrano Names* (historia.fflch.usp.br)
+- CJBrasil (cjbrasil.org) — BNEI ANUSSIM; Família Cabral; sobrenomes sefarditas
+- Portal Anussim (anussim.com.br) — sobrenomes judaico-portugueses da Inquisição
+- JewishGen/Sephardim.com — listas de sobrenomes sefarditas
+- Back to Sepharad (backtosepharad.com) — sobrenomes elegíveis para cidadania portuguesa
+- Decreto-Lei 30-A/2015 (pgdlisboa.pt) — cidadania portuguesa sefardita
+- Internet Archive — *O Estado da Paraíba tem Descendentes de Judeus Sefarditas* (Jamberto Guilherme de Souza)
+
+### Fontes Italianas
+- Heraldrys Institute of Rome (heraldrysinstitute.com) — etimologia Menegatti
+- Portal Antenati (antenati.cultura.gov.it) — registros civis e paroquiais italianos
+- Pagine Bianche Ferrara — portadores atuais do sobrenome
+- CISEI (ciseionline.it) — banco de dados de emigrantes italianos
+- Bassano del Grappa e dintorni — Pietro Menegatti, pintor (1809–1848)
+
+---
+
+*Última atualização: 10 de maio de 2026. Para pesquisa genealógica aprofundada com acesso a cartórios, arquivos paroquiais e documentos inquisitoriais, recomenda-se contratar genealogista credenciado pela Associação Brasileira de Pesquisadores de História e Genealogia (ASBRAP) ou pela Associação Brasileira de Genealogia (ABG).*
