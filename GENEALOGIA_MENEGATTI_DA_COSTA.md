@@ -69,12 +69,27 @@
 
 ---
 
-👤 **ZILDA VIANA** (avó paterna — sobrenome completo desconhecido)
+👤 **ZILDA VIANA** (avó paterna)
 
 📅 Nascimento: Estimativa ~1930–1945 **[INFERÊNCIA]**  
 📅 Falecimento: Desconhecido  
 🌍 Local: Brasil — estado a investigar  
 ✡️ Origem judaica: ❓ INCONCLUSIVO — "Viana" aparece em bases de dados sefarditas (JewishGen/Sephardim.com, Back to Sepharad); **359.146 portadores no Brasil** (Forebears.io), com 71% dos portadores mundiais no Brasil. Origem: Viana do Castelo (Portugal), importante centro mercantil judaico antes de 1497.
+
+**🚨 DESCOBERTA — MyHeritage (verificada pelo solicitante):**
+
+Perfil de **Zilda Viana** localizado na árvore "de sousa Family Tree" (MyHeritage), com família identificada:
+
+- **Pai:** Benedito Carlos Viana *(bisavô paterno de Matheus, via linha materna de Josué)*
+- **Mãe:** Guiomar P.C.C. *(bisavó paterna de Matheus — "P.C.C." = sobrenome incompleto, possivelmente Pereira Caldas Camacho ou similar)*
+- **Irmãs:** Zenia Viana · Zuleica Viana · Zeralva Viana
+- **Família Camacho** documentada acima: João Garcia Camacho × Anna Isabel Camacho; Joaquim Pereira Camacho; Euricos Camacho; Fernando Pereira Camacho — geração de bisavós/trisavós de Zilda
+- **Família Pereira da Silva** também documentada: Antonio Pereira da Silva × Maria Izabel de Oliveira Silva (geração de trisavós de Zilda)
+- **Acima:** dois "Desconhe... Pereira" (trisavós ou quadrisavós de Zilda, identidade parcial)
+
+**Nota genealógica — sobrenome Camacho:** Camacho aparece em algumas listas de cristãos-novos peninsulares, embora seja sobrenome muito difundido no mundo lusófono de origem geral. Sua presença aqui não constitui evidência isolada de herança judaica, mas é dado a integrar na análise geral da linhagem Viana.
+
+**Implicação estrutural:** Benedito Carlos Viana é a **Geração V** (trisavô) de Matheus pela linha paterna (Matheus → Josué → Zilda → Benedito). Sua família Camacho completa dois novos ramos genealógicos antes totalmente desconhecidos.
 
 ---
 
@@ -169,19 +184,35 @@ Se Helcio Menegatti nasceu ~1928–1948, Francesco teria nascido ~1880–1910, e
 
 👤 **MARIA CABRAL** (bisavó materna — mãe de Abigail, CONFIRMADA)
 
-**Possível nome completo: Maria Cabral de Freitas** — se confirmado, este sobrenome composto seria genealogicamente determinante: explicaria a origem do "De Freitas" em Abigail de Freitas sem necessitar de um pai De Freitas desconhecido; reuniria os dois sobrenomes com indicadores sefarditas (Cabral + Freitas) em uma única pessoa.
+**Nome completo verificado:** **Maria Rodrigues Cabral** (nome de batismo) → **Maria Cabral de Freitas** (nome de casada)
 
 📅 Nascimento: ~1894 **[DADO FORNECIDO PELA FAMÍLIA]**  
 📅 Falecimento: ~1996 **[DADO FORNECIDO PELA FAMÍLIA]** — viveu aproximadamente **102 anos**  
 🌍 Local: Brasil — estado a investigar  
-✡️ Origem judaica: ❓ INCONCLUSIVO — **dado crítico encontrado:** "Cabral" aparece **DUAS VEZES** na lista publicada pelo Museu da Inquisição de sobrenomes com alta porcentagem de cristãos-novos acusados de judaísmo nos tribunais portugueses.
+✡️ Origem judaica: ❓ INCONCLUSIVO — "Cabral" aparece **DUAS VEZES** na lista do Museu da Inquisição; "De Freitas" na lista de bandeirantes judeus de Anita Novinsky.
 
-**Nota crítica sobre as datas:** Com nascimento ~1894 e falecimento ~1996, Maria Cabral viveu ~102 anos. Matheus Vinícius (n. 1988) tinha aproximadamente **8 anos** quando ela faleceu — pode ter convivido com ela. Entrevistar familiares que a conheceram pessoalmente é **ação prioritária** para obter dados como local de nascimento, nome dos pais, denominação religiosa e histórias de família.
+**🚨 DESCOBERTA — FamilySearch (verificada pelo solicitante):**
 
-**Status dos perfis FamilySearch à luz das datas corretas:**
-- LCC7-116 (n. 1881 — f. 1968): nascimento ~13 anos anterior; óbito ~28 anos anterior — **incompatível**
-- G5W4-KML (n. 1908 — f. 1991): nascimento ~14 anos posterior; óbito ~5 anos anterior — **incompatível**
-- Nenhum dos perfis encontrados corresponde às datas familiares. Nova busca no FamilySearch com os anos corretos (1894/1996) é necessária.
+Perfil localizado no FamilySearch com **nome de batismo Maria Rodrigues Cabral** e **nome de casada Maria Cabral de Freitas**. Estrutura familiar identificada:
+
+- **Pai de Maria:** Luiz Rodrigues Caldas (ou Luiz Rodrigues C... — nome incompleto no perfil)
+- **Mãe de Maria:** Sylvina de Freitas C... — **a origem do sobrenome De Freitas está na avó materna de Abigail**
+- **Avô paterno de Maria:** Pedro Cabral Caldas
+- **Avó paterna de Maria:** Idalina Rodrigues C...
+- **Marido de Maria:** Alcides Alves de Freitas — o sobrenome "De Freitas" em Abigail vem do **pai** (Alcides), não da mãe
+- **Filho visível na árvore:** Jair Alves de Freitas × Iternice Brito de F...
+
+**Análise estrutural crítica — origem do sobrenome "De Freitas" em Abigail:**
+
+O perfil FamilySearch esclarece a estrutura de sobrenomes da família:
+1. Maria nasceu **Rodrigues Cabral** → ao casar com Alcides Alves de **Freitas**, adotou "Cabral de Freitas"
+2. **Abigail de Freitas** herdou o sobrenome **do pai, Alcides Alves de Freitas** (não da mãe)
+3. A hipótese anterior de "Maria Cabral de Freitas como sobrenome composto de nascimento" é **revisada**: o De Freitas entrou pela linha paterna (Alcides) e pela linha materna de Maria (Sylvina de Freitas)
+4. O sobrenome Freitas aparece em **duas gerações consecutivas** na mesma linhagem (Sylvina de Freitas e Alcides de Freitas) — pode indicar que ambos tinham origem comum na mesma família De Freitas
+
+**Nota sobre as datas:** O FamilySearch não mostrou as datas de nascimento/óbito de Maria nestes screenshots. Verificar se o perfil tem datas próximas a 1894/1996 para confirmar que é a mesma pessoa da memória familiar.
+
+**Nota de memória oral:** Matheus tinha ~8 anos quando ela faleceu (~1996). Entrevistar parentes que a conheceram é ação prioritária.
 
 **Dados de pesquisa sobre o sobrenome Cabral:**
 - Pedro Álvares Cabral nasceu como "Pedro Álvares de Gouveia"; sua mãe era **Isabel de Gouveia** — família reconhecida historicamente como de origem cristã-nova (judaica). Há historiadores que argumentam que o próprio Cabral era cristão-novo e que isso explicaria a composição da tripulação de 1500.

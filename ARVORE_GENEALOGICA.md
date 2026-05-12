@@ -9,29 +9,29 @@
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GERAÇÃO V — TRISAVÓS  [estimados: ~1845–1885]
+ GERAÇÃO V — TRISAVÓS  [estimados: ~1845–1900]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-          ◄─────────── LADO PATERNO ────────────►                     ◄──────────── LADO MATERNO ─────────────►
+          ◄─────────────────────── LADO PATERNO ────────────────────────►              ◄──────────────────────── LADO MATERNO ─────────────────────────►
 
-  ┌─────────────────────────┐  ┌──────────────────────┐     ┌─────────────────────────┐  ┌──────────────────────────┐
-  │ ○ [FAMÍLIA DA COSTA]    │  │ ○ [FAMÍLIA VIANA]    │     │ ○ FAMÍLIA MENEGATTI     │  │ ? [FAMÍLIA DE ABIGAIL]   │
-  │   Portugal →            │  │   Portugal →         │     │   Ferrara (Emilia-      │  │   Poss. família          │
-  │   Brasil colonial       │  │   Brasil colonial    │     │   Romagna) ou Campo     │  │   De Freitas ou Cabral   │
-  │   (antepassados         │  │   (antepassados      │     │   San Martino (Pádua)   │  │   Brasil colonial        │
-  │    de Urbano da Costa)  │  │    de Zilda Viana)   │     │   ITÁLIA                │  │   (antepassados de       │
-  │                         │  │                      │     │   (antepassados de      │  │    Abigail de Freitas)   │
-  │   Hipótese sefardita:   │  │   Origem: Viana do   │     │    Francesco Menegatti) │  │                          │
-  │   "Costa" = top 10      │  │   Castelo, Portugal  │     │                         │  │   Pesquisa: ver Anita    │
-  │   cristãos-novos        │  │   Listado em bases   │     │   Registros paroquiais  │  │   Novinsky: "Freitas"    │
-  │   (Anita Novinsky)      │  │   sefarditas         │     │   desde 1540            │  │   lista bandeirantes     │
-  │                         │  │   JewishGen          │     │   Portal Antenati:      │  │   de origem judaica      │
-  │                         │  │                      │     │   antenati.cultura.     │  │                          │
-  │                         │  │                      │     │   gov.it                │  │                          │
-  └────────────┬────────────┘  └──────────┬───────────┘     └────────────┬────────────┘  └────────────┬─────────────┘
-               │                          │                               │                            │
-               └──────────┬───────────────┘                               └──────────┬─────────────────┘
-                           │                                                          │
+  ┌──────────────────────────┐  ┌─────────────────────────────┐     ┌─────────────────────────┐  ┌──────────────────────────────────────┐
+  │ ○ [FAMÍLIA DA COSTA]     │  │ ◎ BENEDITO CARLOS VIANA     │     │ ○ FAMÍLIA MENEGATTI     │  │ ◎ LUIZ RODRIGUES CALDAS              │
+  │   Portugal →             │  │   × GUIOMAR P.C.C.          │     │   Ferrara (Emilia-      │  │   × SYLVINA DE FREITAS C...          │
+  │   Brasil colonial        │  │                             │     │   Romagna) ou Campo     │  │                                      │
+  │   (antepassados          │  │   [MyHeritage confirmado]   │     │   San Martino (Pádua)   │  │   [FamilySearch confirmado]          │
+  │    de Urbano da Costa)   │  │                             │     │   ITÁLIA                │  │                                      │
+  │                          │  │   Família Camacho acima:    │     │   (antepassados de      │  │   Pai de Maria Rodrigues Cabral      │
+  │   Hipótese sefardita:    │  │   João Garcia Camacho       │     │    Francesco Menegatti) │  │   Mãe de Maria = De FREITAS          │
+  │   "Costa" = top 10       │  │   × Anna Isabel Camacho     │     │                         │  │   (2ª geração de De Freitas          │
+  │   cristãos-novos         │  │   Pereira da Silva:         │     │   Registros paroquiais  │  │    antes de Abigail)                 │
+  │   (Anita Novinsky)       │  │   Antonio P. da Silva       │     │   desde 1540            │  │                                      │
+  │                          │  │   × Maria Izabel Oliveira   │     │   Portal Antenati:      │  │   Avô Pedro Cabral Caldas            │
+  │                          │  │                             │     │   antenati.cultura.     │  │   Avó Idalina Rodrigues C...         │
+  │                          │  │   [pai/avô de Zilda Viana]  │     │   gov.it                │  │   [pai e avó de Luiz, FamilySearch]  │
+  └────────────┬─────────────┘  └─────────────┬───────────────┘     └────────────┬────────────┘  └───────────────────┬──────────────────┘
+               │                              │                                   │                                  │
+               └──────────┬───────────────────┘                                   └──────────┬──────────────────────┘
+                           │                                                                  │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GERAÇÃO IV — BISAVÓS  [~1875–1925 | Maria Cabral: ~1894–1996]                                                  │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -50,19 +50,20 @@
   │   casos documentados na         │  │                    │   │   31% dos Menegatti do mundo         │  │   [identidade a     │
   │   Inquisição brasileira         │  │                    │   │   vivem no Brasil                    │  │    investigar]      │
   │   (Ana da Costa, 1624;          │  │                    │   │                                      │  │                     │
-  │   Theotônio da Costa, 1686)     │  │                    │   │   Pista: Vapor Manilla               │  │ ● MARIA CABRAL      │
-  └────────────────┬────────────────┘  └──────────┬─────────┘   │   (Emigrazione Veneta)              │  │   n. ~1894          │
-                   │                              │              └─────────────────────┬────────────────┘  │   f. ~1996 (~102a)  │
-                   └────────────┬─────────────────┘                                    │                   │   Brasil            │
-                                │                              ? [MÃE DE HELCIO]       │                   │                     │
-                                │                              provavelmente também     │                   │ Poss. sobrenome     │
-                                │                              italiana ou brasileira   │                   │ CABRAL DE FREITAS   │
-                                │                              [desconhecida]           │                   │ (a confirmar)       │
+  │   Theotônio da Costa, 1686)     │  │                    │   │   Pista: Vapor Manilla               │  │ ◎ MARIA RODRIGUES   │
+  └────────────────┬────────────────┘  └──────────┬─────────┘   │   (Emigrazione Veneta)              │  │   CABRAL            │
+                   │                              │              └─────────────────────┬────────────────┘  │   n. ~1894          │
+                   └────────────┬─────────────────┘                                    │                   │   f. ~1996 (~102a)  │
+                                │                              ? [MÃE DE HELCIO]       │                   │   Brasil            │
+                                │                              provavelmente também     │                   │                     │
+                                │                              italiana ou brasileira   │                   │ casou com:          │
+                                │                              [desconhecida]           │                   │ Alcides Alves de    │
+                                │                                                       │                   │ Freitas             │
+                                │                                                       │                   │ → "De Freitas" de   │
+                                │                                                       │                   │   Abigail vem daqui │
                                 │                                                       │                   │                     │
-                                │                                                       │                   │ [bisavó materna     │
-                                │                                                       │                   │  CONFIRMADA]        │
+                                │                                                       │                   │ [FamilySearch ◎]    │
                                 │                                                       │                   └──────────┬──────────┘
-                                │                              [desconhecida]           │                              │
                                 │                                                       └──────────┬────────────────────┘
                                 │                                                                  │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━
@@ -76,18 +77,18 @@
   │   ~1928–1945 · Brasil                    │  │   ~1930–1945 · Brasil      │     │   ~1928–1948 · Brasil       │  │   ~1930–1950 · Brasil                        │
   │                                          │  │                            │     │                             │  │                                              │
   │   avô paterno de Matheus                 │  │   avó paterna de Matheus   │     │   avô materno de Matheus    │  │   avó materna de Matheus                     │
-  │                                          │  │                            │     │   filho de Francesco        │  │   filha de Maria Cabral                      │
-  │   Filho de Urbano da Costa               │  │   sobrenome completo       │     │   Menegatti (imigrante IT)  │  │                                              │
-  │                                          │  │   desconhecido             │     │                             │  │   Nome Abigail = hebraico do AT              │
-  │   Nome Isaías = profeta hebraico         │  │                            │     │   "Helcio" = poss. adaptação│  │   apenas 10.122 portadoras no Brasil         │
-  │   (Yeshayahu) — raro em                  │  │   "Viana" listado em       │     │   brasileira de "Ercole"   │  │   (IBGE 2010) — pico: década de 1950         │
-  │   famílias católicas                     │  │   bases sefarditas         │     │   (Hércules em italiano)    │  │                                              │
-  │   (evangelical ou cripto-judaico)        │  │   (JewishGen, Back         │     │                             │  │   "Freitas" = lista bandeirantes             │
-  │                                          │  │    to Sepharad)            │     │                             │  │   judeus (Anita Novinsky)                    │
-  │   MyHeritage: registros de              │  │                            │     │                             │  │   Caso documentado: Mateus de                │
-  │   Isaías da Costa no Brasil              │  │                            │     │                             │  │   Freitas de Azevedo × cristã-nova           │
-  │   encontrados, sem cruzamento            │  │                            │     │                             │  │   sefardita (Pernambuco, séc. XVI)           │
-  │   confirmado com este ramo               │  │                            │     │                             │  │                                              │
+  │                                          │  │                            │     │   filho de Francesco        │  │   filha de Maria Rodrigues Cabral            │
+  │   Filho de Urbano da Costa               │  │ ◎ PAI: Benedito C. Viana  │     │   Menegatti (imigrante IT)  │  │   e Alcides Alves de Freitas                 │
+  │                                          │  │ ◎ MÃE: Guiomar P.C.C.    │     │                             │  │                                              │
+  │   Nome Isaías = profeta hebraico         │  │ ◎ IRMÃS: Zenia Viana ·   │     │   "Helcio" = poss. adaptação│  │   Nome Abigail = hebraico do AT              │
+  │   (Yeshayahu) — raro em                  │  │          Zuleica Viana ·  │     │   brasileira de "Ercole"    │  │   apenas 10.122 portadoras no Brasil         │
+  │   famílias católicas                     │  │          Zeralva Viana    │     │   (Hércules em italiano)    │  │   (IBGE 2010) — pico: década de 1950         │
+  │   (evangelical ou cripto-judaico)        │  │                           │     │                             │  │                                              │
+  │                                          │  │   [MyHeritage confirmado] │     │                             │  │   "Freitas" = lista bandeirantes             │
+  │   MyHeritage: registros de              │  │                           │     │                             │  │   judeus (Anita Novinsky)                    │
+  │   Isaías da Costa no Brasil              │  │   Família Camacho acima   │     │                             │  │   De Freitas vem do pai Alcides              │
+  │   encontrados, sem cruzamento            │  │   (trisavós de Matheus)   │     │                             │  │   [FamilySearch confirmado ◎]                │
+  │   confirmado com este ramo               │  │                           │     │                             │  │                                              │
   └─────────────────┬────────────────────────┘  └───────────────┬────────────┘     └────────────┬────────────────┘  └──────────────────────┬───────────────────────┘
                     │                                           │                               │                                          │
                     └───────────────┬───────────────────────────┘                               └──────────────────┬───────────────────────┘
@@ -156,15 +157,22 @@
  PRÓXIMOS PASSOS — PRIORIDADE MÁXIMA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  1. ⭐⭐⭐  Localizar Francesco Menegatti: emigrazioneveneta.com + ciseionline.it + antenati.cultura.gov.it
-  2. ⭐⭐⭐  Obter registro de nascimento de Abigail de Freitas → identificar o pai (confirmar "De Freitas")
-  3. ⭐⭐⭐  Obter certidão de casamento de Isaías da Costa × Zilda Viana → identificar família Viana
-  4. ⭐⭐⭐  Pesquisar Torre do Tombo: digitarq.arquivos.pt → "Da Costa" + "Freitas" + Brasil
-  5. ⭐⭐    Teste de DNA autossômico (23andMe/AncestryDNA): confirmar/refutar ancestralidade sefardita
-  6. ⭐⭐    Perguntar a familiares: qual a denominação religiosa da família Da Costa nas gerações anteriores?
+  ✅ CONCLUÍDO: Família Zilda Viana — pais Benedito Carlos Viana + Guiomar P.C.C. (MyHeritage)
+  ✅ CONCLUÍDO: Maria Rodrigues Cabral — nome, pais (Luiz Rodrigues Caldas + Sylvina de Freitas C.),
+                avós (Pedro Cabral Caldas + Idalina Rodrigues C.), marido Alcides Alves de Freitas (FamilySearch)
+  ✅ CONCLUÍDO: Origem do "De Freitas" em Abigail = pai Alcides Alves de Freitas (CONFIRMADO)
+
+  1. ⭐⭐⭐  Verificar datas do perfil FamilySearch de Maria Rodrigues Cabral (n.~1894 / f.~1996)
+  2. ⭐⭐⭐  Confirmar se Abigail aparece como filha de Maria + Alcides no FamilySearch
+  3. ⭐⭐⭐  Localizar Francesco Menegatti: emigrazioneveneta.com + ciseionline.it + antenati.cultura.gov.it
+  4. ⭐⭐⭐  Obter certidão de casamento de Isaías da Costa × Zilda Viana → confirmar Benedito Viana
+  5. ⭐⭐⭐  Expandir árvore MyHeritage: identificar sobrenome completo de Guiomar P.C.C.
+  6. ⭐⭐⭐  Pesquisar Torre do Tombo: digitarq.arquivos.pt → "Da Costa" + "Cabral Caldas" + "Freitas" + Brasil
+  7. ⭐⭐    Teste de DNA autossômico (23andMe/AncestryDNA): confirmar/refutar ancestralidade sefardita
+  8. ⭐⭐    Perguntar a familiares: denominação religiosa da família Da Costa nas gerações anteriores?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Gerado em: 10 de maio de 2026
-  Relatório completo: GENEALOGIA_MENEGATTI_DA_COSTA.md
+  Gerado em: 10 de maio de 2026 | Atualizado: 12 de maio de 2026
+  Relatório completo: GENEALOGIA_MENEGATTI_DA_COSTA.md | RELATORIO_PROFISSIONAL_GPS.md
 ```

@@ -112,18 +112,35 @@ O GPS exige cinco elementos para uma conclusão genealógica profissionalmente a
 
 ---
 
-#### 👤 ZILDA VIANA (avó paterna — sobrenome completo desconhecido) ●
+#### 👤 ZILDA VIANA (avó paterna) ●
 
 📅 Nascimento: ~1930–1945 ○  
-🌍 Local: Brasil — provavelmente Nordeste ○
+🌍 Local: Brasil ○
 
-**Análise de evidências:**
+**🚨 DESCOBERTA CONFIRMADA — MyHeritage "de sousa Family Tree":**
+
+| Campo | Dado verificado | Fonte |
+|-------|----------------|-------|
+| Pai | **Benedito Carlos Viana** | MyHeritage (screenshot verificado) |
+| Mãe | **Guiomar P.C.C.** (sobrenome incompleto) | MyHeritage (screenshot verificado) |
+| Irmã | Zenia Viana | MyHeritage |
+| Irmã | Zuleica Viana | MyHeritage |
+| Irmã | Zeralva Viana | MyHeritage |
+| Família paterna acima | Camacho: João Garcia Camacho × Anna Isabel Camacho | MyHeritage |
+| Família paterna acima | Pereira: Joaquim Pereira Camacho; Euricos Camacho; Fernando Pereira Camacho | MyHeritage |
+| Família paterna acima | Pereira da Silva: Antonio Pereira da Silva × Maria Izabel de Oliveira Silva | MyHeritage |
+| Família acima acima | Dois "Desconhe... Pereira" (quadrisavós de Matheus) | MyHeritage |
+
+**Análise de evidências (atualizada):**
 
 | Indicador | Evidência | Tipo | Força |
 |-----------|-----------|------|-------|
-| Sobrenome Viana | 359.146 portadores no Brasil; 71% do total mundial; concentração em SP, MG, RJ (Forebears.io) | Indireta | Média |
-| Sobrenome Viana | Listado em bases de dados sefarditas: JewishGen/Sephardim.com, Back to Sepharad | Indireta | Baixa-Média |
-| Nome Zilda | Forma apocópica de Mathilde/Clotilde; comum em mulheres nascidas 1920–1950 no Sul/Sudeste | Indireta | Baixa |
+| Pai confirmado | Benedito Carlos Viana — MyHeritage tree | Direta ◎ | Alta (a verificar) |
+| Sobrenome Viana | 359.146 portadores no Brasil; 71% do total mundial (Forebears.io) | Indireta | Média |
+| Sobrenome Viana | Listado em bases sefarditas: JewishGen/Sephardim.com, Back to Sepharad | Indireta | Baixa-Média |
+| Família Camacho | Documentada 2 gerações acima de Zilda; Camacho em algumas listas de cristãos-novos | Indireta | Baixa |
+
+**Conclusão GPS:** Família de Zilda Viana parcialmente identificada. Benedito Carlos Viana (trisavô de Matheus) e família Camacho/Pereira abrem novos ramos a investigar. Verificar certidão de nascimento de Zilda Viana para confirmar filiação.
 
 ---
 
@@ -226,29 +243,48 @@ Menegatti ← Menegat ← Menego (dialeto vêneto) ← Domenico. Terminação "-
 
 #### 👤 MARIA CABRAL (bisavó materna — mãe de Abigail, confirmada) ●
 
+**Nome verificado: Maria Rodrigues Cabral** (batismo) / **Maria Cabral de Freitas** (casamento)
+
 📅 Nascimento: **~1894** ● *[dado fornecido pela família]*  
 📅 Falecimento: **~1996** ● *[dado fornecido pela família]* — viveu aproximadamente **102 anos**  
-🌍 Local: Brasil — provavelmente **Nordeste** ○  
+🌍 Local: Brasil ○  
 ✡️ Origem judaica: ❓ INCONCLUSIVO
 
-**Possível nome completo: Maria Cabral de Freitas**  
-Se confirmado, este sobrenome composto seria a descoberta estrutural mais importante da pesquisa: Abigail de Freitas herdaria o "De Freitas" da mãe, reunindo em uma única pessoa os dois sobrenomes com indicadores sefarditas (Cabral + Freitas). Requer verificação via certidão de nascimento de Abigail ou de casamento de seus pais.
+**🚨 DESCOBERTA CONFIRMADA — FamilySearch (screenshot verificado pelo solicitante):**
 
-**Nota de longevidade e memória familiar:** Com falecimento ~1996, Maria Cabral sobreviveu até que Matheus tinha ~8 anos de idade. **Ela pode ser lembrada por familiares ainda vivos** — esta é a janela de memória oral mais valiosa da pesquisa. Obter relatos de parentes que a conheceram pessoalmente (nomes, origem, religião, histórias).
+| Campo | Dado verificado | Fonte |
+|-------|----------------|-------|
+| Nome de batismo | **Maria Rodrigues Cabral** | FamilySearch (screenshot) |
+| Nome de casada | **Maria Cabral de Freitas** | FamilySearch (screenshot) |
+| Pai de Maria | **Luiz Rodrigues Caldas** (ou Luiz Rodrigues C...) | FamilySearch (screenshot) |
+| Mãe de Maria | **Sylvina de Freitas C...** | FamilySearch (screenshot) |
+| Avô paterno de Maria | **Pedro Cabral Caldas** | FamilySearch (screenshot) |
+| Avó paterna de Maria | **Idalina Rodrigues C...** | FamilySearch (screenshot) |
+| Marido de Maria | **Alcides Alves de Freitas** | FamilySearch (screenshot) |
+| Filho visível | Jair Alves de Freitas × Iternice Brito de F... | FamilySearch (screenshot) |
 
-**🚨 REVISÃO DAS PISTAS FamilySearch:**
+**Resolução estrutural — origem do "De Freitas" em Abigail:**
 
-Os perfis encontrados anteriormente **não correspondem** às datas fornecidas pela família:
+O perfil FamilySearch resolve a questão da origem do sobrenome De Freitas em duas camadas:
+1. **Via materna de Maria:** Sylvina de **Freitas** (mãe de Maria) → a família De Freitas já estava presente antes do casamento
+2. **Via paterna de Abigail:** Alcides Alves de **Freitas** (pai de Abigail) → Abigail herdou o De Freitas do pai
 
-| ID FamilySearch | Datas encontradas | Datas reais (família) | Status |
-|----------------|-------------------|----------------------|--------|
-| LCC7-116 | n. 1881 — f. 1968 | n. ~1894 — f. ~1996 | ❌ Incompatível |
-| G5W4-KML | n. 1908 — f. 1991 | n. ~1894 — f. ~1996 | ❌ Incompatível |
-| GDVH-WTV | n. 1750 — f. 1797 | n. ~1894 — f. ~1996 | ❌ Descartado |
-| G8CK-3J8 | Sem datas | n. ~1894 — f. ~1996 | ❓ A verificar |
-| LH8F-MJG | n. 1923 — f. 2005 | n. ~1894 — f. ~1996 | ❌ Incompatível |
+Portanto, o "De Freitas" em Abigail de Freitas vem do **pai (Alcides)**, não da mãe. A coincidência de Sylvina (avó de Abigail) também ser "de Freitas" pode indicar ramos da mesma família De Freitas.
 
-**⭐ NOVA AÇÃO:** Buscar no FamilySearch com filtros: nome "Maria Cabral", nascimento 1890–1900, óbito 1990–2000, Brasil. Também buscar "Maria Cabral de Freitas" como nome alternativo.
+**Análise de evidências (atualizada):**
+
+| Indicador | Evidência | Tipo | Força |
+|-----------|-----------|------|-------|
+| Perfil FamilySearch | Nome de batismo e casado confirmados via screenshot | Direta ◎ | Alta (a verificar datas) |
+| Pai: Luiz Rodrigues Caldas | Sobrenome "Caldas" novo na árvore — a investigar | Indireta | Baixa-Média |
+| Avô: Pedro Cabral Caldas | Confirma sobrenome Cabral duas gerações acima de Abigail | Direta ◎ | Alta (genealógica) |
+| Sylvina de Freitas | Bisavó de Abigail já era "de Freitas" — duas gerações de De Freitas | Direta ◎ | Alta |
+| Museu da Inquisição | "Cabral" 2× na lista de cristãos-novos | Indireta | Alta (histórica) |
+| Anita Novinsky | "Freitas" em lista de bandeirantes de origem judaica | Indireta | Alta (histórica) |
+
+**Nota sobre datas:** O FamilySearch não mostrou as datas de Maria nesses screenshots. Verificar se o perfil tem datas próximas a ~1894/~1996 para confirmar que é a mesma pessoa da memória familiar. Se as datas divergirem, considerar que pode ser uma parente com o mesmo nome.
+
+**Nota de memória oral:** Matheus tinha ~8 anos em 1996 — parentes mais velhos podem ter memórias diretas de Maria.
 
 **Análise de evidências sobre o sobrenome Cabral:**
 
