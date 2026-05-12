@@ -33,7 +33,7 @@
                └──────────┬───────────────┘                               └──────────┬─────────────────┘
                            │                                                          │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GERAÇÃO IV — BISAVÓS  [~1875–1925]                                                  │
+ GERAÇÃO IV — BISAVÓS  [~1875–1925 | Maria Cabral: ~1894–1996]                                                  │
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                            │                                                          │
          ◄──── LADO PATERNO ────►                                    ◄──────── LADO MATERNO ──────────►
@@ -50,13 +50,18 @@
   │   casos documentados na         │  │                    │   │   31% dos Menegatti do mundo         │  │   [identidade a     │
   │   Inquisição brasileira         │  │                    │   │   vivem no Brasil                    │  │    investigar]      │
   │   (Ana da Costa, 1624;          │  │                    │   │                                      │  │                     │
-  │   Theotônio da Costa, 1686)     │  │                    │   │   Pista: Vapor Manilla               │  │   × MARIA CABRAL    │
-  └────────────────┬────────────────┘  └──────────┬─────────┘   │   (Emigrazione Veneta)              │  │   ~1900–1925        │
-                   │                              │              └─────────────────────┬────────────────┘  │   Brasil            │
-                   └────────────┬─────────────────┘                                    │                   │                     │
-                                │                              ? [MÃE DE HELCIO]       │                   │   [bisavó materna   │
-                                │                              provavelmente também     │                   │    CONFIRMADA]      │
-                                │                              italiana ou brasileira   │                   └──────────┬──────────┘
+  │   Theotônio da Costa, 1686)     │  │                    │   │   Pista: Vapor Manilla               │  │ ● MARIA CABRAL      │
+  └────────────────┬────────────────┘  └──────────┬─────────┘   │   (Emigrazione Veneta)              │  │   n. ~1894          │
+                   │                              │              └─────────────────────┬────────────────┘  │   f. ~1996 (~102a)  │
+                   └────────────┬─────────────────┘                                    │                   │   Brasil            │
+                                │                              ? [MÃE DE HELCIO]       │                   │                     │
+                                │                              provavelmente também     │                   │ Poss. sobrenome     │
+                                │                              italiana ou brasileira   │                   │ CABRAL DE FREITAS   │
+                                │                              [desconhecida]           │                   │ (a confirmar)       │
+                                │                                                       │                   │                     │
+                                │                                                       │                   │ [bisavó materna     │
+                                │                                                       │                   │  CONFIRMADA]        │
+                                │                                                       │                   └──────────┬──────────┘
                                 │                              [desconhecida]           │                              │
                                 │                                                       └──────────┬────────────────────┘
                                 │                                                                  │

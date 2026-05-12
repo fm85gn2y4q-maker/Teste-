@@ -169,10 +169,19 @@ Se Helcio Menegatti nasceu ~1928–1948, Francesco teria nascido ~1880–1910, e
 
 👤 **MARIA CABRAL** (bisavó materna — mãe de Abigail, CONFIRMADA)
 
-📅 Nascimento: Estimativa ~1900–1925 **[INFERÊNCIA]**  
-📅 Falecimento: Desconhecido  
+**Possível nome completo: Maria Cabral de Freitas** — se confirmado, este sobrenome composto seria genealogicamente determinante: explicaria a origem do "De Freitas" em Abigail de Freitas sem necessitar de um pai De Freitas desconhecido; reuniria os dois sobrenomes com indicadores sefarditas (Cabral + Freitas) em uma única pessoa.
+
+📅 Nascimento: ~1894 **[DADO FORNECIDO PELA FAMÍLIA]**  
+📅 Falecimento: ~1996 **[DADO FORNECIDO PELA FAMÍLIA]** — viveu aproximadamente **102 anos**  
 🌍 Local: Brasil — estado a investigar  
 ✡️ Origem judaica: ❓ INCONCLUSIVO — **dado crítico encontrado:** "Cabral" aparece **DUAS VEZES** na lista publicada pelo Museu da Inquisição de sobrenomes com alta porcentagem de cristãos-novos acusados de judaísmo nos tribunais portugueses.
+
+**Nota crítica sobre as datas:** Com nascimento ~1894 e falecimento ~1996, Maria Cabral viveu ~102 anos. Matheus Vinícius (n. 1988) tinha aproximadamente **8 anos** quando ela faleceu — pode ter convivido com ela. Entrevistar familiares que a conheceram pessoalmente é **ação prioritária** para obter dados como local de nascimento, nome dos pais, denominação religiosa e histórias de família.
+
+**Status dos perfis FamilySearch à luz das datas corretas:**
+- LCC7-116 (n. 1881 — f. 1968): nascimento ~13 anos anterior; óbito ~28 anos anterior — **incompatível**
+- G5W4-KML (n. 1908 — f. 1991): nascimento ~14 anos posterior; óbito ~5 anos anterior — **incompatível**
+- Nenhum dos perfis encontrados corresponde às datas familiares. Nova busca no FamilySearch com os anos corretos (1894/1996) é necessária.
 
 **Dados de pesquisa sobre o sobrenome Cabral:**
 - Pedro Álvares Cabral nasceu como "Pedro Álvares de Gouveia"; sua mãe era **Isabel de Gouveia** — família reconhecida historicamente como de origem cristã-nova (judaica). Há historiadores que argumentam que o próprio Cabral era cristão-novo e que isso explicaria a composição da tripulação de 1500.

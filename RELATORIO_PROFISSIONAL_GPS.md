@@ -226,24 +226,29 @@ Menegatti ← Menegat ← Menego (dialeto vêneto) ← Domenico. Terminação "-
 
 #### 👤 MARIA CABRAL (bisavó materna — mãe de Abigail, confirmada) ●
 
-📅 Nascimento: ~1900–1925 ○  
-📅 Falecimento: ~1960–2000 ○  
+📅 Nascimento: **~1894** ● *[dado fornecido pela família]*  
+📅 Falecimento: **~1996** ● *[dado fornecido pela família]* — viveu aproximadamente **102 anos**  
 🌍 Local: Brasil — provavelmente **Nordeste** ○  
 ✡️ Origem judaica: ❓ INCONCLUSIVO
 
-**🚨 PISTAS CONCRETAS — FamilySearch:**
+**Possível nome completo: Maria Cabral de Freitas**  
+Se confirmado, este sobrenome composto seria a descoberta estrutural mais importante da pesquisa: Abigail de Freitas herdaria o "De Freitas" da mãe, reunindo em uma única pessoa os dois sobrenomes com indicadores sefarditas (Cabral + Freitas). Requer verificação via certidão de nascimento de Abigail ou de casamento de seus pais.
 
-Cinco perfis de "Maria Cabral" encontrados no FamilySearch Brasil:
+**Nota de longevidade e memória familiar:** Com falecimento ~1996, Maria Cabral sobreviveu até que Matheus tinha ~8 anos de idade. **Ela pode ser lembrada por familiares ainda vivos** — esta é a janela de memória oral mais valiosa da pesquisa. Obter relatos de parentes que a conheceram pessoalmente (nomes, origem, religião, histórias).
 
-| ID FamilySearch | Datas | Observação |
-|----------------|-------|------------|
-| **LCC7-116** | **n. 1881 — f. 1968** | **⭐ Geração perfeita para bisavó de Matheus** |
-| **G5W4-KML** | **n. 1908 — f. 1991** | ⭐ Também compatível |
-| GDVH-WTV | n. 1750 — f. 1797 | Muito antiga — descartável |
-| G8CK-3J8 | Sem datas | A verificar |
-| LH8F-MJG | n. 1923 — f. 2005 | Maria Cabral da Silva |
+**🚨 REVISÃO DAS PISTAS FamilySearch:**
 
-**⭐ AÇÃO IMEDIATA:** Acessar FamilySearch.org com conta gratuita e verificar IDs **LCC7-116** e **G5W4-KML** — podem ser a Maria Cabral bisavó de Matheus.
+Os perfis encontrados anteriormente **não correspondem** às datas fornecidas pela família:
+
+| ID FamilySearch | Datas encontradas | Datas reais (família) | Status |
+|----------------|-------------------|----------------------|--------|
+| LCC7-116 | n. 1881 — f. 1968 | n. ~1894 — f. ~1996 | ❌ Incompatível |
+| G5W4-KML | n. 1908 — f. 1991 | n. ~1894 — f. ~1996 | ❌ Incompatível |
+| GDVH-WTV | n. 1750 — f. 1797 | n. ~1894 — f. ~1996 | ❌ Descartado |
+| G8CK-3J8 | Sem datas | n. ~1894 — f. ~1996 | ❓ A verificar |
+| LH8F-MJG | n. 1923 — f. 2005 | n. ~1894 — f. ~1996 | ❌ Incompatível |
+
+**⭐ NOVA AÇÃO:** Buscar no FamilySearch com filtros: nome "Maria Cabral", nascimento 1890–1900, óbito 1990–2000, Brasil. Também buscar "Maria Cabral de Freitas" como nome alternativo.
 
 **Análise de evidências sobre o sobrenome Cabral:**
 
