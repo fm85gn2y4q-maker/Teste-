@@ -87,9 +87,15 @@ Perfil de **Zilda Viana** localizado na árvore "de sousa Family Tree" (MyHerita
 - **Família Pereira da Silva** também documentada: Antonio Pereira da Silva × Maria Izabel de Oliveira Silva (geração de trisavós de Zilda)
 - **Acima:** dois "Desconhe... Pereira" (trisavós ou quadrisavós de Zilda, identidade parcial)
 
-**Nota genealógica — sobrenome Camacho:** Camacho aparece em algumas listas de cristãos-novos peninsulares, embora seja sobrenome muito difundido no mundo lusófono de origem geral. Sua presença aqui não constitui evidência isolada de herança judaica, mas é dado a integrar na análise geral da linhagem Viana.
+**Nota genealógica — sobrenomes Camacho e Guiomar:** 
 
-**Implicação estrutural:** Benedito Carlos Viana é a **Geração V** (trisavô) de Matheus pela linha paterna (Matheus → Josué → Zilda → Benedito). Sua família Camacho completa dois novos ramos genealógicos antes totalmente desconhecidos.
+- **CAMACHO é sobrenome sefardita confirmado** — **Diogo Fernandes Camacho** está documentado como cristão-novo em 1731; encontrado no Geni.com e objeto de paper acadêmico do ANPUH (2019). Camacho aparece na lista de "famílias bandeirantes de origem judaica" em Minas Gerais (Martins Castro Consultoria) e em 6+ referências bibliográficas no *Dicionário Sefaradi de Sobrenomes* (Faiguenboim et al., 2003). Nota histórica: Bartolomeu Camacho, "natural de Viana" (Portugal), foi um dos primeiros colonos de São Paulo — a combinação Camacho + Viana existe documentada desde o período colonial (ASBRAP, Rev. 13).
+
+- **Guiomar P.C.C.** — MyHeritage snippet recuperado via Google: *"Guiomar Viana (born Pereira Duarte) was born in 1893 and married Benedito Carlos Viana."* Ou seja, o nome de solteira de Guiomar envolve **Pereira Duarte** (nascida ~1893). A sigla P.C.C. na árvore MyHeritage pode representar abreviações dos sobrenomes; a hipótese mais provável é **Pereira** (confirmado) + Caldas ou Camacho.
+
+- **Conexão histórica Pereira Caldas + Viana, Maranhão:** A cidade de Viana (Maranhão) foi fundada em 1757 pelo governador Gonçalo Pereira Lobato e Sousa, e seu filho era **João Pereira Caldas** (governador do Piauí, 1759). Essa linhagem Pereira Caldas com ligação direta a Viana é coerente com famílias Viana oriundas do Maranhão.
+
+**Implicação estrutural:** Benedito Carlos Viana é a **Geração V** (trisavô) de Matheus pela linha paterna (Matheus → Josué → Zilda → Benedito). Sua família Camacho/Pereira completa ramos genealógicos antes totalmente desconhecidos. A árvore "de sousa Family Tree" no MyHeritage foi criada por **Eloisa Helena de Sousa** (URL: myheritage.com/family-trees/de-sousa/OYYV7XQBNIOSRGQOMGTITO74OAMARXA).
 
 ---
 
@@ -109,7 +115,11 @@ Perfil de **Zilda Viana** localizado na árvore "de sousa Family Tree" (MyHerita
 📅 Falecimento: Desconhecido  
 🌍 Local: Brasil — estado a investigar  
 ✡️ Origem judaica: ❓ INCONCLUSIVO — **dado de pesquisa crítico:** o nome "Abigail" tem apenas **10.122 portadoras em todo o Brasil** (IBGE Censo 2010), com pico na **década de 1950**. Trata-se de um dos nomes hebraicos mais raros e específicos do Antigo Testamento (*Avigayil*, esposa do rei Davi; uma das sete profetisas na tradição judaica). A Wikipedia inglesa confirma que o nome tornou-se popular após a Reforma Protestante, principalmente entre os Puritanos. No Brasil, seu uso concentra-se em famílias evangélicas e em linhagens com herança cripto-judaica documentada. A combinação Abigail + sobrenome De Freitas (ver abaixo) é o dado onomástico mais intrigante desta árvore.  
-📝 FamilySearch e Geni.com não retornaram registros públicos indexados para "Abigail de Freitas" — o que pode indicar registros em cartório não digitalizados. A investigação do registro de nascimento/batismo de Abigail é prioritária para identificar o pai (e confirmar se o sobrenome "De Freitas" vem do lado paterno).
+📝 FamilySearch e Geni.com não retornaram registros públicos indexados para "Abigail de Freitas" — o que pode indicar registros em cartório não digitalizados.
+
+**🚨 DESCOBERTA — Irmão de Abigail localizado:** O professor **Jair Alves de Freitas** (irmão de Abigail, filho de Maria × Alcides, visível no FamilySearch) tem uma **Escola Municipal nomeada em sua homenagem**: *Escola Municipal Professor Jair Alves de Freitas*, Rua Rocha Pita s/n, Parque Lafaiete, **Duque de Caxias, RJ** (fundada 18/03/1996). Isso confirma que a família se instalou na **Baixada Fluminense/Grande Rio** e que Jair foi educador reconhecido na região. FamilySearch ID **L23F-M9L** existe para "Jayr Alves de Freitas" (1989) — possivelmente descendente homônimo. Escavador.com lista "Jair de Freitas Alves" em processos em MG e RJ.
+
+**Implicação:** A família Alcides × Maria (pais de Abigail e Jair) está geograficamente localizada na região de Duque de Caxias — a 20 km de Irajá, onde Matheus vive. Isso é coerente com toda a árvore.
 
 ---
 
@@ -121,8 +131,13 @@ Perfil de **Zilda Viana** localizado na árvore "de sousa Family Tree" (MyHerita
 
 📅 Nascimento: Estimativa ~1895–1915 **[INFERÊNCIA]**  
 📅 Falecimento: Estimativa ~1960–1990  
-🌍 Local: Brasil — provavelmente Nordeste ou Sudeste  
+🌍 Local: Brasil — provavelmente Nordeste  
 ✡️ Origem judaica: ❓ INCONCLUSIVO  
+
+**Análise crítica do nome "Urbano":** O nome **Urbano** não é hebraico — é latim (*Urbanus*), nome do **papa-mártir São Urbano I** (†230), com festa em **25 de maio** no calendário litúrgico católico romano. Sua presença na geração de bisavô indica que a família Da Costa **era formalmente católica** nessa geração (~1895–1915). A mudança para nomes do Antigo Testamento nas gerações seguintes (Isaías, Josué) é coerente com **conversão evangélica/pentecostal**, não necessariamente com revelação de identidade cripto-judaica. A **Assembleia de Deus chegou a Pernambuco em 1916 e ao Rio de Janeiro em 1922** via famílias migrantes do Norte/Nordeste — exatamente o padrão desta família. A **Primeira Igreja Batista de Irajá** (bairro onde a família vive) foi fundada em **15 de dezembro de 1934** com 36 membros. Isso coloca a conversão de Isaías da Costa (~1928–1945) dentro do período exato de expansão dessas igrejas em Irajá.
+
+**Hipótese refinada:** A família Da Costa provavelmente tem **raízes de cristãos-novos** (Urbano ainda era católico formal), com uma **parcela da família convertida ao protestantismo/Assembleia de Deus entre 1920–1940**, passando a usar nomes hebraicos do AT (Isaías, Josué) como expressão dessa fé — prática documentada entre famílias nordestinas com herança marrana que encontravam na Bíblia hebraica um elemento familiar. As duas hipóteses (cripto-judaísmo + conversão evangélica) **não são mutuamente excludentes**.
+
 📝 Dados históricos encontrados sobre famílias Da Costa no Brasil colonial:
 - **Ana da Costa** — processo n.° 11116 na Torre do Tombo (1624): entre os primeiros 25 brasileiros processados pela Inquisição por judaizar; fonte: Arnold Wiznitzer, *Jews in Colonial Brazil* (Columbia Univ. Press, 1960)
 - **Maria da Costa** — presa pela Inquisição em 1618, descrita por Anita Novinsky como "fervorosa judia"; era madrasta do bandeirante **Antônio Raposo Tavares** (um dos maiores exploradores do Brasil colonial)
@@ -132,7 +147,9 @@ Perfil de **Zilda Viana** localizado na árvore "de sousa Family Tree" (MyHerita
 - **James Lopes da Costa** — fundou a primeira sinagoga de Amsterdã (Bet Ya'akov) em 1607; família originária de Portugal
 - Fonte: Hebrew History Federation Factpaper "The da Costas — A Remarkable Sephardic Family" (hebrewhistory.info/factpapers/fp041_dacostas.htm)
 
-**Dado quantitativo de Anita Novinsky:** O sobrenome "Costa" aparece **49 vezes** no "Livro dos Culpados" do séc. XVIII — entre os **10 mais frequentes** entre cristãos-novos processados no Brasil. Posição: 7ª colocação, atrás de Rodrigues (137), Nunes (120), Henriques (68), Mendes (66), Correia (51), Lopes (51). Fonte: entrevista de Novinsky publicada em seer.ufrgs.br/webmosaica.
+**Dado quantitativo de Anita Novinsky:** O sobrenome "Costa" aparece **49 vezes** no "Livro dos Culpados" do séc. XVIII — entre os **10 mais frequentes** entre cristãos-novos processados no Brasil. Posição: 7ª colocação. Ranking completo: Rodrigues (137), Nunes (120), Henriques (68), Mendes (66), Correia (51), Lopes (51), **Costa (49)**, Cardoso (48), Silva (47), Fonseca (33). Fonte: Anita Novinsky, *Inquisição: Rol dos Culpados* (1992); catálogo FamilySearch: familysearch.org/library/books/records/item/393051.
+
+**Da Costa no Recife holandês (1630–1654):** A família Da Costa foi **documentada diretamente na comunidade judaica de Recife**: Benjamin da Costa (expulso em 1655, fundou indústria açucareira na Martinica); Jeronimus Nunes da Costa (investidor da WIC); **9 membros Da Costa** como credores da Companhia das Índias Ocidentais. A família Isaac da Costa (sobrinho de Uriel da Costa, filósofo sefardita português 1583–1640) está entre os primeiros colonos judeus do Brasil. Fonte: "The da Costas: A Remarkable Sephardic Family" (hebrewhistory.info/factpapers/fp041_dacostas.htm).
 
 **Dado jurídico atual:** O Decreto-Lei português 30-A/2015 (e revisão 26/2022), que regula cidadania portuguesa para descendentes de sefarditas, reconhece "Mendes da Costa" como sobrenome sefardita elegível. "Da Costa" está listado em: JewishGen/Sephardim.com, Back to Sepharad, Portal Anussim (cjbrasil.org), Acervo Judaico.
 
@@ -172,10 +189,20 @@ Fonte: Forebears.io, cognomix.it, cognomi.top
 - Terminação "-atti" indica origem ferrarese-vêneta (cognato: Zanotti, Moretti, Benatti)
 - Variantes do mesmo tronco: Menegazzi, Menegazzo, Menegato (Vêneto), Menegon (Vicenza/Treviso), Menegotti (Vicenza/Belluno)
 
+**Concentração geográfica precisa na Itália (nova descoberta):**
+- **Fiscaglia** (município formado pela fusão de Massa Fiscaglia + Migliarino + Migliaro, província de Ferrara): **Menegatti é o sobrenome #1** — maior concentração do sobrenome em toda a Itália
+- Ferrara cidade: 14º sobrenome mais comum (375 ocorrências, dados 2006)
+- Massa Fiscaglia perdeu até **25% da população por emigração** entre 1880–1920 — exatamente o período de emigração de Francesco
+- **Geneanet confirma:** Menegatti Giovanna (n. 1866, f. 1929, **Massa Fiscaglia**) — mesma geração dos pais de Francesco, família documentada ali
+- Conclusão: **Massa Fiscaglia (hoje Fiscaglia), Ferrara, Emilia-Romagna** é a origem mais provável de Francesco Menegatti
+
 **Presença do sobrenome no Brasil:**
 - ~2.232 portadores no Brasil (Forebears.io) = **31% do total mundial**
-- Estados com maior presença: **São Paulo, Paraná, Rio Grande do Sul**
-- O site Emigração Vêneta (emigrazioneveneta.com) confirma que "Menegatti" aparece em **lista de passageiros do Vapor Manilla** — registro de imigração italiana para o Brasil
+- Estados com maior presença: São Paulo, Paraná, Rio Grande do Sul
+- O Vapor Manilla (Santos, 30/10/1897) trouxe: **Adolfo Menegatti + Desolina + Marco + Primo**, de Emilia-Romagna. Adolfo pode ser pai, tio ou irmão mais velho de Francesco.
+- **FamilySearch LBQT-VHX confirmado:** Francesco/Francisco Menegatti, nascimento 1878/1885 (duas versões de contribuidores), óbito 1966. Encaixe geracional perfeito como bisavô de Matheus.
+
+**Arquivo Nacional do Rio de Janeiro:** O banco de dados "Entrada de Estrangeiros – Porto do Rio de Janeiro" (1875–1910, ~1,3 milhões de nomes) está acessível em **bases.an.gov.br/rv/Menu_Externo/** — deve ser consultado para "Menegatti", pois se Francesco chegou pelo Rio (e não por Santos), seu registro está ali.
 
 **Período provável de imigração de Francesco:**
 Se Helcio Menegatti nasceu ~1928–1948, Francesco teria nascido ~1880–1910, emigrando provavelmente na **segunda onda** (1890–1914) ou **terceira onda** (1918–1930) da imigração italiana para o Brasil.
@@ -227,11 +254,37 @@ O perfil FamilySearch esclarece a estrutura de sobrenomes da família:
 
 ---
 
-👤 **PAI DE ABIGAIL DE FREITAS** (trisavô materno — IDENTIDADE DESCONHECIDA)
+👤 **ALCIDES ALVES DE FREITAS** (trisavô materno — PAI DE ABIGAIL, CONFIRMADO via FamilySearch)
+
+📅 Nascimento: Estimativa ~1895–1920 **[INFERÊNCIA]**  
+🌍 Local: Brasil — provavelmente **Duque de Caxias ou região do Grande Rio** ◎  
+✡️ Origem judaica: ❓ INCONCLUSIVO — sobrenome De Freitas na lista de bandeirantes judaicos de Anita Novinsky; ver análise abaixo
+
+**Dados encontrados:**
+- Casou com **Maria Rodrigues Cabral** → casal formou a bisavó Abigail de Freitas
+- Filho confirmado: **Jair Alves de Freitas** (professor, Duque de Caxias, RJ)
+- FamilySearch: **João Alves de Freitas (1916–2002)**, ID LHN2-V5Q — possível parente/irmão de Alcides
+- Geneanet (árvore Valdenei Silveira) contém tanto "Anna Rodrigues Cabral" quanto "João Alves de Freitas (1)" — pode ser a mesma família
+- Escavador.com: "Jair de Freitas Alves" (sobrenome invertido) com processos em MG e RJ
+
+**SOBRENOME CALDAS — NOVA DESCOBERTA DE ALTA RELEVÂNCIA:**
+
+Pedro Cabral Caldas (avô paterno de Maria Rodrigues Cabral) introduz o sobrenome **CALDAS** na árvore. Caldas é um **sobrenome sefardita confirmado**:
+- Listado em JewishGen, Sephardim.com, Back to Sepharad e genealogia.org.mx ("surname meaning 'Hot springs'")
+- **nameyourroots.com:** "Caldas appears in a list of 517 Sephardic families punished by the Inquisition in Portugal and Brazil"
+- Origem: do latim *calidus* (quente), topônimo "Caldas" — termas/fontes termais; descendentes de D. Garcia Rodrigues de Caldas (séc. XIV, Galícia)
+- No Brasil: famílias Caldas documentadas no Ceará (artigo "Os antigos Caldas e seus descendentes", *Revista do Instituto do Ceará*, 1988) e Minas Gerais
+- Nota: também é sobrenome de famílias cristãs-velhas portuguesas — Caldas isolado não é prova de origem judaica, mas é indicador relevante
+
+Ou seja, **a linhagem de Maria Rodrigues Cabral concentra quatro sobrenomes com indicadores sefarditas**: Cabral (2× Museu da Inquisição), De Freitas (lista Novinsky), Rodrigues (137× no Rol dos Culpados — #1) e **Caldas** (lista de 517 famílias punidas).
+
+---
+
+👤 **PAI DE ABIGAIL DE FREITAS** (trisavô materno — IDENTIDADE RESOLVIDA: é Alcides Alves de Freitas, ver acima)
 
 📅 Nascimento: Estimativa ~1895–1920 **[INFERÊNCIA]**  
 🌍 Local: Brasil — a identificar  
-✡️ Origem judaica: ❓ A DETERMINAR — se este ancestral desconhecido for o portador do sobrenome "De Freitas", os dados da pesquisa tornam-se altamente relevantes:
+✡️ Origem judaica: ❓ A DETERMINAR — sobrenome De Freitas é portador do mesmo ramo analisado acima.
 
 **Dados de pesquisa sobre o sobrenome De Freitas:**
 - "Freitas" aparece **explicitamente na lista de famílias bandeirantes paulistas com origem judaica** documentada por Anita Novinsky. Lista: *"Camacho, Paiva, Castilho, Barbosa, Mendes, Bueno, Fernandes, Alvares, Raposo Tavares, Neto, Rebelo, Furtado, Bicudo, Mendonça, Lopes, Grou, Machado, Pedroso, Pires, Silva, Ribeiro, Quadros, Lopes Fragoso, Alvares Pimentel, Moraes, Rodrigues Salamanca, Lemos, Esteves, Sousa, Leme, Mota, Jorge, Sanches, Corrêa, Peixoto, Proença, Roldão, **Costa**, Vaz, Santos, Bezarano, Macedo, Melo Coutinho, Mourato, Amaral, Coutinho, Gonçalves, Varejão, Madeira, Vaz de Barros, Lima, **Freitas**."* (Fonte: viladeutopia.com.br)

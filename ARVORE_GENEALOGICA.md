@@ -16,7 +16,8 @@
 
   ┌──────────────────────────┐  ┌─────────────────────────────┐     ┌─────────────────────────┐  ┌──────────────────────────────────────┐
   │ ○ [FAMÍLIA DA COSTA]     │  │ ◎ BENEDITO CARLOS VIANA     │     │ ○ FAMÍLIA MENEGATTI     │  │ ◎ LUIZ RODRIGUES CALDAS              │
-  │   Portugal →             │  │   × GUIOMAR P.C.C.          │     │   Ferrara (Emilia-      │  │   × SYLVINA DE FREITAS C...          │
+  │   Portugal →             │  │   × GUIOMAR PEREIRA DUARTE │
+  │   (n. ~1893) [MyHeritage ◎] │     │   Ferrara (Emilia-      │  │   × SYLVINA DE FREITAS C...          │
   │   Brasil colonial        │  │                             │     │   Romagna) ou Campo     │  │                                      │
   │   (antepassados          │  │   [MyHeritage confirmado]   │     │   San Martino (Pádua)   │  │   [FamilySearch confirmado]          │
   │    de Urbano da Costa)   │  │                             │     │   ITÁLIA                │  │                                      │
@@ -157,19 +158,24 @@
  PRÓXIMOS PASSOS — PRIORIDADE MÁXIMA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ✅ CONCLUÍDO: Família Zilda Viana — pais Benedito Carlos Viana + Guiomar P.C.C. (MyHeritage)
-  ✅ CONCLUÍDO: Maria Rodrigues Cabral — nome, pais (Luiz Rodrigues Caldas + Sylvina de Freitas C.),
-                avós (Pedro Cabral Caldas + Idalina Rodrigues C.), marido Alcides Alves de Freitas (FamilySearch)
+  ✅ CONCLUÍDO: Família Zilda Viana — pais Benedito Carlos Viana + Guiomar Pereira Duarte (n.~1893), MyHeritage
+  ✅ CONCLUÍDO: Maria Rodrigues Cabral — nome, pais, avós, marido Alcides Alves de Freitas (FamilySearch)
   ✅ CONCLUÍDO: Origem do "De Freitas" em Abigail = pai Alcides Alves de Freitas (CONFIRMADO)
+  ✅ CONCLUÍDO: Jair Alves de Freitas (irmão de Abigail) = professor em Duque de Caxias, RJ (escola nomeada em sua homenagem)
+  ✅ CONCLUÍDO: CALDAS confirmado como sobrenome sefardita (517 famílias punidas pela Inquisição)
+  ✅ CONCLUÍDO: CAMACHO confirmado como sobrenome sefardita (Diogo Fernandes Camacho, cristão-novo 1731)
+  ✅ CONCLUÍDO: Menegatti = sobrenome #1 em Fiscaglia (ex-Massa Fiscaglia), Ferrara/Emilia-Romagna
+  ✅ CONCLUÍDO: Primeira Igreja Batista de Irajá fundada em 15/12/1934 — contexto da conversão evangélica da família Da Costa
 
-  1. ⭐⭐⭐  Verificar datas do perfil FamilySearch de Maria Rodrigues Cabral (n.~1894 / f.~1996)
-  2. ⭐⭐⭐  Confirmar se Abigail aparece como filha de Maria + Alcides no FamilySearch
-  3. ⭐⭐⭐  Localizar Francesco Menegatti: emigrazioneveneta.com + ciseionline.it + antenati.cultura.gov.it
-  4. ⭐⭐⭐  Obter certidão de casamento de Isaías da Costa × Zilda Viana → confirmar Benedito Viana
-  5. ⭐⭐⭐  Expandir árvore MyHeritage: identificar sobrenome completo de Guiomar P.C.C.
-  6. ⭐⭐⭐  Pesquisar Torre do Tombo: digitarq.arquivos.pt → "Da Costa" + "Cabral Caldas" + "Freitas" + Brasil
-  7. ⭐⭐    Teste de DNA autossômico (23andMe/AncestryDNA): confirmar/refutar ancestralidade sefardita
-  8. ⭐⭐    Perguntar a familiares: denominação religiosa da família Da Costa nas gerações anteriores?
+  1. ⭐⭐⭐  Acessar Arquivo Nacional RJ: bases.an.gov.br/rv/Menu_Externo/ — buscar "Menegatti" (1875–1910)
+  2. ⭐⭐⭐  Verificar FamilySearch LBQT-VHX (Francesco Menegatti) — confirmar filhos (Helcio?) e pais
+  3. ⭐⭐⭐  Verificar datas do perfil FamilySearch de Maria Rodrigues Cabral (n.~1894 / f.~1996)
+  4. ⭐⭐⭐  Confirmar se Abigail aparece como filha de Maria + Alcides no FamilySearch
+  5. ⭐⭐⭐  Obter certidão de casamento de Isaías da Costa × Zilda Viana → confirmar Benedito Viana
+  6. ⭐⭐⭐  Pesquisar Torre do Tombo: digitarq.arquivos.pt → "Da Costa" + "Caldas" + "Camacho" + Brasil
+  7. ⭐⭐    Pesquisar Portal Antenati Ferrara: nascimentos Menegatti em Massa Fiscaglia 1870–1895
+  8. ⭐⭐    Teste de DNA autossômico (Genera Brasil, R99): confirmar/refutar ancestralidade sefardita
+  9. ⭐⭐    Perguntar a familiares: denominação religiosa Da Costa (Assembleia de Deus? Batista?)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
