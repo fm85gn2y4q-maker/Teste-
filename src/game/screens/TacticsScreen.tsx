@@ -19,7 +19,7 @@ import { generateId } from '../database';
 const FORMATIONS: Formation[] = ['4-4-2', '4-3-3', '4-5-1', '3-5-2', '5-3-2'];
 
 // Pitch positions for each formation [x%, y%] (0,0 = top-left, goal at bottom)
-const FORMATION_POSITIONS: Record<Formation, [number, number][]> = {
+const FORMATION_POSITIONS: Partial<Record<Formation, [number, number][]>> & Record<'4-4-2', [number, number][]> = {
   '4-4-2': [
     [50, 90], // GK
     [20, 72], [38, 72], [62, 72], [80, 72], // DEF
