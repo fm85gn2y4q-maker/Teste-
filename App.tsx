@@ -8,6 +8,7 @@ import { Text } from 'react-native';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { DetailScreen } from './src/screens/DetailScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { SalaryScreen } from './src/screens/SalaryScreen';
 import { RootStackParamList, MainTabParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -18,6 +19,7 @@ const PURPLE = '#6C3DE8';
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
     Home: '📈',
+    Salary: '💰',
     Settings: '⚙️',
   };
   return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{icons[name] ?? '•'}</Text>;
@@ -40,6 +42,7 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Watchlist' }} />
+      <Tab.Screen name="Salary" component={SalaryScreen} options={{ tabBarLabel: 'Remuneração' }} />
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: 'Config' }} />
     </Tab.Navigator>
   );
