@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analisador de Teses Bancárias — TJRJ</title>
+<style>
+  :root{
+    --paper:#F6F5F1; --card:#FFFFFF; --ink:#20242B; --ink-soft:#565B66; --ink-faint:#8A8F99;
+    --line:#DDDCD4; --brass:#8F6F1F; --brass-soft:#F0E8D2; --navy:#24384E; --navy-soft:#E8ECF1;
+    --good:#2E6B45; --good-soft:#E3EFE7; --warn:#8A5A16; --warn-soft:#F5EBDA; --crit:#8C3A32; --crit-soft:#F4E4E1;
+    --shadow:0 1px 3px rgba(32,36,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#171A20; --card:#1F242D; --ink:#E8E7E2; --ink-soft:#AEB2BA; --ink-faint:#7C818B;
+      --line:#333945; --brass:#C7A24A; --brass-soft:#332C1A; --navy:#9FB4CC; --navy-soft:#242E3C;
+      --good:#7CBF95; --good-soft:#1E2F25; --warn:#D3A45B; --warn-soft:#322816; --crit:#D98B82; --crit-soft:#33211F;
+      --shadow:0 1px 3px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171A20; --card:#1F242D; --ink:#E8E7E2; --ink-soft:#AEB2BA; --ink-faint:#7C818B;
+    --line:#333945; --brass:#C7A24A; --brass-soft:#332C1A; --navy:#9FB4CC; --navy-soft:#242E3C;
+    --good:#7CBF95; --good-soft:#1E2F25; --warn:#D3A45B; --warn-soft:#322816; --crit:#D98B82; --crit-soft:#33211F;
+    --shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F6F5F1; --card:#FFFFFF; --ink:#20242B; --ink-soft:#565B66; --ink-faint:#8A8F99;
+    --line:#DDDCD4; --brass:#8F6F1F; --brass-soft:#F0E8D2; --navy:#24384E; --navy-soft:#E8ECF1;
+    --good:#2E6B45; --good-soft:#E3EFE7; --warn:#8A5A16; --warn-soft:#F5EBDA; --crit:#8C3A32; --crit-soft:#F4E4E1;
+    --shadow:0 1px 3px rgba(32,36,43,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font:15px/1.55 'Avenir Next','Segoe UI',system-ui,-apple-system,sans-serif;}
+  .wrap{max-width:960px; margin:0 auto; padding:0 20px 80px;}
+  h1,h2,h3{font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif; line-height:1.25; margin:0; text-wrap:balance;}
+  h1{font-size:1.7rem;} h2{font-size:1.25rem;} h3{font-size:1.02rem;}
+  a{color:var(--brass);}
+  .eyebrow{font-size:.7rem; letter-spacing:.13em; text-transform:uppercase; color:var(--brass); font-weight:650;}
+  header{padding:28px 0 16px; border-bottom:3px double var(--brass); margin-bottom:20px;
+    display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;}
+  header .sub{color:var(--ink-soft); font-size:.85rem; max-width:56ch;}
+  .btn{display:inline-block; border:1px solid var(--line); background:var(--card); color:var(--ink);
+    border-radius:8px; padding:8px 14px; font-size:.85rem; font-weight:600; cursor:pointer;}
+  .btn:hover{border-color:var(--brass);}
+  .btn.primary{background:var(--navy); color:#fff; border-color:var(--navy);}
+  :root[data-theme="dark"] .btn.primary, .dark .btn.primary{color:#171A20;}
+  .btn.primary:hover{opacity:.92;}
+  .btn:focus-visible, input:focus-visible, select:focus-visible, label:focus-within{outline:2px solid var(--brass); outline-offset:2px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:12px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow);}
+  .tcard{cursor:pointer; border-left:4px solid var(--brass); transition:transform .08s;}
+  .tcard:hover{transform:translateY(-2px); border-color:var(--brass);}
+  .tcard h3{margin-bottom:4px;}
+  .tcard p{margin:4px 0 8px; font-size:.83rem; color:var(--ink-soft);}
+  .chip{display:inline-block; padding:2px 9px; border-radius:999px; font-size:.68rem; font-weight:650; letter-spacing:.04em; margin-right:5px;}
+  .chip.a{background:var(--good-soft); color:var(--good);}
+  .chip.b{background:var(--warn-soft); color:var(--warn);}
+  .chip.jec{background:var(--navy-soft); color:var(--navy);}
+  .chip.risco{background:var(--crit-soft); color:var(--crit);}
+  .steps{display:flex; gap:6px; margin:16px 0; flex-wrap:wrap;}
+  .step{padding:5px 12px; border-radius:999px; font-size:.75rem; font-weight:650; background:var(--navy-soft); color:var(--ink-soft); cursor:pointer;}
+  .step.on{background:var(--navy); color:#fff;}
+  .step.done{color:var(--good);}
+  .q{border-top:1px solid var(--line); padding:12px 0;}
+  .q:first-child{border-top:none;}
+  .q .txt{font-weight:600;}
+  .q .help{font-size:.8rem; color:var(--ink-soft); margin:3px 0 8px;}
+  .q .opts{display:flex; gap:8px;}
+  .q .opts label{border:1px solid var(--line); border-radius:8px; padding:5px 16px; cursor:pointer; font-size:.85rem; background:var(--card);}
+  .q .opts input{position:absolute; opacity:0; width:0;}
+  .q .opts label.sel-s{background:var(--good-soft); border-color:var(--good); color:var(--good); font-weight:650;}
+  .q .opts label.sel-n{background:var(--crit-soft); border-color:var(--crit); color:var(--crit); font-weight:650;}
+  .q .msg{margin-top:8px; padding:8px 12px; border-radius:8px; font-size:.82rem;}
+  .msg.kill{background:var(--crit-soft); color:var(--crit);}
+  .msg.warn{background:var(--warn-soft); color:var(--warn);}
+  .banner{padding:12px 16px; border-radius:10px; font-weight:650; margin:12px 0;}
+  .banner.ok{background:var(--good-soft); color:var(--good);}
+  .banner.warn{background:var(--warn-soft); color:var(--warn);}
+  .banner.kill{background:var(--crit-soft); color:var(--crit);}
+  .doc{display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-top:1px dashed var(--line);}
+  .doc:first-child{border-top:none;}
+  .doc input{margin-top:4px; accent-color:var(--brass);}
+  .doc .ob{font-size:.66rem; font-weight:700; color:var(--crit); letter-spacing:.05em;}
+  .doc .op{font-size:.66rem; font-weight:700; color:var(--ink-faint); letter-spacing:.05em;}
+  .doc .dh{font-size:.78rem; color:var(--ink-soft);}
+  fieldset{border:1px solid var(--line); border-radius:10px; margin:12px 0; padding:10px 14px;}
+  legend{font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--brass); padding:0 6px;}
+  .frm{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:10px 0;}
+  .frm label{display:block; font-size:.72rem; font-weight:650; color:var(--ink-soft); letter-spacing:.04em;}
+  .frm input,.frm select{width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:7px;
+    background:var(--card); color:var(--ink); font:inherit; font-variant-numeric:tabular-nums;}
+  .res{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-top:12px;}
+  .res .r{background:var(--navy-soft); border-radius:9px; padding:10px 12px;}
+  .res .r .n{font-family:Georgia,serif; font-weight:650; font-size:1.15rem; font-variant-numeric:tabular-nums; color:var(--navy);}
+  .res .r .l{font-size:.72rem; color:var(--ink-soft);}
+  .res .r.hi{background:var(--brass-soft);} .res .r.hi .n{color:var(--brass);}
+  ul{margin:.4em 0; padding-left:1.2em;} li{margin:.28em 0;} li::marker{color:var(--brass);}
+  details{border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin:10px 0; background:var(--card);}
+  summary{cursor:pointer; font-weight:650; font-size:.9rem;}
+  .parecer{border-left:4px solid var(--brass);}
+  .parecer h3{margin-top:14px;}
+  .parecer .copy{font-size:.86rem; background:var(--navy-soft); border-radius:8px; padding:10px 12px; margin:6px 0; white-space:pre-wrap;}
+  .juris{font-size:.8rem; color:var(--ink-soft);}
+  .bar{display:flex; gap:8px; margin:16px 0; flex-wrap:wrap;}
+  .tag-api{font-size:.68rem; background:var(--brass-soft); color:var(--brass); border-radius:5px; padding:1px 7px; font-weight:700;}
+  table{border-collapse:collapse; width:100%; font-size:.84rem;}
+  th{text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; padding:6px 8px; background:var(--navy-soft);}
+  td{padding:6px 8px; border-top:1px solid var(--line); font-variant-numeric:tabular-nums;}
+  .tablebox{overflow-x:auto;}
+  .hidden{display:none;}
+  .saved{font-size:.84rem;}
+  .saved li{display:flex; gap:10px; align-items:center;}
+  .saved button{font-size:.72rem; padding:3px 9px;}
+  @media print{
+    nav,header .hbtns,.steps,.bar,.noprint{display:none !important;}
+    body{background:#fff; color:#111; font-size:12px;}
+    .card{box-shadow:none; border-color:#bbb; break-inside:avoid;}
+    .wrap{max-width:100%; padding:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Operação Direito Bancário RJ · Ferramenta de triagem</div>
+    <h1>Analisador de Teses Bancárias — TJRJ</h1>
+    <div class="sub">Responda às perguntas de cada tese e a ferramenta aplica o posicionamento do TJRJ e do STJ, calcula o proveito líquido e monta o parecer de propositura — sem deixar passar pressuposto fático ou jurídico.</div>
+  </div>
+  <div class="hbtns"><button class="btn" onclick="goHome()">Início</button></div>
+</header>
+
+<div id="home">
+  <details>
+    <summary>📋 Módulo 0 — Triagem do cliente: comece SEMPRE por aqui</summary>
+    <ol>
+      <li><b>Meu INSS</b> (app ou gov.br, com o cliente): baixar <b>Extrato de Empréstimos (HISCRE)</b> e <b>Extrato de Pagamento de Benefício</b>. Leva ~5 min. Guarde os PDFs no dossiê.</li>
+      <li><b>Ler o HISCRE linha a linha:</b> "EMPRÉSTIMO" = consignado comum (Teses 1, 2, 5) · "CARTÃO"/RMC/RCC com colunas <i>Limite de Cartão</i> (valor que caiu na conta) e <i>Reservado Atualizado</i> (desconto mensal sem fim) = Teses 3/4.</li>
+      <li><b>Extrato de Pagamento:</b> conferir descontos de seguros/"cartão protegido" e associativos (associativo → devolução administrativa INSS, <u>não judicializar</u>).</li>
+      <li><b>Conta corrente (3–12 meses, ideal 10 anos):</b> tarifas, pacotes, seguros, capitalização = Tese 7.</li>
+      <li><b>SUSEP/SAFE</b> (gov.br do cliente): listar todas as apólices ativas → entrevista dirigida: infarto? AVC? câncer? invalidez? acidente? = Tese 2 (apólices).</li>
+      <li><b>Entrevista de versão fática</b> por contrato impugnado: <i>“O(a) sr(a). assinou isto?”</i> — NEGA assinatura → Teses 1/3 · ASSINOU achando que era empréstimo → Tese 4 · Assinou ciente → só teses de conteúdo (2, 5, 6, 7).</li>
+      <li><b>Requerimento administrativo prévio</b> ao banco (cópia do contrato + AR do cartão + planilha de evolução), com protocolo. Blindagem antipredatória: nada é ajuizado sem isso.</li>
+    </ol>
+  </details>
+
+  <fieldset><legend>Dados do caso (aparecem no parecer)</legend>
+    <div class="frm">
+      <div><label>Cliente</label><input id="c-nome" placeholder="Nome completo"></div>
+      <div><label>CPF</label><input id="c-cpf" placeholder="000.000.000-00"></div>
+      <div><label>Nº do benefício (NB)</label><input id="c-nb"></div>
+      <div><label>Banco réu</label><input id="c-banco" placeholder="ex.: BMG"></div>
+      <div><label>Nº do contrato</label><input id="c-contrato"></div>
+      <div><label>Comarca (RJ)</label><input id="c-comarca" placeholder="ex.: Duque de Caxias"></div>
+    </div>
+  </fieldset>
+
+  <h2 style="margin:18px 0 10px">Escolha a tese para analisar</h2>
+  <div class="grid" id="tese-grid"></div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Análises salvas neste navegador</h3>
+    <ul class="saved" id="saved-list"><li style="color:var(--ink-faint)">Nenhuma ainda.</li></ul>
+  </div>
+
+  <details>
+    <summary>🔌 APIs e fontes externas integradas / roteirizadas</summary>
+    <ul>
+      <li><span class="tag-api">API</span> <b>BACEN/SGS</b> — taxa média de mercado por modalidade (usada nas Teses 5 e 6). Consulta automática quando aberto como arquivo local; no modo online restrito, use o valor manual conferido em <a href="https://www.bcb.gov.br/estatisticas/txjuros" target="_blank" rel="noopener">bcb.gov.br/estatisticas/txjuros</a>.</li>
+      <li><span class="tag-api">Portal</span> <b>Meu INSS</b> — HISCRE + Extrato de Pagamento (roteiro no Módulo 0; não há API pública — acesso com gov.br do cliente).</li>
+      <li><span class="tag-api">Portal</span> <b>SUSEP/SAFE</b> — apólices do cliente: <a href="https://www.gov.br/susep" target="_blank" rel="noopener">gov.br/susep</a>.</li>
+      <li><span class="tag-api">API</span> <b>DataJud/CNJ</b> — consulta processual pública (integração futura na planilha: acompanhamento em lote por número CNJ).</li>
+      <li><span class="tag-api">Consulta</span> <b>Registrato/BCB</b> — relatório de empréstimos do cliente em todos os bancos (gov.br do cliente) — confirma contratos fora do HISCRE.</li>
+    </ul>
+  </details>
+</div>
+
+<div id="wizard" class="hidden">
+  <div class="bar">
+    <span class="chip a" id="w-chip"></span>
+    <h2 id="w-title" style="flex:1"></h2>
+  </div>
+  <p class="juris" id="w-resumo"></p>
+  <div class="steps" id="w-steps"></div>
+  <div id="w-body"></div>
+  <div class="bar noprint">
+    <button class="btn" onclick="nav(-1)">← Anterior</button>
+    <button class="btn primary" id="w-next" onclick="nav(1)">Próximo →</button>
+    <button class="btn" onclick="salvar()">💾 Salvar análise</button>
+    <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+  </div>
+</div>
+</div>
+
+<script>
+"use strict";
+const MARCO_DOBRO = "30/03/2021 (EAREsp 676.608/RS — antes: restituição simples; depois: em dobro)";
+
+const COMUM = {
+  blindagem: [
+    ["Procuração ESPECÍFICA para esta ação (banco + contrato identificados nos poderes)", true, "Blindagem contra rótulo de litigância predatória — o TJRJ integra a rede CNJ de monitoramento."],
+    ["Termo de ciência da ação assinado pelo cliente (ideal: vídeo curto confirmando que sabe da demanda)", true, ""],
+    ["Requerimento administrativo prévio ao banco com protocolo (contrato, AR do cartão, planilha)", true, "Além de blindar, a omissão do banco vira argumento probatório."],
+    ["Comprovante de residência atual (fixa a comarca e evita alegação de foro artificial)", true, ""]
+  ],
+  gratuidade: [
+    ["Declaração de hipossuficiência assinada", true, ""],
+    ["Extrato de Pagamento do INSS (renda líquida pós-descontos)", true, ""],
+    ["Extrato de Empréstimos (nível de endividamento)", true, ""],
+    ["Declaração de IR ou comprovante de isenção (site Receita)", true, ""],
+    ["Contas básicas (luz, água, gás, telefone)", false, ""],
+    ["Certidão DETRAN de veículos + laudos médicos + foto simples da residência (Maps)", false, "Quanto mais completo o dossiê, mais difícil o indeferimento sem fundamentação. Se indeferir: (1) remessa ao JEC; (2) parcelamento das custas; (3) desistência ANTES da citação. Agravo é o último recurso."]
+  ],
+  danoMoral: [
+    ["Termo de declaração do cliente narrando as dificuldades concretas (remédio, aluguel, mercado)", true, "TJRJ 2025/2026: sem prova de repercussão, dano moral tende a R$ 4–5 mil; com dossiê, R$ 10–15 mil já foram mantidos."],
+    ["Cálculo do % do benefício comprometido pelos descontos", true, ""],
+    ["Comprovantes de inadimplência em despesas básicas / negativação SERASA", false, ""],
+    ["Idade e condição de saúde documentadas (Estatuto da Pessoa Idosa reforça)", false, ""]
+  ]
+};
+
+const TESES = [
+{ id:"t1", nome:"Tese 1 — Consignado fraudado (nulidade)", chips:[["a","PRIORIDADE A"]], foro:"Vara Cível (exige perícia grafotécnica — JEC não comporta)",
+  resumo:"TJRJ: roteiro vencedor consolidado. Impugnada a assinatura, o ônus é do banco (Tema 1.061/STJ); o banco recusa a perícia em quase 100% dos casos analisados → presunção de veracidade → nulidade + dobro pós-30/03/2021 + dano moral in re ipsa (Súmulas 94, 144 e 343/TJRJ; Súmulas 479 e 54/STJ).",
+  perguntas:[
+    ["O desconto aparece no HISCRE como EMPRÉSTIMO (não como cartão/RMC)?","Se for linha de cartão, use as Teses 3/4.","s",true,"Linha de cartão → analise pelas Teses 3 ou 4.",""],
+    ["O cliente NEGA ter assinado/contratado este contrato?","Pergunta feita de forma neutra, registrada no termo de declaração.","s",true,"Se ele assinou achando que era outra coisa → Tese 4 (conversão). Se assinou ciente → verifique prestamista (T2) e juros (T5).",""],
+    ["O cliente mantém a negativa mesmo alertado de que o banco pode exibir contrato e vídeo?","Filtro de veracidade: evita revés com cliente que 'esqueceu' que contratou.","s",true,"Não ajuizar nulidade com versão fática frágil — risco de má-fé e de contaminar a carteira.",""],
+    ["Você já obteve os extratos BANCÁRIOS do cliente do mês do contrato?","Essencial: verificar se houve crédito do valor na conta dele.","s",false,"","Sem isso você não calcula a compensação — o TJRJ compensa valores comprovadamente creditados (art. 368 CC). Obtenha antes de ajuizar."],
+    ["Descontado do valor eventualmente creditado (compensação), o proveito líquido ainda compensa a ação?","Use a calculadora do passo 3.","s",true,"Proveito líquido baixo → não ajuizar isoladamente; agrupe com outras teses do mesmo cliente.",""],
+    ["O primeiro desconto ocorreu há MENOS de 10 anos?","Prescrição decenal (art. 205 CC) para a repetição.","s",false,"","Descontos com mais de 10 anos: recupere apenas a janela decenal; avalie impacto no valor."],
+    ["O contrato é físico (papel) e não digital?","","s",false,"","Contrato DIGITAL não mata a tese no TJRJ: o banco deve provar a segurança do procedimento eletrônico (logs, IP, biometria, certificado) — telas sistêmicas não bastam (15ª Câm., 0200887-60.2021). Impugne a validade da assinatura eletrônica ponto a ponto."]
+  ],
+  docs:[
+    ["HISCRE destacando o contrato impugnado",true,""],
+    ["Extrato de Pagamento com o desconto mensal",true,""],
+    ["Extratos bancários do mês da contratação (verificar crédito)",true,""],
+    ["Requerimento administrativo de cópia do contrato + resposta ou silêncio (protocolo)",true,""],
+    ["Termo de declaração do cliente negando a contratação",true,""],
+    ["Documentos pessoais, comprovante de residência, procuração específica",true,""]
+  ],
+  pedidos:["Tutela de urgência: cessação imediata dos descontos + ofício à fonte pagadora (Súmula 144/TJRJ)","Declaração de nulidade/inexistência do contrato","Restituição em dobro dos descontos posteriores a 30/03/2021 e simples dos anteriores (art. 42, p.ú., CDC + EAREsp 676.608/RS)","Dano moral (in re ipsa — instruir dossiê para fugir do patamar módico)","Inversão do ônus da prova (art. 6º, VIII, CDC + Tema 1.061/STJ)","Exibição do contrato original e da via do cliente (art. 396 CPC)"],
+  fund:["Tema 1.061/STJ — ônus do banco de provar autenticidade da assinatura impugnada","Súmula 479/STJ + Súmula 94/TJRJ — fraude de terceiro = fortuito interno","Súmula 144/TJRJ — ofício à fonte pagadora","Súmula 343/TJRJ — parâmetros de dano moral","Súmula 54/STJ — juros do dano moral desde o evento danoso","Lei 14.905/2024 — correção IPCA + juros SELIC","TJRJ: 0001035-15.2021.8.19.0079 (8ª Câm.) · 0002968-36.2022.8.19.0031 (5ª Câm.) · 0004242-36.2021.8.19.0042 (20ª Câm.) · 0200887-60.2021.8.19.0001 (15ª Câm.)"],
+  armadilhas:["NUNCA prometa 'devolução total': a compensação do valor creditado é praxe no TJRJ.","Impugne a assinatura de forma ESPECÍFICA e expressa na inicial (gatilho do Tema 1.061). Impugnação genérica não transfere o ônus.","Não requerer perícia às custas do autor: o ônus é do banco. Se o juiz determinar, requeira que os honorários periciais fiquem a cargo do réu.","Se o banco exibir contrato válido com assinatura reconhecida → desistir cedo e pivotar para T2/T5 no mesmo contrato."],
+  calc:"restituicao" },
+
+{ id:"t2", nome:"Tese 2 — Seguro prestamista (nulidade + apólices)", chips:[["a","PRIORIDADE A"],["jec","SERVE P/ JEC"]], foro:"JEC (cobrança documental) ou cumulada na vara cível",
+  resumo:"Vedação objetiva: art. 12, V, da IN PRES/INSS 138/2022 proíbe prestamista embutido em consignado. Contratos anteriores a nov/2022: venda casada (art. 39, I, CDC). TJRJ condena à devolução em dobro + dano moral R$ 4–5 mil quando não há prova de anuência específica (8ª e 15ª Câmaras). Frente extra: apólices com coberturas jamais acionadas (SUSEP/SAFE).",
+  perguntas:[
+    ["Há cobrança de prêmio de seguro no contrato de consignado ou desconto de 'seguro'/'cartão protegido' no benefício/fatura?","","s",true,"Sem cobrança identificada, não há tese.",""],
+    ["O contrato é posterior a 10/11/2022 (IN 138)?","","s",false,"","Anterior à IN: a tese muda de fundamento — venda casada (art. 39, I, CDC) + ausência de anuência específica. Continua viável no TJRJ."],
+    ["O banco tem prova de anuência ESPECÍFICA e apartada do seguro (proposta assinada separada)?","","n",true,"Com adesão específica comprovada, a nulidade enfraquece — avalie apenas a frente de acionamento de cobertura.",""],
+    ["Você consultou as apólices do cliente no SUSEP/SAFE?","Todas as apólices ativas, com as coberturas de cada uma.","s",false,"","Faça antes de ajuizar: cada apólice ignorada é potencial indenização (invalidez, doença grave, morte do cônjuge coobrigado…)."],
+    ["Na entrevista dirigida, o cliente relatou evento potencialmente coberto (infarto, AVC, câncer, invalidez, acidente)?","","s",false,"","Se SIM: abra frente própria de acionamento/cobrança da cobertura. ATENÇÃO à prescrição do seguro (ânua para o segurado, art. 206, §1º, II, CC, contada da ciência) — analise caso a caso ANTES de prometer."]
+  ],
+  docs:[
+    ["Contrato ou demonstrativo com o prêmio destacado",true,""],
+    ["Extrato de Pagamento/fatura com o desconto do seguro",true,""],
+    ["Relatório de apólices SUSEP/SAFE",true,""],
+    ["Condições gerais da apólice (site da seguradora)",false,"Necessárias na frente de acionamento de cobertura."],
+    ["Laudos/atestados do evento coberto (se houver)",false,""]
+  ],
+  pedidos:["Nulidade da cobrança do prêmio (IN 138/2022, art. 12, V, ou venda casada art. 39, I, CDC)","Restituição em dobro (marco 30/03/2021)","Dano moral (módico nesta tese — cumule com outras quando possível)","Na frente de apólices: pagamento da indenização securitária + juros e correção"],
+  fund:["IN PRES/INSS 138/2022, art. 12, V","CDC arts. 39, I (venda casada) e 42, p.ú.","Súmula 297/STJ (CDC aplica-se a bancos)","TJRJ: 0811356-47.2023.8.19.0066 (8ª Câm.) · 0808801-67.2024.8.19.0213 (15ª Câm., 'cartão protegido' — telas sistêmicas imprestáveis)"],
+  armadilhas:["Prescrição ânua do seguro na frente de acionamento — cheque a data da ciência do evento ANTES de qualquer promessa ao cliente.","Ação contra a SEGURADORA (cobertura) é diferente da ação contra o BANCO (nulidade do prêmio) — não misture pedidos contra rés distintas sem litisconsórcio adequado.","No JEC, sem sucumbência no 1º grau: precifique o contrato de honorários de acordo."],
+  calc:"restituicao" },
+
+{ id:"t3", nome:"Tese 3 — Nulidade de RMC/RCC", chips:[["a","PRIORIDADE A"],["risco","TEMA 1.414 SUSPENSO"]], foro:"Vara Cível — ajuizar para liminar + prova (mérito aguarda o STJ)",
+  resumo:"TJRJ decidia maciçamente pró-consumidor antes da suspensão (03/2026): sem compras na fatura + sem AR do cartão + telas unilaterais = nulidade + dobro + R$ 5 mil (5ª, 8ª, 15ª, 16ª, 17ª Câmaras). Suspensão nacional NÃO impede ajuizar: garante análise de tutela de urgência, força exibição de contrato/faturas e estanca a prescrição decenal. Tema 1.328 (dano moral in re ipsa em RMC) também afetado. Parecer do MPF favorável ao consumidor.",
+  perguntas:[
+    ["O HISCRE mostra linha de CARTÃO (RMC/RCC) com 'Limite de Cartão' e 'Reservado Atualizado'?","","s",true,"Sem linha de cartão, não é esta tese.",""],
+    ["O cliente NEGA ter assinado o contrato de cartão?","","s",true,"Se assinou querendo empréstimo → Tese 4 (conversão), que segue mais segura.",""],
+    ["As faturas mostram ausência de COMPRAS (só saque inicial e encargos)?","Peça as faturas no requerimento administrativo.","s",false,"","Compras habituais na fatura enfraquecem muito a negativa — reavalie a versão fática."],
+    ["O banco NÃO tem comprovante de entrega do cartão físico (AR)?","","s",false,"","AR assinado pelo cliente enfraquece a tese de desconhecimento."],
+    ["O cliente compreende que o mérito ficará suspenso até o STJ julgar o Tema 1.414?","Registrar no termo de ciência.","s",true,"Sem alinhamento de expectativa, não ajuíze: cliente ansioso vira reclamação na OAB.",""],
+    ["Há urgência concreta (desconto comprometendo subsistência) para o pedido liminar?","","s",false,"","Sem urgência qualificada, a liminar pode ser negada — fundamente com o dossiê de dano moral/mínimo existencial."]
+  ],
+  docs:[
+    ["HISCRE com a linha RMC/RCC destacada",true,""],
+    ["Planilha: total já descontado ('Reservado' × meses) vs. valor recebido ('Limite')",true,"O contraste (ex.: recebeu R$ 1.100, já pagou R$ 8.000+) é o coração retórico da inicial e da liminar."],
+    ["Faturas do cartão (via requerimento administrativo)",true,""],
+    ["Requerimento do AR de entrega do cartão + resposta/silêncio",true,""],
+    ["Extratos bancários do mês da averbação (crédito? compensação?)",true,""]
+  ],
+  pedidos:["Tutela de urgência: suspensão dos descontos (analisável mesmo com o Tema 1.414 suspenso) + ofício à fonte pagadora (Súmula 144/TJRJ)","Nulidade do contrato de cartão consignado","Restituição em dobro (marco 30/03/2021)","Dano moral","Subsidiariamente: conversão em empréstimo consignado (protege a ação se o Tema 1.414 vier parcialmente desfavorável)","Exibição de contrato, faturas e comprovante de entrega do cartão"],
+  fund:["Tema 1.061/STJ (assinatura impugnada)","Temas 1.414 e 1.328/STJ — suspensos, monitorar","Art. 115, Lei 8.213/91 (autorização expressa como condição do desconto)","Súmulas 94, 144, 343/TJRJ; 479/STJ","TJRJ: 0810045-04.2024.8.19.0028 (5ª Câm.) · 0035824-66.2021.8.19.0038 (17ª Câm.) · 0001035-15.2021.8.19.0079 (8ª Câm.)"],
+  armadilhas:["Formule SEMPRE o pedido subsidiário de conversão — é o paraquedas do Tema 1.414.","Informe a suspensão na inicial com transparência e peça expressamente a apreciação da tutela de urgência (a suspensão não a bloqueia).","Honorários: o ciclo desta tese será LONGO — não a use como motor de caixa; ela é a carteira represada de alto potencial."],
+  calc:"restituicao" },
+
+{ id:"t4", nome:"Tese 4 — Conversão de RMC/RCC em consignado", chips:[["a","PRIORIDADE A"]], foro:"Vara Cível",
+  resumo:"A tese mais segura do portfólio no TJRJ: cliente assinou, mas queria empréstimo. Vício de consentimento + falha do dever de informação (art. 6º, III, CDC) + venda casada (art. 39, I) + onerosidade excessiva → conversão pela taxa média BACEN da época, restituição em dobro do excedente e dano moral ~R$ 5 mil. A 6ª Câmara reformou improcedência para converter (02/2026); a 8ª cita 6 precedentes internos.",
+  perguntas:[
+    ["O cliente ADMITE ter assinado algo, mas afirma que pediu/queria EMPRÉSTIMO, não cartão?","Esta é a versão fática nuclear — registre literalmente no termo.","s",true,"Se nega a assinatura → Tese 3. Se sabia que era cartão → sem tese de conversão.",""],
+    ["As faturas mostram ausência de compras (produto nunca usado como cartão)?","","s",false,"","Compras frequentes contradizem a versão 'queria empréstimo'."],
+    ["O banco não prova entrega do cartão físico (AR)?","","s",false,"","AR não mata a tese (recebimento ≠ compreensão do produto), mas exige inicial mais robusta no dever de informação."],
+    ["Você consegue apurar o excedente: o que ele pagou como cartão vs. o que pagaria em consignado comum?","Simulação com a taxa média BACEN da época (calculadora do passo 3 ajuda com a taxa).","s",false,"","O pedido líquido de restituição do excedente precisa de planilha — juiz do RJ defere liquidação, mas a planilha ancora a liminar e o acordo."],
+    ["Proveito líquido (excedente em dobro + dano moral − eventual compensação) justifica a demanda?","","s",true,"Baixo proveito: agrupe com outras teses do cliente.",""]
+  ],
+  docs:[
+    ["HISCRE com a linha RMC/RCC",true,""],
+    ["Contrato exibido pelo banco (ou protocolo do pedido)",true,""],
+    ["Faturas completas",true,""],
+    ["Planilha de comparação cartão × consignado (taxa média BACEN da época)",true,""],
+    ["Termo de declaração: 'pedi empréstimo, me deram cartão'",true,""]
+  ],
+  pedidos:["Conversão do contrato em empréstimo consignado comum, com taxa média BACEN da época da contratação","Recálculo e restituição EM DOBRO do que excedeu (art. 42, p.ú., CDC)","Limitação das parcelas ao nº confessado pelo cliente (padrão 6ª Câm.: 72 parcelas confessadas)","Dano moral","Tutela de urgência para adequação do desconto"],
+  fund:["CDC arts. 6º, III; 31; 39, I; 51, IV; 52","Tema 1.061/STJ quando houver impugnação parcial de assinatura","TJRJ: 0809486-51.2022.8.19.0211 (8ª Câm., venda casada) · 0804353-40.2022.8.19.0207 (6ª Câm., reformou improcedência) · precedentes citados: 0004664-33.2021.8.19.0067 (19ª) · 0004953-89.2021.8.19.0026 (6ª) · 0854286-18.2022.8.19.0001 (12ª)"],
+  armadilhas:["Não confunda os pedidos: aqui NÃO se pede nulidade pura (cliente admite que quis crédito). Pedido híbrido mal formulado dá improcedência.","Verifique a exposição ao Tema 1.414 na comarca: alguns juízos suspendem também conversões. Se suspender, a liminar de adequação ainda é analisável.","A confissão do nº de parcelas pretendidas pelo cliente delimita o pedido — documente-a com precisão no termo."],
+  calc:"restituicao" },
+
+{ id:"t5", nome:"Tese 5 — Juros abusivos em empréstimo pessoal", chips:[["b","PRIORIDADE B"],["risco","TEMA 1.378 PENDENTE"]], foro:"Vara Cível — volume controlado até o julgamento",
+  resumo:"Crefisa, Agibank, BMG, Bradesco Financiamentos: até 20% a.m. (800%+ a.a.). Parâmetro: taxa que excede 1,5× a média BACEN da modalidade é abusiva (REsp 1.061.530/RS). MAS o Tema 1.378 vai decidir se a taxa isolada basta — por isso a inicial NUNCA se apoia só na taxa: articula os 5 fatores de ausência de risco (consignado disfarçado).",
+  perguntas:[
+    ["A taxa contratada excede 1,5× a média BACEN da modalidade no MÊS da contratação?","Use a calculadora do passo 3 (API BACEN ou manual).","s",true,"Abaixo do gatilho de 1,5×, a revisional não prospera no cenário atual.",""],
+    ["O benefício do cliente é recebido em conta do próprio banco credor (portabilidade)?","Fator 1 de ausência de risco.","s",false,"","Cada fator ausente enfraquece o 'pulo do gato' — com menos de 3 fatores, pondere não ajuizar antes do Tema 1.378."],
+    ["A parcela é debitada automaticamente quando o benefício cai?","Fator 2.","s",false,"",""],
+    ["Há cláusula de débito em outras contas do cliente no mesmo banco?","Fator 3 — localize no contrato.","s",false,"",""],
+    ["Há seguro prestamista embutido na operação?","Fator 4 (e tese T2 acessória).","s",false,"",""],
+    ["O banco réu está na lista de bons alvos (BMG, Crefisa, Agibank, Bradesco) e NÃO é Mercantil do Brasil?","Mercantil: tickets de R$ 50–500 não pagam a operação.","s",true,"Ticket ínfimo: não ajuizar isoladamente.",""],
+    ["O cliente está ciente do risco regulatório (Tema 1.378) registrado no termo de ciência?","","s",true,"Alinhamento de expectativa obrigatório nesta tese.",""]
+  ],
+  docs:[
+    ["Contrato com taxa mensal e anual (CET) destacadas",true,""],
+    ["Print/tabela da taxa média BACEN da modalidade no mês da contratação",true,"bcb.gov.br/estatisticas/txjuros — anexe à inicial."],
+    ["Extratos comprovando portabilidade + débito automático",true,""],
+    ["Planilha de recálculo pela taxa média",true,""]
+  ],
+  pedidos:["Revisão dos juros remuneratórios para a taxa média BACEN da época (limite 1,5×)","Restituição (em dobro após 30/03/2021) do pago a maior","Descaracterização da mora enquanto se discute o encargo","Subsidiário: redução equitativa com base no CDC (onerosidade excessiva, art. 51, IV) pela desproporção risco × remuneração"],
+  fund:["REsp 1.061.530/RS (repetitivo) — abusividade acima de 1,5× a média de mercado","Tema 1.378/STJ — pendente: taxa isolada como fundamento (POR ISSO a inicial articula os 5 fatores de ausência de risco)","CDC arts. 39, V, e 51, IV","Precedentes ilustrativos de outras cortes citados no manual (TJSP 15ª Câm.; TJMG 20ª Câm. — Crefisa)"],
+  armadilhas:["Inicial 'preguiçosa' (só taxa × média) morre se o Tema 1.378 vier restritivo. Sempre os 5 fatores.","Dimensione a carteira: não concentre a banca nesta tese antes do julgamento.","Juros altos NÃO são abusivos per se — o STJ rejeita limitação em 12% a.a. Não use esse argumento fóssil."],
+  calc:"juros" },
+
+{ id:"t6", nome:"Tese 6 — Revisional de financiamento de veículo", chips:[["b","ALTO TICKET"]], foro:"Vara Cível",
+  resumo:"Bem em garantia (alienação fiduciária) = risco mínimo do banco → taxa acima de 1,5× a média BACEN (aquisição de veículos PF) é revisável — e a garantia deixa a tese FORA do alcance do Tema 1.378. Nicho RJ: motoristas de app e motoboys. Única tese com honorários iniciais viáveis; abre a porta para defesas de busca e apreensão.",
+  perguntas:[
+    ["A taxa contratada excede 1,5× a média BACEN de 'aquisição de veículos — PF' no mês do contrato?","Calculadora do passo 3.","s",true,"Sem excesso relevante, não há revisional.",""],
+    ["O contrato tem alienação fiduciária do veículo (garantia)?","","s",false,"","Sem garantia, a operação cai na hipótese do Tema 1.378 — trate como Tese 5."],
+    ["Há tarifas acessórias questionáveis (registro, avaliação, seguro embutido)?","","s",false,"","Cumule com Temas 958/972 do STJ (tarifas e seguro de proteção financeira — venda casada)."],
+    ["O cliente está adimplente ou com atraso menor que 30 dias?","","s",false,"","Inadimplente: risco de busca e apreensão no meio da revisional — oriente sobre purga/consignação e precifique a defesa."],
+    ["O cliente pode pagar honorários iniciais?","Única tese em que a cobrança inicial é praxe e aceita.","s",false,"","Sem inicial, avalie êxito puro — o ticket costuma comportar."]
+  ],
+  docs:[
+    ["Cédula de crédito bancário / contrato completo",true,""],
+    ["Carnê ou extrato de parcelas pagas",true,""],
+    ["Taxa média BACEN da modalidade no mês (print)",true,""],
+    ["Planilha de recálculo (contador parceiro ou assistente)",true,""]
+  ],
+  pedidos:["Revisão dos juros para a taxa média (limite 1,5× — REsp 1.061.530/RS)","Nulidade de tarifas acessórias abusivas e seguro embutido (venda casada — Tema 972/STJ)","Restituição do pago a maior (dobro pós-30/03/2021)","Descaracterização da mora","Manutenção do cliente na posse do veículo"],
+  fund:["REsp 1.061.530/RS (repetitivo)","Temas 958 e 972/STJ (tarifas e seguro de proteção financeira)","CDC arts. 39, I e V; 51, IV","Precedente ilustrativo: TJMG 21ª Câm. (voto vencedor: abusividade acima de 1,5× a média p/ veículos)"],
+  armadilhas:["Concorrência alta com ferramentas de captação por IA — capture ANTES da busca e apreensão, pela revisional.","Revisional não suspende automaticamente as parcelas: oriente o cliente a manter pagamento/consignar para não dar causa à apreensão.","Perícia contábil pode ser necessária — provisione custo e tempo."],
+  calc:"juros" },
+
+{ id:"t7", nome:"Tese 7 — Descontos indevidos em conta corrente", chips:[["a","PRIORIDADE A"],["jec","MOTOR DO JEC"]], foro:"JEC amistoso mapeado (sem custas, ciclo 4–8 meses)",
+  resumo:"Tarifas, 'pacotes de serviço', seguros, capitalização e SVAs debitados sem contratação provada. Prova documental pura — o extrato fala por si. Prescrição decenal acumula valores relevantes. Restituição em dobro + dano moral variável por juizado. É o motor de caixa dos primeiros 12 meses.",
+  perguntas:[
+    ["Os extratos mostram lançamentos recorrentes de tarifa/pacote/seguro/capitalização que o cliente não reconhece?","Marque linha a linha com o cliente.","s",true,"Sem lançamentos impugnáveis, não há tese.",""],
+    ["O cliente NÃO possui contrato/adesão assinada para esses serviços (ou o banco não exibiu no requerimento administrativo)?","","s",true,"Adesão específica comprovada → tese enfraquece; avalie onerosidade/cancelamento.",""],
+    ["Você reuniu o máximo de extratos retroativos (meta: 10 anos — a janela decenal)?","Peça no app do banco ou por requerimento (LGPD art. 15 ajuda).","s",false,"","Cada mês de extrato a menos é dinheiro fora do pedido."],
+    ["A soma dos lançamentos (em dobro) + dano moral supera R$ 3.000?","Calculadora do passo 3.","s",false,"","Abaixo disso, agrupe com outras teses ou cumule vários 'serviços' na mesma ação."],
+    ["O JEC da comarca-alvo foi mapeado como amistoso (procedência e dano moral razoáveis)?","Mapa de juizados da Fase 1 do projeto.","s",false,"","JEC hostil: prefira vara cível (com gratuidade) ou outra comarca competente."],
+    ["O cliente tem condições de comparecer à audiência de conciliação (ou justificar ausência)?","","s",true,"Ausência do autor no JEC = extinção + custas. Cliente sem mobilidade: só com logística garantida.",""]
+  ],
+  docs:[
+    ["Extratos de conta (o máximo retroativo possível)",true,""],
+    ["Planilha de lançamentos impugnados (data, rubrica, valor)",true,"Esta planilha É a prova nuclear + base do cálculo."],
+    ["Requerimento administrativo pedindo os instrumentos de contratação + resposta/silêncio",true,""],
+    ["Negativa formal do cliente (termo)",true,""]
+  ],
+  pedidos:["Declaração de inexistência de contratação dos serviços impugnados","Cessação dos lançamentos (tutela de urgência se relevantes)","Restituição em dobro (marco 30/03/2021; anteriores na forma simples, dentro da janela decenal)","Dano moral (variável por juizado — cheque o mapa)"],
+  fund:["CDC arts. 39, III (fornecimento sem solicitação), 42, p.ú.","Prescrição decenal — art. 205 CC (repetição de indébito contratual, entendimento consolidado do STJ)","Súmula 297/STJ","Res. CMN 3.919/2010 (tarifas só com contratação/autorização)"],
+  armadilhas:["Some TODOS os serviços impugnáveis numa única ação por banco — pulverizar em várias ações pequenas é bandeira vermelha de litigância predatória.","No JEC não há sucumbência no 1º grau: sua remuneração é 100% contratual — precifique.","Valor da causa acima de 40 SM não cabe no JEC; acima de 20 SM exige advogado (você) — planeje o teto do pedido."],
+  calc:"restituicao" }
+];
+
+let cur=null, stepIx=0, answers={}, docsChk={};
+
+function goHome(){ document.getElementById('wizard').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); renderSaved(); }
+function abrir(id, saved){ cur=TESES.find(t=>t.id===id); stepIx=0;
+  answers=saved?saved.answers:{}; docsChk=saved?saved.docs:{};
+  if(saved&&saved.caso){ for(const k in saved.caso){ const el=document.getElementById(k); if(el) el.value=saved.caso[k]; } }
+  document.getElementById('home').classList.add('hidden'); document.getElementById('wizard').classList.remove('hidden');
+  document.getElementById('w-title').textContent=cur.nome;
+  document.getElementById('w-resumo').textContent=cur.resumo;
+  const ch=document.getElementById('w-chip'); ch.className='chip '+cur.chips[0][0]; ch.textContent=cur.chips[0][1];
+  render(); }
+function nav(d){ stepIx=Math.max(0,Math.min(3,stepIx+d)); render(); }
+function render(){
+  const steps=["1 · Pressupostos","2 · Documentos","3 · Cálculo","4 · Parecer"];
+  document.getElementById('w-steps').innerHTML=steps.map((s,i)=>`<span class="step ${i===stepIx?'on':''}" onclick="stepIx=${i};render()">${s}</span>`).join('');
+  document.getElementById('w-next').style.visibility= stepIx===3?'hidden':'visible';
+  const b=document.getElementById('w-body');
+  if(stepIx===0) b.innerHTML=renderPerguntas();
+  else if(stepIx===1) b.innerHTML=renderDocs();
+  else if(stepIx===2) b.innerHTML=renderCalc();
+  else b.innerHTML=renderParecer();
+  if(stepIx===2) hydrateCalc();
+}
+function setAns(i,v){ answers[i]=v; render(); }
+function aval(){
+  let kills=[], warns=[], resp=0;
+  cur.perguntas.forEach((p,i)=>{ const a=answers[i]; if(a===undefined) return; resp++;
+    const bad = a!==p[2];
+    if(bad && p[3]) kills.push(p[4]||("Pressuposto ausente: "+p[0]));
+    else if(bad && p[5]) warns.push(p[5]);
+    else if(!bad && p[5] && p[2]==='n') warns.push(p[5]);
+  });
+  return {kills,warns,resp,total:cur.perguntas.length};
+}
+function renderPerguntas(){
+  const ev=aval();
+  let ban;
+  if(ev.kills.length) ban=`<div class="banner kill">⛔ TESE INVIÁVEL no estado atual — ${ev.kills.length} pressuposto(s) eliminatório(s) ausente(s). Veja abaixo o motivo e o pivô sugerido.</div>`;
+  else if(ev.resp<ev.total) ban=`<div class="banner warn">⏳ Responda tudo: ${ev.resp}/${ev.total} pressupostos verificados.</div>`;
+  else if(ev.warns.length) ban=`<div class="banner warn">⚠️ TESE VIÁVEL COM RESSALVAS — ${ev.warns.length} ponto(s) de atenção antes de ajuizar.</div>`;
+  else ban=`<div class="banner ok">✅ TESE VIÁVEL — todos os pressupostos fáticos presentes. Avance para documentos.</div>`;
+  return `<div class="card">${ban}${cur.perguntas.map((p,i)=>{
+    const a=answers[i];
+    const bad = a!==undefined && a!==p[2];
+    let msg='';
+    if(bad&&p[3]) msg=`<div class="msg kill">⛔ ${p[4]||'Pressuposto eliminatório ausente.'}</div>`;
+    else if(a!==undefined&&p[5]&&(bad||p[2]==='n')) msg=`<div class="msg warn">⚠️ ${p[5]}</div>`;
+    return `<div class="q"><div class="txt">${i+1}. ${p[0]}</div>${p[1]?`<div class="help">${p[1]}</div>`:''}
+      <div class="opts">
+        <label class="${a==='s'?(p[2]==='s'?'sel-s':'sel-n'):''}"><input type="radio" name="q${i}" onclick="setAns(${i},'s')" ${a==='s'?'checked':''}>Sim</label>
+        <label class="${a==='n'?(p[2]==='n'?'sel-s':'sel-n'):''}"><input type="radio" name="q${i}" onclick="setAns(${i},'n')" ${a==='n'?'checked':''}>Não</label>
+      </div>${msg}</div>`;}).join('')}</div>`;
+}
+function dlist(arr,pref){ return arr.map((d,i)=>`<div class="doc"><input type="checkbox" id="${pref}${i}" ${docsChk[pref+i]?'checked':''} onchange="docsChk['${pref}${i}']=this.checked">
+  <div><label for="${pref}${i}"><b>${d[0]}</b> <span class="${d[1]?'ob':'op'}">${d[1]?'OBRIGATÓRIO':'RECOMENDADO'}</span></label>${d[2]?`<div class="dh">${d[2]}</div>`:''}</div></div>`).join(''); }
+function renderDocs(){
+  return `<div class="card"><h3>Documentos da tese</h3>${dlist(cur.docs,'d')}</div>
+  <div class="card"><h3>Blindagem antipredatória (obrigatória em TODA ação — TJRJ monitora demanda em massa)</h3>${dlist(COMUM.blindagem,'b')}</div>
+  <div class="card"><h3>Dossiê de gratuidade de justiça (o calcanhar de Aquiles no RJ)</h3>${dlist(COMUM.gratuidade,'g')}</div>
+  <div class="card"><h3>Dossiê de dano moral (fugir do patamar módico)</h3>${dlist(COMUM.danoMoral,'m')}</div>`;
+}
+function renderCalc(){
+  if(cur.calc==='juros') return calcJurosHTML();
+  return calcRestHTML();
+}
+function calcRestHTML(){ return `<div class="card">
+  <h3>Calculadora de restituição — marco do dobro: ${MARCO_DOBRO}</h3>
+  <div class="frm">
+    <div><label>Valor da parcela/desconto mensal (R$)</label><input id="k-parc" type="number" step="0.01" value="${answers._parc||''}"></div>
+    <div><label>1º desconto (mês/ano)</label><input id="k-ini" type="month" value="${answers._ini||''}"></div>
+    <div><label>Último desconto (ou hoje)</label><input id="k-fim" type="month" value="${answers._fim||''}"></div>
+    <div><label>Valor creditado na conta (compensação, R$)</label><input id="k-comp" type="number" step="0.01" value="${answers._comp||0}"></div>
+    <div><label>Dano moral estimado (R$)</label><select id="k-dm">
+      ${[4000,5000,8000,10000,15000].map(v=>`<option ${answers._dm==v?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div><label>% honorários contratuais</label><input id="k-hc" type="number" value="${answers._hc||30}"></div>
+  </div>
+  <button class="btn primary" onclick="calcRest()">Calcular</button>
+  <div class="res" id="k-out"></div>
+  <p class="juris" style="margin-top:10px">Regras aplicadas: descontos até 03/2021 na forma <b>simples</b>; a partir de 04/2021 <b>em dobro</b> (EAREsp 676.608/RS). Janela limitada aos últimos 120 meses (prescrição decenal). Compensação abatida do total (praxe TJRJ, art. 368 CC). Sucumbência estimada em 15% na vara cível (некompute no JEC 1º grau).</p>
+</div>`.replace('некompute','não compute'); }
+function calcRest(){
+  const parc=+document.getElementById('k-parc').value||0;
+  const ini=document.getElementById('k-ini').value, fim=document.getElementById('k-fim').value;
+  const comp=+document.getElementById('k-comp').value||0;
+  const dm=+document.getElementById('k-dm').value||0;
+  const hc=(+document.getElementById('k-hc').value||30)/100;
+  if(!parc||!ini||!fim){ document.getElementById('k-out').innerHTML='<div class="r"><div class="l">Preencha parcela e datas.</div></div>'; return; }
+  answers._parc=parc; answers._ini=ini; answers._fim=fim; answers._comp=comp; answers._dm=dm; answers._hc=hc*100;
+  const [iy,im]=ini.split('-').map(Number), [fy,fm]=fim.split('-').map(Number);
+  let months=[];
+  for(let y=iy,m=im; y<fy||(y===fy&&m<=fm); ){ months.push([y,m]); m++; if(m>12){m=1;y++;} }
+  const now=new Date(fy,fm-1,1); // prescrição: 120 meses retroativos do último
+  const cut=new Date(fy,fm-1-119,1);
+  const presc=months.filter(([y,m])=> new Date(y,m-1,1)<cut).length;
+  months=months.filter(([y,m])=> new Date(y,m-1,1)>=cut);
+  const nPre = months.filter(([y,m])=> (y<2021)||(y===2021&&m<=3)).length;
+  const nPos = months.length-nPre;
+  const simples=nPre*parc, dobro=nPos*parc*2, bruto=simples+dobro;
+  const liquido=Math.max(0,bruto-comp)+dm;
+  const hono=liquido*hc, suc=liquido*0.15;
+  const f=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  answers._calcTxt=`Restituição: ${nPre} parcelas simples (${f(simples)}) + ${nPos} em dobro (${f(dobro)}) − compensação ${f(comp)} + dano moral ${f(dm)} = proveito líquido ${f(liquido)}. Honorários projetados: contratuais ${f(hono)} + sucumbência (vara) ~${f(suc)}.${presc?` ATENÇÃO: ${presc} parcela(s) fora da janela decenal excluída(s).`:''}`;
+  document.getElementById('k-out').innerHTML=`
+    <div class="r"><div class="n">${nPre} × simples</div><div class="l">${f(simples)} (até 03/2021)</div></div>
+    <div class="r"><div class="n">${nPos} × dobro</div><div class="l">${f(dobro)} (após 03/2021)</div></div>
+    <div class="r"><div class="n">− ${f(comp)}</div><div class="l">compensação (valor creditado)</div></div>
+    <div class="r"><div class="n">+ ${f(dm)}</div><div class="l">dano moral estimado</div></div>
+    <div class="r hi"><div class="n">${f(liquido)}</div><div class="l">PROVEITO LÍQUIDO do cliente</div></div>
+    <div class="r hi"><div class="n">${f(hono+suc)}</div><div class="l">seus honorários projetados (contratual + sucumbência vara)</div></div>
+    ${presc?`<div class="r"><div class="n">${presc}</div><div class="l">parcelas excluídas — prescrição decenal</div></div>`:''}`;
+}
+function calcJurosHTML(){ return `<div class="card">
+  <h3>Teste de abusividade — 1,5× a taxa média BACEN (REsp 1.061.530/RS)</h3>
+  <div class="frm">
+    <div><label>Taxa contratada (% a.m.)</label><input id="j-tx" type="number" step="0.01" value="${answers._jtx||''}"></div>
+    <div><label>Mês/ano da contratação</label><input id="j-data" type="month" value="${answers._jdata||''}"></div>
+    <div><label>Taxa média BACEN (% a.m.) — manual</label><input id="j-media" type="number" step="0.01" value="${answers._jmedia||''}" placeholder="confira em bcb.gov.br/estatisticas/txjuros"></div>
+    <div><label>Código da série SGS (opcional, p/ busca automática)</label><input id="j-serie" placeholder="ex.: 25464" value="${answers._jserie||''}"></div>
+  </div>
+  <div class="bar">
+    <button class="btn" onclick="buscaBacen()">🔌 Buscar no BACEN (SGS)</button>
+    <button class="btn primary" onclick="calcJuros()">Testar abusividade</button>
+  </div>
+  <div class="res" id="j-out"></div>
+  <p class="juris" style="margin-top:10px">A busca automática consulta a série do SGS/BACEN para o mês informado (funciona com o arquivo aberto no seu computador; em ambiente restrito, use o campo manual). <b>Valide sempre a série da modalidade correta</b> na página <a href="https://www.bcb.gov.br/estatisticas/txjuros" target="_blank" rel="noopener">Taxas de juros do BCB</a> — ex.: crédito pessoal não consignado, aquisição de veículos PF — e anexe o print à inicial. Lembre: a inicial NUNCA se apoia só na taxa (Tema 1.378) — articule os fatores de ausência de risco.</p>
+</div>`; }
+async function buscaBacen(){
+  const serie=document.getElementById('j-serie').value.trim();
+  const data=document.getElementById('j-data').value;
+  const out=document.getElementById('j-out');
+  if(!serie||!data){ out.innerHTML='<div class="r"><div class="l">Informe a série SGS e o mês.</div></div>'; return; }
+  const [y,m]=data.split('-');
+  const di=`01/${m}/${y}`, df=`28/${m}/${y}`;
+  out.innerHTML='<div class="r"><div class="l">Consultando BACEN…</div></div>';
+  try{
+    const r=await fetch(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${serie}/dados?formato=json&dataInicial=${di}&dataFinal=${df}`);
+    const js=await r.json();
+    if(js.length){ document.getElementById('j-media').value=(+js[js.length-1].valor).toFixed(2);
+      out.innerHTML=`<div class="r"><div class="n">${js[js.length-1].valor}%</div><div class="l">série ${serie} em ${m}/${y} — confira a modalidade e clique em Testar</div></div>`; }
+    else out.innerHTML='<div class="r"><div class="l">Série sem dado no mês — confira o código ou use o campo manual.</div></div>';
+  }catch(e){ out.innerHTML='<div class="r"><div class="l">Sem acesso à API neste ambiente — abra o arquivo no seu computador ou preencha a taxa média manualmente.</div></div>'; }
+}
+function calcJuros(){
+  const tx=+document.getElementById('j-tx').value||0;
+  const md=+document.getElementById('j-media').value||0;
+  answers._jtx=tx; answers._jmedia=md; answers._jdata=document.getElementById('j-data').value; answers._jserie=document.getElementById('j-serie').value;
+  if(!tx||!md){ document.getElementById('j-out').innerHTML='<div class="r"><div class="l">Preencha as duas taxas.</div></div>'; return; }
+  const lim=md*1.5, exc=((tx/lim)-1)*100, abus=tx>lim;
+  answers._calcTxt=`Juros: contratada ${tx}% a.m. × média BACEN ${md}% a.m. — limite 1,5× = ${lim.toFixed(2)}% a.m. → ${abus?`ABUSIVA (excede o limite em ${exc.toFixed(0)}%)`:'dentro do limite — revisional NÃO recomendada'}.`;
+  document.getElementById('j-out').innerHTML=`
+    <div class="r"><div class="n">${tx}%</div><div class="l">taxa contratada (a.m.)</div></div>
+    <div class="r"><div class="n">${md}%</div><div class="l">média BACEN (a.m.)</div></div>
+    <div class="r"><div class="n">${lim.toFixed(2)}%</div><div class="l">limite (1,5× a média)</div></div>
+    <div class="r ${abus?'hi':''}"><div class="n">${abus?'⚠️ ABUSIVA':'✅ regular'}</div><div class="l">${abus?`excede o limite em ${exc.toFixed(0)}%`:'não ajuizar por juros'}</div></div>`;
+}
+function hydrateCalc(){ if(answers._calcTxt){ if(cur.calc==='juros'&&answers._jtx&&answers._jmedia) calcJuros(); else if(answers._parc) calcRest(); } }
+function caso(){ return ['c-nome','c-cpf','c-nb','c-banco','c-contrato','c-comarca'].reduce((o,k)=>{o[k]=document.getElementById(k)?.value||'';return o;},{}); }
+function renderParecer(){
+  const ev=aval(); const c=caso();
+  const st= ev.kills.length?['kill','⛔ INVIÁVEL — NÃO AJUIZAR']:(ev.resp<ev.total?['warn','⏳ ANÁLISE INCOMPLETA']:(ev.warns.length?['warn','⚠️ VIÁVEL COM RESSALVAS']:['ok','✅ VIÁVEL — PRONTA PARA PROPOSITURA']));
+  const faltam = cur.docs.map((d,i)=>({d,ok:docsChk['d'+i]})).filter(x=>x.d[1]&&!x.ok).map(x=>x.d[0]);
+  const bfalta = COMUM.blindagem.map((d,i)=>({d,ok:docsChk['b'+i]})).filter(x=>!x.ok).map(x=>x.d[0]);
+  return `<div class="card parecer">
+    <div class="banner ${st[0]}">${st[1]}</div>
+    <p><b>${cur.nome}</b> · Cliente: ${c['c-nome']||'—'} · CPF ${c['c-cpf']||'—'} · NB ${c['c-nb']||'—'} · Réu: ${c['c-banco']||'—'} · Contrato ${c['c-contrato']||'—'} · Comarca: ${c['c-comarca']||'—'}</p>
+    ${ev.kills.length?`<h3>Impedimentos</h3><ul>${ev.kills.map(k=>`<li>${k}</li>`).join('')}</ul>`:''}
+    ${ev.warns.length?`<h3>Ressalvas a tratar antes de ajuizar</h3><ul>${ev.warns.map(w=>`<li>${w}</li>`).join('')}</ul>`:''}
+    ${faltam.length?`<h3>Documentos obrigatórios pendentes</h3><ul>${faltam.map(d=>`<li>${d}</li>`).join('')}</ul>`:''}
+    ${bfalta.length?`<h3>Blindagem pendente (não ajuizar sem)</h3><ul>${bfalta.map(d=>`<li>${d}</li>`).join('')}</ul>`:''}
+    ${answers._calcTxt?`<h3>Memória de cálculo</h3><div class="copy">${answers._calcTxt}</div>`:''}
+    <h3>Foro</h3><p>${cur.foro}</p>
+    <h3>Pedidos da inicial (ordem sugerida)</h3><ul>${cur.pedidos.map(p=>`<li>${p}</li>`).join('')}</ul>
+    <h3>Fundamentos (TJRJ + STJ)</h3><ul class="juris">${cur.fund.map(f=>`<li>${f}</li>`).join('')}</ul>
+    <h3>Armadilhas — leia antes de protocolar</h3><ul>${cur.armadilhas.map(a=>`<li>${a}</li>`).join('')}</ul>
+    <p class="juris">Parecer gerado pelo Analisador de Teses Bancárias RJ em ${new Date().toLocaleDateString('pt-BR')}. Ferramenta de apoio — a decisão de ajuizar é ato privativo do advogado responsável.</p>
+  </div>`;
+}
+function salvar(){
+  const list=JSON.parse(localStorage.getItem('anl')||'[]');
+  const c=caso();
+  list.unshift({id:cur.id,nome:cur.nome,cliente:c['c-nome']||'sem nome',data:new Date().toLocaleString('pt-BR'),answers,docs:docsChk,caso:c});
+  localStorage.setItem('anl',JSON.stringify(list.slice(0,50)));
+  alert('Análise salva neste navegador.');
+}
+function renderSaved(){
+  const list=JSON.parse(localStorage.getItem('anl')||'[]');
+  const el=document.getElementById('saved-list');
+  if(!list.length){ el.innerHTML='<li style="color:var(--ink-faint)">Nenhuma ainda.</li>'; return; }
+  el.innerHTML=list.map((s,i)=>`<li><b>${s.cliente}</b> — ${s.nome} <span style="color:var(--ink-faint)">(${s.data})</span>
+    <button class="btn" onclick='abrir("${s.id}",JSON.parse(localStorage.getItem("anl"))[${i}])'>Abrir</button>
+    <button class="btn" onclick='delSaved(${i})'>Excluir</button></li>`).join('');
+}
+function delSaved(i){ const l=JSON.parse(localStorage.getItem('anl')||'[]'); l.splice(i,1); localStorage.setItem('anl',JSON.stringify(l)); renderSaved(); }
+document.getElementById('tese-grid').innerHTML=TESES.map(t=>`<div class="card tcard" onclick="abrir('${t.id}')">
+  <div>${t.chips.map(c=>`<span class="chip ${c[0]}">${c[1]}</span>`).join('')}</div>
+  <h3>${t.nome}</h3><p>${t.resumo.slice(0,140)}…</p>
+  <span class="juris">Foro: ${t.foro}</span></div>`).join('');
+renderSaved();
+</script>
+</body>
+</html>
