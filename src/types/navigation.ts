@@ -1,9 +1,9 @@
 export type RootStackParamList = {
   Main: undefined;
-  Detail: { ticker: string };
+  Results: undefined;
 };
 
 export type MainTabParamList = {
-  Home: undefined;
-  Settings: undefined;
+  Lista: undefined;
+  Config: undefined;
 };

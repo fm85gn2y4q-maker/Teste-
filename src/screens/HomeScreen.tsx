@@ -1,213 +1,399 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  RefreshControl,
-  SafeAreaView,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { CompositeScreenProps } from '@react-navigation/native';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+
+import { CATALOG, getProduct } from '../data/catalog';
+import { REGIONS, marketsInRegion } from '../data/markets';
+import { parseShoppingList } from '../engine/parseList';
 import { useStore } from '../store/useStore';
-import { AssetCard } from '../components/AssetCard';
-import { WatchlistAsset } from '../analysis/types';
-import { searchTicker } from '../api/brapi';
-import { RootStackParamList, MainTabParamList } from '../types/navigation';
-import { CompositeNavigationProp } from '@react-navigation/native';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { COLORS } from '../theme';
+import { MainTabParamList, RootStackParamList } from '../types/navigation';
 
-type Props = {
-  navigation: CompositeNavigationProp<
-    BottomTabNavigationProp<MainTabParamList, 'Home'>,
-    NativeStackNavigationProp<RootStackParamList>
-  >;
-};
-
-const PURPLE = '#6C3DE8';
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Lista'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { watchlist, loadingTickers, refreshAll, addTicker, removeTicker } = useStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<{ stock: string; name: string }[]>([]);
+  const { regionId, items, setRegion, addItem, removeItem, setQuantity, mergeItems, clearList } =
+    useStore();
+  const [search, setSearch] = useState('');
+  const [pasteVisible, setPasteVisible] = useState(false);
+  const [pasteText, setPasteText] = useState('');
+  const [pasteFeedback, setPasteFeedback] = useState<string | null>(null);
 
-  useEffect(() => {
-    useStore.getState().initWatchlist();
-  }, []);
+  const suggestions = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return CATALOG.filter((p) =>
+      [p.name, ...(p.aliases ?? [])].some((n) => n.toLowerCase().includes(q)),
+    ).slice(0, 6);
+  }, [search]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refreshAll();
-    setRefreshing(false);
-  }, [refreshAll]);
+  const marketCount = marketsInRegion(regionId).length;
 
-  const onSearch = async (text: string) => {
-    setSearchText(text);
-    if (text.length < 2) { setSearchResults([]); return; }
-    try {
-      const results = await searchTicker(text);
-      setSearchResults(results.slice(0, 8));
-    } catch {
-      setSearchResults([]);
-    }
-  };
-
-  const onAdd = (ticker: string) => {
-    addTicker(ticker.toUpperCase());
-    setSearchText('');
-    setSearchResults([]);
-  };
-
-  const onRemove = (ticker: string) => {
-    Alert.alert('Remover ativo', `Remover ${ticker} da watchlist?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Remover', style: 'destructive', onPress: () => removeTicker(ticker) },
-    ]);
-  };
-
-  const bullish = watchlist.filter((a) => (a.convergence?.overallScore ?? 0) >= 30).length;
-  const bearish = watchlist.filter((a) => (a.convergence?.overallScore ?? 0) <= -30).length;
+  function handlePaste() {
+    const { items: parsed, unmatched } = parseShoppingList(pasteText);
+    mergeItems(parsed);
+    setPasteText('');
+    setPasteVisible(false);
+    setPasteFeedback(
+      unmatched.length === 0
+        ? `${parsed.length} item(ns) adicionados à lista.`
+        : `${parsed.length} item(ns) adicionados. Não encontrei: ${unmatched.join(', ')}.`,
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Header */}
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Grafista B3</Text>
-          <Text style={styles.headerSub}>Convergência Multi-Escola</Text>
-        </View>
-        <View style={styles.headerStats}>
-          <View style={[styles.statPill, { backgroundColor: '#DCFCE7' }]}>
-            <Text style={[styles.statText, { color: '#16A34A' }]}>↑ {bullish}</Text>
-          </View>
-          <View style={[styles.statPill, { backgroundColor: '#FEE2E2' }]}>
-            <Text style={[styles.statText, { color: '#DC2626' }]}>↓ {bearish}</Text>
-          </View>
-        </View>
+        <Text style={styles.title}>Feira Esperta</Text>
+        <Text style={styles.subtitle}>
+          Compare supermercados da sua região e monte o plano de compra mais barato
+        </Text>
       </View>
 
-      {/* Busca */}
-      <View style={styles.searchBox}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar ativo (ex: PETR4)..."
-          placeholderTextColor="#9CA3AF"
-          value={searchText}
-          onChangeText={onSearch}
-          autoCapitalize="characters"
-        />
-        {searchText.length > 0 && (
-          <TouchableOpacity style={styles.clearBtn} onPress={() => { setSearchText(''); setSearchResults([]); }}>
-            <Text style={styles.clearBtnText}>✕</Text>
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <Text style={styles.sectionLabel}>Sua região</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.regionRow}>
+          {REGIONS.map((region) => {
+            const active = region.id === regionId;
+            return (
+              <Pressable
+                key={region.id}
+                onPress={() => setRegion(region.id)}
+                style={[styles.regionChip, active && styles.regionChipActive]}
+              >
+                <Text style={[styles.regionChipText, active && styles.regionChipTextActive]}>
+                  {region.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+        <Text style={styles.regionInfo}>
+          {marketCount} mercados cadastrados nesta região
+        </Text>
+
+        <Text style={styles.sectionLabel}>Monte sua lista</Text>
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar produto (ex.: arroz, leite...)"
+            placeholderTextColor={COLORS.textMuted}
+            value={search}
+            onChangeText={setSearch}
+          />
+          <Pressable style={styles.pasteButton} onPress={() => setPasteVisible(true)}>
+            <Text style={styles.pasteButtonText}>Colar lista</Text>
+          </Pressable>
+        </View>
+
+        {suggestions.map((product) => (
+          <Pressable
+            key={product.id}
+            style={styles.suggestion}
+            onPress={() => {
+              addItem(product.id);
+              setSearch('');
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={styles.suggestionName}>{product.name}</Text>
+              <Text style={styles.suggestionMeta}>{product.category}</Text>
+            </View>
+            <Text style={styles.suggestionAdd}>+ adicionar</Text>
+          </Pressable>
+        ))}
+
+        {pasteFeedback && <Text style={styles.pasteFeedback}>{pasteFeedback}</Text>}
+
+        <View style={styles.listHeader}>
+          <Text style={styles.sectionLabel}>
+            Lista de compras ({items.length} {items.length === 1 ? 'item' : 'itens'})
+          </Text>
+          {items.length > 0 && (
+            <Pressable onPress={clearList}>
+              <Text style={styles.clearText}>Limpar</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {items.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyEmoji}>🛒</Text>
+            <Text style={styles.emptyText}>
+              Sua lista está vazia. Busque produtos acima ou cole sua lista pronta.
+            </Text>
+          </View>
+        ) : (
+          items.map((item) => {
+            const product = getProduct(item.productId);
+            return (
+              <View key={item.productId} style={styles.itemRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.itemName}>{product.name}</Text>
+                  <Text style={styles.itemMeta}>{product.category}</Text>
+                </View>
+                <View style={styles.qtyControls}>
+                  <Pressable
+                    style={styles.qtyButton}
+                    onPress={() => setQuantity(item.productId, item.quantity - 1)}
+                  >
+                    <Text style={styles.qtyButtonText}>−</Text>
+                  </Pressable>
+                  <Text style={styles.qtyValue}>{item.quantity}</Text>
+                  <Pressable
+                    style={styles.qtyButton}
+                    onPress={() => setQuantity(item.productId, item.quantity + 1)}
+                  >
+                    <Text style={styles.qtyButtonText}>+</Text>
+                  </Pressable>
+                </View>
+                <Pressable onPress={() => removeItem(item.productId)} style={styles.removeButton}>
+                  <Text style={styles.removeButtonText}>✕</Text>
+                </Pressable>
+              </View>
+            );
+          })
         )}
-      </View>
 
-      {/* Resultados de busca */}
-      {searchResults.length > 0 && (
-        <View style={styles.searchResults}>
-          {searchResults.map((r) => (
-            <TouchableOpacity key={r.stock} style={styles.searchResultItem} onPress={() => onAdd(r.stock)}>
-              <Text style={styles.resultTicker}>{r.stock}</Text>
-              <Text style={styles.resultName} numberOfLines={1}>{r.name}</Text>
-              <Text style={styles.resultAdd}>+</Text>
-            </TouchableOpacity>
-          ))}
+        <View style={{ height: 96 }} />
+      </ScrollView>
+
+      {items.length > 0 && (
+        <View style={styles.footer}>
+          <Pressable style={styles.cta} onPress={() => navigation.navigate('Results')}>
+            <Text style={styles.ctaText}>Calcular melhor plano de compra</Text>
+          </Pressable>
         </View>
       )}
 
-      {/* Lista */}
-      <FlatList
-        data={watchlist}
-        keyExtractor={(item) => item.ticker}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PURPLE} />
-        }
-        ListHeaderComponent={
-          <Text style={styles.listHeader}>Watchlist — {watchlist.length} ativos</Text>
-        }
-        renderItem={({ item }: { item: WatchlistAsset }) => (
-          <AssetCard
-            asset={item}
-            loading={loadingTickers.has(item.ticker)}
-            onPress={() => navigation.navigate('Detail', { ticker: item.ticker })}
-            onLongPress={() => onRemove(item.ticker)}
-          />
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>Watchlist vazia.{'\n'}Busque um ativo para adicionar.</Text>
+      <Modal visible={pasteVisible} animationType="slide" transparent>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalBackdrop}
+        >
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Colar lista de compras</Text>
+            <Text style={styles.modalHint}>
+              Um item por linha. Aceita quantidades: “2 arroz”, “leite x3”, “café”.
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              multiline
+              placeholder={'2 arroz\nfeijão\nleite x3\npapel higiênico'}
+              placeholderTextColor={COLORS.textMuted}
+              value={pasteText}
+              onChangeText={setPasteText}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setPasteVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancelar</Text>
+              </Pressable>
+              <Pressable style={[styles.modalButton, styles.modalConfirm]} onPress={handlePaste}>
+                <Text style={styles.modalConfirmText}>Adicionar itens</Text>
+              </Pressable>
+            </View>
           </View>
-        }
-      />
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F9FAFB' },
+  safe: { flex: 1, backgroundColor: COLORS.bg },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: PURPLE,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: '#fff' },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
-  headerStats: { flexDirection: 'row', gap: 6 },
-  statPill: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  statText: { fontSize: 13, fontWeight: '700' },
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 4,
-    backgroundColor: '#fff',
+  title: { fontSize: 26, fontWeight: '800', color: '#fff' },
+  subtitle: { fontSize: 13, color: '#DCFCE7', marginTop: 4, lineHeight: 18 },
+  content: { padding: 20 },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  regionRow: { marginBottom: 6 },
+  regionChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 8,
+  },
+  regionChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  regionChipText: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  regionChipTextActive: { color: '#fff' },
+  regionInfo: { fontSize: 12, color: COLORS.textMuted, marginBottom: 12 },
+  searchRow: { flexDirection: 'row', gap: 8 },
+  searchInput: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     borderRadius: 12,
-    paddingHorizontal: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  searchInput: { flex: 1, height: 44, fontSize: 15, color: '#111827' },
-  clearBtn: { padding: 8 },
-  clearBtnText: { color: '#9CA3AF', fontSize: 14 },
-
-  searchResults: {
-    marginHorizontal: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-    marginBottom: 4,
-    overflow: 'hidden',
-  },
-  searchResultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    fontSize: 15,
+    color: COLORS.text,
   },
-  resultTicker: { fontSize: 14, fontWeight: '700', color: '#111827', width: 60 },
-  resultName: { flex: 1, fontSize: 12, color: '#6B7280', marginHorizontal: 8 },
-  resultAdd: { fontSize: 20, color: PURPLE, fontWeight: '700' },
-
-  list: { padding: 16 },
-  listHeader: { fontSize: 12, color: '#9CA3AF', marginBottom: 8, fontWeight: '600', letterSpacing: 0.5 },
-  emptyBox: { alignItems: 'center', marginTop: 60 },
-  emptyText: { color: '#9CA3AF', fontSize: 15, textAlign: 'center', lineHeight: 24 },
+  pasteButton: {
+    backgroundColor: COLORS.primarySoft,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+  },
+  pasteButtonText: { color: COLORS.primaryDark, fontWeight: '700', fontSize: 13 },
+  suggestion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+  },
+  suggestionName: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  suggestionMeta: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  suggestionAdd: { color: COLORS.primary, fontWeight: '700', fontSize: 13 },
+  pasteFeedback: {
+    marginTop: 10,
+    fontSize: 13,
+    color: COLORS.info,
+    backgroundColor: '#EFF6FF',
+    padding: 10,
+    borderRadius: 10,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  clearText: { color: COLORS.danger, fontWeight: '600', fontSize: 13 },
+  emptyBox: {
+    alignItems: 'center',
+    padding: 28,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  emptyEmoji: { fontSize: 34, marginBottom: 8 },
+  emptyText: { textAlign: 'center', color: COLORS.textMuted, fontSize: 14, lineHeight: 20 },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  itemName: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  itemMeta: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  qtyControls: { flexDirection: 'row', alignItems: 'center', marginRight: 8 },
+  qtyButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: COLORS.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qtyButtonText: { fontSize: 18, fontWeight: '700', color: COLORS.primaryDark },
+  qtyValue: {
+    minWidth: 28,
+    textAlign: 'center',
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  removeButton: { padding: 6 },
+  removeButtonText: { color: COLORS.textMuted, fontSize: 14 },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 16,
+    backgroundColor: COLORS.bg,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  cta: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  ctaText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15,23,42,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: COLORS.card,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 32,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: COLORS.text },
+  modalHint: { fontSize: 13, color: COLORS.textMuted, marginTop: 4, marginBottom: 12 },
+  modalInput: {
+    minHeight: 120,
+    maxHeight: 200,
+    backgroundColor: COLORS.bg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 15,
+    color: COLORS.text,
+    textAlignVertical: 'top',
+  },
+  modalActions: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  modalButton: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalCancel: { backgroundColor: COLORS.bg, borderWidth: 1, borderColor: COLORS.border },
+  modalCancelText: { color: COLORS.text, fontWeight: '600' },
+  modalConfirm: { backgroundColor: COLORS.primary },
+  modalConfirmText: { color: '#fff', fontWeight: '700' },
 });

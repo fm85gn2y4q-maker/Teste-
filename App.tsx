@@ -6,19 +6,18 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 
 import { HomeScreen } from './src/screens/HomeScreen';
-import { DetailScreen } from './src/screens/DetailScreen';
+import { ResultsScreen } from './src/screens/ResultsScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { COLORS } from './src/theme';
 import { RootStackParamList, MainTabParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const PURPLE = '#6C3DE8';
-
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
-    Home: '📈',
-    Settings: '⚙️',
+    Lista: '🛒',
+    Config: '⚙️',
   };
   return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{icons[name] ?? '•'}</Text>;
 }
@@ -28,7 +27,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: PURPLE,
+        tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
           backgroundColor: '#fff',
@@ -39,8 +38,8 @@ function MainTabs() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Watchlist' }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: 'Config' }} />
+      <Tab.Screen name="Lista" component={HomeScreen} options={{ tabBarLabel: 'Lista' }} />
+      <Tab.Screen name="Config" component={SettingsScreen} options={{ tabBarLabel: 'Config' }} />
     </Tab.Navigator>
   );
 }
@@ -52,8 +51,8 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen
-          name="Detail"
-          component={DetailScreen}
+          name="Results"
+          component={ResultsScreen}
           options={{ animation: 'slide_from_right' }}
         />
       </Stack.Navigator>
