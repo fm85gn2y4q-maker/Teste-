@@ -1,6 +1,6 @@
 import { getProduct } from '../data/catalog';
-import { getRegion } from '../data/markets';
-import { Market, MarketQuote, QuoteLine, ShoppingItem } from '../types';
+import { getBairro } from '../data/bairros';
+import { Market, MarketQuote, NearbyMarket, QuoteLine, ShoppingItem } from '../types';
 
 /**
  * Hash determinístico (mercado, produto) → variação de -4% a +4%,
@@ -24,11 +24,11 @@ function roundPrice(value: number): number {
 /** Preço de tabela (sem promoção) de um produto em um mercado. */
 export function fullUnitPrice(market: Market, productId: string): number {
   const product = getProduct(productId);
-  const region = getRegion(market.regionId);
+  const bairro = getBairro(market.bairroId);
   const categoryFactor = market.categoryFactors[product.category] ?? 1;
   return roundPrice(
     product.basePrice *
-      region.costFactor *
+      bairro.costFactor *
       market.overallFactor *
       categoryFactor *
       priceJitter(market.id, productId),
@@ -47,8 +47,9 @@ export function effectiveUnitPrice(market: Market, productId: string): number | 
   return roundPrice(full * (1 - discountPct / 100));
 }
 
-/** Orçamento completo de uma lista de compras em um único mercado. */
-export function quoteMarket(market: Market, list: ShoppingItem[]): MarketQuote {
+/** Orçamento completo de uma lista de compras em um único mercado próximo. */
+export function quoteMarket(nearby: NearbyMarket, list: ShoppingItem[]): MarketQuote {
+  const { market } = nearby;
   const lines: QuoteLine[] = [];
   const missing: string[] = [];
   let totalSavedInPromos = 0;
@@ -74,9 +75,13 @@ export function quoteMarket(market: Market, list: ShoppingItem[]): MarketQuote {
   const availableTotal = roundPrice(lines.reduce((sum, l) => sum + l.lineTotal, 0));
   return {
     market,
+    bairroName: nearby.bairroName,
+    distanceKm: nearby.distanceKm,
+    travelCost: nearby.travelCost,
     lines,
     missing,
     availableTotal,
+    effectiveTotal: roundPrice(availableTotal + nearby.travelCost),
     coverage: list.length === 0 ? 1 : (list.length - missing.length) / list.length,
     totalSavedInPromos: roundPrice(totalSavedInPromos),
   };

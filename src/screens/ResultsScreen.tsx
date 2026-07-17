@@ -4,8 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { getProduct } from '../data/catalog';
-import { getRegion, marketsInRegion } from '../data/markets';
-import { compareRegion } from '../engine/planner';
+import { getBairro } from '../data/bairros';
+import { marketsNear } from '../data/markets';
+import { compareNearby } from '../engine/planner';
 import { useStore } from '../store/useStore';
 import { COLORS } from '../theme';
 import { MarketQuote, PlanStop } from '../types';
@@ -13,6 +14,10 @@ import { RootStackParamList } from '../types/navigation';
 import { formatBRL } from '../utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Results'>;
+
+function formatKm(km: number): string {
+  return `${km.toString().replace('.', ',')} km`;
+}
 
 function QuoteRow({ quote, rank, isBest }: { quote: MarketQuote; rank: number; isBest: boolean }) {
   const incomplete = quote.missing.length > 0;
@@ -22,8 +27,12 @@ function QuoteRow({ quote, rank, isBest }: { quote: MarketQuote; rank: number; i
       <View style={{ flex: 1 }}>
         <Text style={styles.quoteName}>{quote.market.name}</Text>
         <Text style={styles.quoteMeta}>
-          {quote.market.address}
-          {incomplete ? ` · faltam ${quote.missing.length} item(ns)` : ' · lista completa'}
+          {quote.bairroName} · {formatKm(quote.distanceKm)}
+          {incomplete ? ` · faltam ${quote.missing.length} item(ns)` : ''}
+        </Text>
+        <Text style={styles.quoteBreakdown}>
+          {formatBRL(quote.availableTotal)} em compras + {formatBRL(quote.travelCost)} de
+          deslocamento
         </Text>
         {quote.totalSavedInPromos > 0.009 && (
           <Text style={styles.quotePromo}>
@@ -32,7 +41,7 @@ function QuoteRow({ quote, rank, isBest }: { quote: MarketQuote; rank: number; i
         )}
       </View>
       <Text style={[styles.quoteTotal, isBest && { color: COLORS.primaryDark }]}>
-        {formatBRL(quote.availableTotal)}
+        {formatBRL(quote.effectiveTotal)}
       </Text>
     </View>
   );
@@ -47,7 +56,9 @@ function StopCard({ stop, index }: { stop: PlanStop; index: number }) {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.stopName}>{stop.market.name}</Text>
-          <Text style={styles.stopAddress}>{stop.market.address}</Text>
+          <Text style={styles.stopAddress}>
+            {stop.market.address} · {stop.bairroName} · {formatKm(stop.distanceKm)}
+          </Text>
         </View>
         <Text style={styles.stopSubtotal}>{formatBRL(stop.subtotal)}</Text>
       </View>
@@ -70,19 +81,19 @@ function StopCard({ stop, index }: { stop: PlanStop; index: number }) {
 }
 
 export function ResultsScreen({ navigation }: Props) {
-  const { regionId, items, maxStops, extraStopCost } = useStore();
+  const { bairroId, items, maxStops, costPerKm } = useStore();
 
-  const result = useMemo(
-    () => compareRegion(marketsInRegion(regionId), items, { maxStops, extraStopCost }),
-    [regionId, items, maxStops, extraStopCost],
-  );
+  const result = useMemo(() => {
+    const nearby = marketsNear(bairroId, costPerKm);
+    return compareNearby(nearby, items, { maxStops, costPerKm });
+  }, [bairroId, items, maxStops, costPerKm]);
 
-  const region = getRegion(regionId);
+  const bairro = getBairro(bairroId);
   const { quotes, bestSingle, worstComplete, plan } = result;
 
   const savingsVsWorst =
     bestSingle && worstComplete && worstComplete.market.id !== bestSingle.market.id
-      ? worstComplete.availableTotal - bestSingle.availableTotal
+      ? worstComplete.effectiveTotal - bestSingle.effectiveTotal
       : null;
 
   const planWorthIt = plan !== null && plan.stops.length > 1 && plan.savingsVsBestSingle > 0.009;
@@ -93,9 +104,9 @@ export function ResultsScreen({ navigation }: Props) {
         <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
           <Text style={styles.back}>‹ Voltar</Text>
         </Pressable>
-        <Text style={styles.title}>Plano de compra · {region.name}</Text>
+        <Text style={styles.title}>Melhor custo-benefício · {bairro.name}</Text>
         <Text style={styles.subtitle}>
-          {items.length} itens comparados em {quotes.length} mercados
+          {items.length} itens comparados em {quotes.length} mercados (bairro + vizinhos)
         </Text>
       </View>
 
@@ -104,8 +115,14 @@ export function ResultsScreen({ navigation }: Props) {
           <View style={styles.heroCard}>
             <Text style={styles.heroLabel}>🏆 Melhor mercado único</Text>
             <Text style={styles.heroMarket}>{bestSingle.market.name}</Text>
-            <Text style={styles.heroAddress}>{bestSingle.market.address}</Text>
-            <Text style={styles.heroTotal}>{formatBRL(bestSingle.availableTotal)}</Text>
+            <Text style={styles.heroAddress}>
+              {bestSingle.market.address} · {formatKm(bestSingle.distanceKm)} de você
+            </Text>
+            <Text style={styles.heroTotal}>{formatBRL(bestSingle.effectiveTotal)}</Text>
+            <Text style={styles.heroBreakdown}>
+              {formatBRL(bestSingle.availableTotal)} em compras +{' '}
+              {formatBRL(bestSingle.travelCost)} de deslocamento
+            </Text>
             {bestSingle.missing.length > 0 && (
               <Text style={styles.heroWarning}>
                 ⚠️ Não tem: {bestSingle.missing.map((id) => getProduct(id).name).join(', ')}
@@ -114,7 +131,8 @@ export function ResultsScreen({ navigation }: Props) {
             {savingsVsWorst !== null && savingsVsWorst > 0.009 && (
               <View style={styles.savingsPill}>
                 <Text style={styles.savingsPillText}>
-                  Você economiza {formatBRL(savingsVsWorst)} vs. {worstComplete!.market.name}
+                  Você economiza {formatBRL(savingsVsWorst)} vs. {worstComplete!.market.name} (
+                  {worstComplete!.bairroName})
                 </Text>
               </View>
             )}
@@ -131,7 +149,7 @@ export function ResultsScreen({ navigation }: Props) {
                 <Text style={styles.planSummary}>
                   Comprando em {plan.stops.length} mercados você paga{' '}
                   <Text style={styles.planStrong}>{formatBRL(plan.effectiveTotal)}</Text> (já
-                  contando {formatBRL(plan.stopCost)} de deslocamento) e economiza{' '}
+                  contando {formatBRL(plan.travelCost)} de deslocamento) e economiza{' '}
                   <Text style={styles.planStrong}>{formatBRL(plan.savingsVsBestSingle)}</Text> em
                   relação ao melhor mercado único.
                 </Text>
@@ -142,20 +160,21 @@ export function ResultsScreen({ navigation }: Props) {
             ) : (
               <Text style={styles.planSummary}>
                 Para esta lista, dividir a compra entre mercados não compensa o deslocamento —
-                comprar tudo no <Text style={styles.planStrong}>{bestSingle?.market.name}</Text> é o
-                plano mais econômico.
+                comprar tudo no <Text style={styles.planStrong}>{bestSingle?.market.name}</Text>{' '}
+                {bestSingle ? `(${bestSingle.bairroName})` : ''} é o plano com melhor
+                custo-benefício.
               </Text>
             )}
             {plan.missing.length > 0 && (
               <Text style={styles.planMissing}>
-                Nenhum mercado da região tem:{' '}
+                Nenhum mercado próximo tem:{' '}
                 {plan.missing.map((id) => getProduct(id).name).join(', ')}
               </Text>
             )}
           </View>
         )}
 
-        <Text style={styles.sectionLabel}>Comparação completa</Text>
+        <Text style={styles.sectionLabel}>Comparação completa (compras + deslocamento)</Text>
         {quotes.map((quote, i) => (
           <QuoteRow
             key={quote.market.id}
@@ -166,8 +185,8 @@ export function ResultsScreen({ navigation }: Props) {
         ))}
 
         <Text style={styles.disclaimer}>
-          Preços simulados para demonstração. Ajuste o custo de deslocamento e o número máximo de
-          mercados na aba Config.
+          Preços simulados para demonstração; redes e bairros reais do Rio. Deslocamento estimado
+          em ida e volta ({formatBRL(costPerKm)}/km — ajuste na aba Config).
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -185,7 +204,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
   },
   back: { color: '#DCFCE7', fontSize: 15, fontWeight: '600', marginBottom: 6 },
-  title: { fontSize: 21, fontWeight: '800', color: '#fff' },
+  title: { fontSize: 20, fontWeight: '800', color: '#fff' },
   subtitle: { fontSize: 13, color: '#DCFCE7', marginTop: 2 },
   content: { padding: 20, paddingBottom: 40 },
   heroCard: {
@@ -199,6 +218,7 @@ const styles = StyleSheet.create({
   heroMarket: { fontSize: 22, fontWeight: '800', color: COLORS.text, marginTop: 6 },
   heroAddress: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
   heroTotal: { fontSize: 30, fontWeight: '800', color: COLORS.primaryDark, marginTop: 10 },
+  heroBreakdown: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
   heroWarning: { fontSize: 13, color: COLORS.accent, marginTop: 8, lineHeight: 18 },
   savingsPill: {
     backgroundColor: COLORS.primarySoft,
@@ -278,6 +298,7 @@ const styles = StyleSheet.create({
   quoteRank: { width: 34, fontSize: 15, fontWeight: '800', color: COLORS.textMuted },
   quoteName: { fontSize: 15, fontWeight: '700', color: COLORS.text },
   quoteMeta: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  quoteBreakdown: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   quotePromo: { fontSize: 12, color: COLORS.primaryDark, marginTop: 2, fontWeight: '600' },
   quoteTotal: { fontSize: 16, fontWeight: '800', color: COLORS.text, marginLeft: 8 },
   disclaimer: {

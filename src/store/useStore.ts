@@ -3,28 +3,28 @@ import { ShoppingItem } from '../types';
 import { DEFAULT_PLANNER_OPTIONS } from '../engine/planner';
 
 interface AppState {
-  regionId: string;
+  bairroId: string;
   items: ShoppingItem[];
   maxStops: number;
-  extraStopCost: number;
+  costPerKm: number;
 
-  setRegion: (regionId: string) => void;
+  setBairro: (bairroId: string) => void;
   addItem: (productId: string, quantity?: number) => void;
   removeItem: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
   mergeItems: (items: ShoppingItem[]) => void;
   clearList: () => void;
   setMaxStops: (value: number) => void;
-  setExtraStopCost: (value: number) => void;
+  setCostPerKm: (value: number) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
-  regionId: 'centro',
+  bairroId: 'barra',
   items: [],
   maxStops: DEFAULT_PLANNER_OPTIONS.maxStops,
-  extraStopCost: DEFAULT_PLANNER_OPTIONS.extraStopCost,
+  costPerKm: DEFAULT_PLANNER_OPTIONS.costPerKm,
 
-  setRegion: (regionId) => set({ regionId }),
+  setBairro: (bairroId) => set({ bairroId }),
 
   addItem: (productId, quantity = 1) =>
     set((state) => {
@@ -63,5 +63,5 @@ export const useStore = create<AppState>((set) => ({
 
   clearList: () => set({ items: [] }),
   setMaxStops: (value) => set({ maxStops: Math.min(4, Math.max(1, value)) }),
-  setExtraStopCost: (value) => set({ extraStopCost: Math.max(0, value) }),
+  setCostPerKm: (value) => set({ costPerKm: Math.max(0, Math.round(value * 100) / 100) }),
 }));

@@ -41,7 +41,7 @@ function Stepper({
 }
 
 export function SettingsScreen() {
-  const { maxStops, extraStopCost, setMaxStops, setExtraStopCost } = useStore();
+  const { maxStops, costPerKm, setMaxStops, setCostPerKm } = useStore();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -67,28 +67,30 @@ export function SettingsScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Custo de deslocamento</Text>
+          <Text style={styles.cardTitle}>Custo de deslocamento por km</Text>
           <Text style={styles.cardHint}>
-            Custo estimado (combustível/tempo) por mercado adicional visitado. O plano só divide a
-            compra quando a economia supera esse custo.
+            Custo estimado (combustível/app de transporte/tempo) por km rodado, contado em ida e
+            volta até cada mercado. Mercados de bairros vizinhos só valem a pena quando o preço
+            compensa a distância.
           </Text>
           <Stepper
-            value={extraStopCost}
-            onChange={setExtraStopCost}
-            step={2}
+            value={costPerKm}
+            onChange={setCostPerKm}
+            step={0.5}
             min={0}
-            max={40}
-            format={formatBRL}
+            max={6}
+            format={(v) => `${formatBRL(v)}/km`}
           />
         </View>
 
         <View style={styles.aboutCard}>
           <Text style={styles.aboutTitle}>Como funciona</Text>
           <Text style={styles.aboutText}>
-            O app compara sua lista em todos os mercados da região escolhida, aplicando as
-            promoções de cada um. Depois testa todas as combinações de mercados (até o limite
-            configurado) e atribui cada item ao mercado mais barato, descontando o custo de
-            deslocamento — assim ele só recomenda dividir a compra quando realmente compensa.
+            O app compara sua lista nos mercados do seu bairro e dos bairros vizinhos, aplicando as
+            promoções de cada um e somando o custo de deslocamento pela distância real. Depois
+            testa todas as combinações de mercados (até o limite configurado) e atribui cada item
+            ao mercado mais barato — assim ele só recomenda ir mais longe, ou dividir a compra,
+            quando o custo-benefício realmente compensa.
           </Text>
         </View>
       </ScrollView>

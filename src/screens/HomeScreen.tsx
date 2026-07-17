@@ -16,7 +16,8 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 import { CATALOG, getProduct } from '../data/catalog';
-import { REGIONS, marketsInRegion } from '../data/markets';
+import { BAIRROS, getBairro } from '../data/bairros';
+import { marketsNear } from '../data/markets';
 import { parseShoppingList } from '../engine/parseList';
 import { useStore } from '../store/useStore';
 import { COLORS } from '../theme';
@@ -28,7 +29,7 @@ type Props = CompositeScreenProps<
 >;
 
 export function HomeScreen({ navigation }: Props) {
-  const { regionId, items, setRegion, addItem, removeItem, setQuantity, mergeItems, clearList } =
+  const { bairroId, items, costPerKm, setBairro, addItem, removeItem, setQuantity, mergeItems, clearList } =
     useStore();
   const [search, setSearch] = useState('');
   const [pasteVisible, setPasteVisible] = useState(false);
@@ -43,7 +44,9 @@ export function HomeScreen({ navigation }: Props) {
     ).slice(0, 6);
   }, [search]);
 
-  const marketCount = marketsInRegion(regionId).length;
+  const bairro = getBairro(bairroId);
+  const nearby = marketsNear(bairroId, costPerKm);
+  const neighborNames = bairro.adjacent.map((a) => getBairro(a.bairroId).name).join(', ');
 
   function handlePaste() {
     const { items: parsed, unmatched } = parseShoppingList(pasteText);
@@ -60,32 +63,35 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Feira Esperta</Text>
+        <Text style={styles.title}>Feira Esperta · Rio</Text>
         <Text style={styles.subtitle}>
-          Compare supermercados da sua região e monte o plano de compra mais barato
+          Compare os supermercados perto de você e monte o plano de compra com melhor custo-benefício
         </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.sectionLabel}>Sua região</Text>
+        <Text style={styles.sectionLabel}>Seu bairro</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.regionRow}>
-          {REGIONS.map((region) => {
-            const active = region.id === regionId;
+          {BAIRROS.map((b) => {
+            const active = b.id === bairroId;
             return (
               <Pressable
-                key={region.id}
-                onPress={() => setRegion(region.id)}
+                key={b.id}
+                onPress={() => setBairro(b.id)}
                 style={[styles.regionChip, active && styles.regionChipActive]}
               >
                 <Text style={[styles.regionChipText, active && styles.regionChipTextActive]}>
-                  {region.name}
+                  {b.name}
+                </Text>
+                <Text style={[styles.regionChipZone, active && styles.regionChipTextActive]}>
+                  {b.zone}
                 </Text>
               </Pressable>
             );
           })}
         </ScrollView>
         <Text style={styles.regionInfo}>
-          {marketCount} mercados cadastrados nesta região
+          {nearby.length} mercados perto de você — em {bairro.name} e vizinhos ({neighborNames})
         </Text>
 
         <Text style={styles.sectionLabel}>Monte sua lista</Text>
@@ -252,6 +258,7 @@ const styles = StyleSheet.create({
   },
   regionChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   regionChipText: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  regionChipZone: { fontSize: 10, color: COLORS.textMuted, marginTop: 1 },
   regionChipTextActive: { color: '#fff' },
   regionInfo: { fontSize: 12, color: COLORS.textMuted, marginBottom: 12 },
   searchRow: { flexDirection: 'row', gap: 8 },

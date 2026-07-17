@@ -1,253 +1,434 @@
-import { Market, Region } from '../types';
+import { Market, NearbyMarket } from '../types';
+import { distanceKm, getBairro } from './bairros';
 
-export const REGIONS: Region[] = [
-  { id: 'centro', name: 'Centro', costFactor: 1.05 },
-  { id: 'zona-norte', name: 'Zona Norte', costFactor: 0.97 },
-  { id: 'zona-sul', name: 'Zona Sul', costFactor: 1.1 },
-  { id: 'zona-leste', name: 'Zona Leste', costFactor: 0.94 },
-  { id: 'zona-oeste', name: 'Zona Oeste', costFactor: 1.0 },
-];
-
+/**
+ * Mercados inspirados nas redes que operam no Rio de Janeiro, com perfis de
+ * preço típicos de cada bandeira. Endereços e preços são simulados.
+ */
 export const MARKETS: Market[] = [
-  // Centro
+  // Barra da Tijuca
   {
-    id: 'economax-centro',
-    name: 'Economax',
-    regionId: 'centro',
-    address: 'Av. Central, 1200',
-    overallFactor: 0.93,
-    categoryFactors: { 'Hortifrúti': 1.08, 'Carnes e Frios': 1.05 },
+    id: 'assai-barra',
+    name: 'Assaí Atacadista',
+    bairroId: 'barra',
+    address: 'Av. das Américas, 1500 — Barra',
+    overallFactor: 0.85,
+    categoryFactors: { 'Hortifrúti': 1.15, 'Padaria': 1.25, 'Carnes e Frios': 0.95 },
     promotions: [
-      { productId: 'arroz-5kg', discountPct: 12 },
-      { productId: 'sabao-po-1kg', discountPct: 15 },
-      { productId: 'refri-2l', discountPct: 20 },
+      { productId: 'arroz-5kg', discountPct: 14 },
+      { productId: 'oleo-900ml', discountPct: 10 },
+      { productId: 'papel-hig-12', discountPct: 12 },
+      { productId: 'cerveja-lata', discountPct: 15 },
     ],
-    unavailable: ['pao-frances-kg', 'bolo-pronto'],
+    unavailable: ['alface-un', 'pao-frances-kg', 'bolo-pronto', 'iogurte-170g'],
   },
   {
-    id: 'bompreco-centro',
-    name: 'Bom Preço Supermercados',
-    regionId: 'centro',
-    address: 'Rua XV de Novembro, 88',
-    overallFactor: 1.0,
-    categoryFactors: { 'Básicos': 0.95, 'Padaria': 0.92 },
+    id: 'paodeacucar-barra',
+    name: 'Pão de Açúcar',
+    bairroId: 'barra',
+    address: 'Av. Olegário Maciel, 130 — Barra',
+    overallFactor: 1.15,
+    categoryFactors: { 'Padaria': 0.9, 'Hortifrúti': 0.95, 'Laticínios': 0.97 },
     promotions: [
-      { productId: 'leite-1l', discountPct: 10 },
+      { productId: 'cafe-500g', discountPct: 20 },
+      { productId: 'suco-1l', discountPct: 12 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'zonasul-barra',
+    name: 'Zona Sul',
+    bairroId: 'barra',
+    address: 'Av. das Américas, 4666 (BarraShopping)',
+    overallFactor: 1.12,
+    categoryFactors: { 'Padaria': 0.85, 'Hortifrúti': 0.92 },
+    promotions: [
+      { productId: 'pao-frances-kg', discountPct: 10 },
+      { productId: 'mussarela-200g', discountPct: 12 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'extra-barra',
+    name: 'Extra Hiper',
+    bairroId: 'barra',
+    address: 'Av. Ayrton Senna, 2150 — Barra',
+    overallFactor: 0.99,
+    categoryFactors: { 'Básicos': 0.96, 'Limpeza': 0.94, 'Bebidas': 0.95 },
+    promotions: [
+      { productId: 'sabao-po-1kg', discountPct: 15 },
+      { productId: 'refri-2l', discountPct: 18 },
       { productId: 'frango-kg', discountPct: 8 },
     ],
     unavailable: [],
   },
-  {
-    id: 'empori-centro',
-    name: 'Empório Central',
-    regionId: 'centro',
-    address: 'Praça da Matriz, 45',
-    overallFactor: 1.12,
-    categoryFactors: { 'Hortifrúti': 0.9, 'Padaria': 0.88 },
-    promotions: [{ productId: 'cafe-500g', discountPct: 18 }],
-    unavailable: ['cerveja-lata', 'amaciante-2l'],
-  },
-  {
-    id: 'atacamais-centro',
-    name: 'Ataca+ Atacarejo',
-    regionId: 'centro',
-    address: 'Av. Industrial, 3000',
-    overallFactor: 0.88,
-    categoryFactors: { 'Hortifrúti': 1.15, 'Padaria': 1.2, 'Carnes e Frios': 0.95 },
-    promotions: [
-      { productId: 'papel-hig-12', discountPct: 14 },
-      { productId: 'oleo-900ml', discountPct: 10 },
-    ],
-    unavailable: ['alface-un', 'pao-frances-kg', 'iogurte-170g'],
-  },
 
-  // Zona Norte
+  // Recreio
   {
-    id: 'economax-norte',
-    name: 'Economax',
-    regionId: 'zona-norte',
-    address: 'Av. dos Imigrantes, 500',
-    overallFactor: 0.94,
-    categoryFactors: { 'Hortifrúti': 1.06 },
+    id: 'guanabara-recreio',
+    name: 'Supermercados Guanabara',
+    bairroId: 'recreio',
+    address: 'Av. das Américas, 15500 — Recreio',
+    overallFactor: 0.89,
+    categoryFactors: { 'Básicos': 0.93, 'Bebidas': 0.94 },
     promotions: [
-      { productId: 'feijao-1kg', discountPct: 15 },
-      { productId: 'detergente-500ml', discountPct: 25 },
+      { productId: 'feijao-1kg', discountPct: 18 },
+      { productId: 'acucar-1kg', discountPct: 12 },
+      { productId: 'frango-kg', discountPct: 12 },
+      { productId: 'detergente-500ml', discountPct: 20 },
     ],
-    unavailable: ['bolo-pronto'],
+    unavailable: [],
   },
   {
-    id: 'quitanda-norte',
-    name: 'Quitanda & Cia',
-    regionId: 'zona-norte',
-    address: 'Rua das Palmeiras, 210',
-    overallFactor: 1.04,
-    categoryFactors: { 'Hortifrúti': 0.82, 'Laticínios': 0.95 },
+    id: 'mundial-recreio',
+    name: 'Supermercados Mundial',
+    bairroId: 'recreio',
+    address: 'Estrada Benvindo de Novais, 850 — Recreio',
+    overallFactor: 0.93,
+    categoryFactors: { 'Hortifrúti': 0.88, 'Carnes e Frios': 0.93 },
     promotions: [
-      { productId: 'banana-kg', discountPct: 20 },
-      { productId: 'tomate-kg', discountPct: 12 },
+      { productId: 'banana-kg', discountPct: 15 },
+      { productId: 'carne-moida-kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'hortifruti-recreio',
+    name: 'Hortifruti Natural da Terra',
+    bairroId: 'recreio',
+    address: 'Av. Alfredo Baltazar da Silveira, 580',
+    overallFactor: 1.05,
+    categoryFactors: { 'Hortifrúti': 0.75, 'Padaria': 0.95, 'Laticínios': 0.98 },
+    promotions: [
+      { productId: 'tomate-kg', discountPct: 15 },
+      { productId: 'maca-kg', discountPct: 12 },
+      { productId: 'alface-un', discountPct: 10 },
     ],
     unavailable: [
-      'cerveja-lata', 'refri-2l', 'sabao-po-1kg', 'amaciante-2l',
-      'papel-hig-12', 'shampoo-350ml', 'desodorante', 'contra-file-kg',
+      'refri-2l', 'cerveja-lata', 'sabao-po-1kg', 'agua-sanitaria-1l', 'amaciante-2l',
+      'esponja-4un', 'papel-hig-12', 'sabonete-90g', 'creme-dental', 'shampoo-350ml',
+      'desodorante',
+    ],
+  },
+
+  // Jacarepaguá (Freguesia)
+  {
+    id: 'atacadao-jacarepagua',
+    name: 'Atacadão',
+    bairroId: 'jacarepagua',
+    address: 'Estrada dos Bandeirantes, 1400',
+    overallFactor: 0.84,
+    categoryFactors: { 'Hortifrúti': 1.18, 'Padaria': 1.3, 'Carnes e Frios': 0.96 },
+    promotions: [
+      { productId: 'arroz-5kg', discountPct: 12 },
+      { productId: 'macarrao-500g', discountPct: 15 },
+      { productId: 'sabao-po-1kg', discountPct: 10 },
+    ],
+    unavailable: ['alface-un', 'pao-frances-kg', 'bolo-pronto', 'iogurte-170g', 'requeijao-200g'],
+  },
+  {
+    id: 'guanabara-jacarepagua',
+    name: 'Supermercados Guanabara',
+    bairroId: 'jacarepagua',
+    address: 'Estrada do Gabinal, 313 — Freguesia',
+    overallFactor: 0.9,
+    categoryFactors: { 'Básicos': 0.93, 'Laticínios': 0.96 },
+    promotions: [
+      { productId: 'leite-1l', discountPct: 12 },
+      { productId: 'oleo-900ml', discountPct: 14 },
+      { productId: 'linguica-kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'prezunic-jacarepagua',
+    name: 'Prezunic',
+    bairroId: 'jacarepagua',
+    address: 'Av. Geremário Dantas, 800 — Freguesia',
+    overallFactor: 0.96,
+    categoryFactors: { 'Carnes e Frios': 0.92, 'Padaria': 0.95 },
+    promotions: [
+      { productId: 'contra-file-kg', discountPct: 12 },
+      { productId: 'frango-kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+
+  // São Conrado
+  {
+    id: 'zonasul-saoconrado',
+    name: 'Zona Sul',
+    bairroId: 'sao-conrado',
+    address: 'Estrada da Gávea, 899 (Fashion Mall)',
+    overallFactor: 1.14,
+    categoryFactors: { 'Padaria': 0.86, 'Hortifrúti': 0.93 },
+    promotions: [{ productId: 'iogurte-170g', discountPct: 15 }],
+    unavailable: [],
+  },
+
+  // Ipanema / Leblon
+  {
+    id: 'zonasul-leblon',
+    name: 'Zona Sul',
+    bairroId: 'ipanema-leblon',
+    address: 'Rua Dias Ferreira, 290 — Leblon',
+    overallFactor: 1.13,
+    categoryFactors: { 'Padaria': 0.85, 'Hortifrúti': 0.92, 'Carnes e Frios': 0.97 },
+    promotions: [
+      { productId: 'pao-frances-kg', discountPct: 12 },
+      { productId: 'manteiga-200g', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'hortifruti-ipanema',
+    name: 'Hortifruti Natural da Terra',
+    bairroId: 'ipanema-leblon',
+    address: 'Rua Visconde de Pirajá, 359 — Ipanema',
+    overallFactor: 1.07,
+    categoryFactors: { 'Hortifrúti': 0.76, 'Laticínios': 0.98 },
+    promotions: [
+      { productId: 'banana-kg', discountPct: 12 },
+      { productId: 'limao-kg', discountPct: 15 },
+    ],
+    unavailable: [
+      'refri-2l', 'cerveja-lata', 'sabao-po-1kg', 'agua-sanitaria-1l', 'amaciante-2l',
+      'esponja-4un', 'papel-hig-12', 'sabonete-90g', 'creme-dental', 'shampoo-350ml',
+      'desodorante',
     ],
   },
   {
-    id: 'superfamilia-norte',
-    name: 'Super Família',
-    regionId: 'zona-norte',
-    address: 'Av. Norte, 1750',
-    overallFactor: 0.99,
-    categoryFactors: { 'Carnes e Frios': 0.92, 'Básicos': 0.97 },
+    id: 'paodeacucar-ipanema',
+    name: 'Pão de Açúcar',
+    bairroId: 'ipanema-leblon',
+    address: 'Rua Barão da Torre, 342 — Ipanema',
+    overallFactor: 1.16,
+    categoryFactors: { 'Padaria': 0.9, 'Laticínios': 0.96 },
     promotions: [
-      { productId: 'carne-moida-kg', discountPct: 10 },
+      { productId: 'cafe-500g', discountPct: 18 },
+      { productId: 'requeijao-200g', discountPct: 12 },
+    ],
+    unavailable: [],
+  },
+
+  // Copacabana
+  {
+    id: 'mundial-copacabana',
+    name: 'Supermercados Mundial',
+    bairroId: 'copacabana',
+    address: 'Rua Barata Ribeiro, 439',
+    overallFactor: 0.94,
+    categoryFactors: { 'Hortifrúti': 0.88, 'Carnes e Frios': 0.94, 'Bebidas': 0.95 },
+    promotions: [
+      { productId: 'tomate-kg', discountPct: 12 },
+      { productId: 'cerveja-lata', discountPct: 12 },
+      { productId: 'contra-file-kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'zonasul-copacabana',
+    name: 'Zona Sul',
+    bairroId: 'copacabana',
+    address: 'Av. Nossa Sra. de Copacabana, 1155',
+    overallFactor: 1.11,
+    categoryFactors: { 'Padaria': 0.86, 'Hortifrúti': 0.93 },
+    promotions: [{ productId: 'bolo-pronto', discountPct: 15 }],
+    unavailable: [],
+  },
+  {
+    id: 'superprix-copacabana',
+    name: 'SuperPrix',
+    bairroId: 'copacabana',
+    address: 'Rua Pompeu Loureiro, 32',
+    overallFactor: 1.02,
+    categoryFactors: { 'Laticínios': 0.95, 'Básicos': 0.97 },
+    promotions: [
+      { productId: 'leite-1l', discountPct: 10 },
+      { productId: 'ovos-12', discountPct: 12 },
+    ],
+    unavailable: ['contra-file-kg'],
+  },
+
+  // Botafogo
+  {
+    id: 'extra-botafogo',
+    name: 'Extra Hiper',
+    bairroId: 'botafogo',
+    address: 'Rua Voluntários da Pátria, 138',
+    overallFactor: 0.98,
+    categoryFactors: { 'Básicos': 0.95, 'Limpeza': 0.93 },
+    promotions: [
+      { productId: 'amaciante-2l', discountPct: 15 },
+      { productId: 'arroz-5kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'mundial-botafogo',
+    name: 'Supermercados Mundial',
+    bairroId: 'botafogo',
+    address: 'Rua São Clemente, 168',
+    overallFactor: 0.93,
+    categoryFactors: { 'Hortifrúti': 0.87, 'Carnes e Frios': 0.93 },
+    promotions: [
+      { productId: 'batata-kg', discountPct: 12 },
+      { productId: 'frango-kg', discountPct: 10 },
       { productId: 'linguica-kg', discountPct: 12 },
     ],
     unavailable: [],
   },
-
-  // Zona Sul
   {
-    id: 'gourmetmax-sul',
-    name: 'GourmetMax',
-    regionId: 'zona-sul',
-    address: 'Al. das Acácias, 77',
-    overallFactor: 1.18,
-    categoryFactors: { 'Hortifrúti': 0.92, 'Carnes e Frios': 0.95, 'Padaria': 0.85 },
+    id: 'superprix-botafogo',
+    name: 'SuperPrix',
+    bairroId: 'botafogo',
+    address: 'Rua da Passagem, 108',
+    overallFactor: 1.01,
+    categoryFactors: { 'Padaria': 0.94, 'Laticínios': 0.96 },
+    promotions: [{ productId: 'pao-forma', discountPct: 12 }],
+    unavailable: ['contra-file-kg'],
+  },
+
+  // Tijuca
+  {
+    id: 'guanabara-tijuca',
+    name: 'Supermercados Guanabara',
+    bairroId: 'tijuca',
+    address: 'Rua Conde de Bonfim, 344',
+    overallFactor: 0.88,
+    categoryFactors: { 'Básicos': 0.92, 'Bebidas': 0.94, 'Limpeza': 0.95 },
     promotions: [
-      { productId: 'contra-file-kg', discountPct: 15 },
-      { productId: 'suco-1l', discountPct: 10 },
+      { productId: 'arroz-5kg', discountPct: 16 },
+      { productId: 'feijao-1kg', discountPct: 15 },
+      { productId: 'cafe-500g', discountPct: 12 },
+      { productId: 'refri-2l', discountPct: 15 },
     ],
     unavailable: [],
   },
   {
-    id: 'bompreco-sul',
-    name: 'Bom Preço Supermercados',
-    regionId: 'zona-sul',
-    address: 'Av. Beira-Rio, 950',
-    overallFactor: 1.02,
-    categoryFactors: { 'Básicos': 0.94, 'Limpeza': 0.93 },
+    id: 'mundial-tijuca',
+    name: 'Supermercados Mundial',
+    bairroId: 'tijuca',
+    address: 'Rua General Roca, 863',
+    overallFactor: 0.93,
+    categoryFactors: { 'Hortifrúti': 0.88, 'Carnes e Frios': 0.93 },
     promotions: [
-      { productId: 'arroz-5kg', discountPct: 10 },
-      { productId: 'papel-hig-12', discountPct: 12 },
+      { productId: 'cebola-kg', discountPct: 12 },
+      { productId: 'carne-moida-kg', discountPct: 10 },
     ],
     unavailable: [],
   },
   {
-    id: 'atacamais-sul',
-    name: 'Ataca+ Atacarejo',
-    regionId: 'zona-sul',
-    address: 'Rod. Sul, km 12',
-    overallFactor: 0.9,
-    categoryFactors: { 'Hortifrúti': 1.12, 'Padaria': 1.25 },
-    promotions: [
-      { productId: 'cerveja-lata', discountPct: 18 },
-      { productId: 'sabao-po-1kg', discountPct: 12 },
-      { productId: 'frango-kg', discountPct: 9 },
-    ],
-    unavailable: ['pao-frances-kg', 'alface-un', 'bolo-pronto'],
-  },
-  {
-    id: 'mercadinho-sul',
-    name: 'Mercadinho da Esquina',
-    regionId: 'zona-sul',
-    address: 'Rua dos Ipês, 12',
-    overallFactor: 1.09,
-    categoryFactors: { 'Padaria': 0.9 },
-    promotions: [{ productId: 'pao-frances-kg', discountPct: 10 }],
-    unavailable: ['contra-file-kg', 'amaciante-2l', 'desodorante', 'suco-1l'],
-  },
-
-  // Zona Leste
-  {
-    id: 'atacamais-leste',
-    name: 'Ataca+ Atacarejo',
-    regionId: 'zona-leste',
-    address: 'Av. do Trabalhador, 4200',
-    overallFactor: 0.87,
-    categoryFactors: { 'Hortifrúti': 1.1, 'Padaria': 1.18 },
-    promotions: [
-      { productId: 'arroz-5kg', discountPct: 15 },
-      { productId: 'oleo-900ml', discountPct: 12 },
-      { productId: 'papel-hig-12', discountPct: 10 },
-    ],
-    unavailable: ['alface-un', 'bolo-pronto', 'iogurte-170g'],
-  },
-  {
-    id: 'superfamilia-leste',
-    name: 'Super Família',
-    regionId: 'zona-leste',
-    address: 'Rua da Estação, 333',
+    id: 'prezunic-tijuca',
+    name: 'Prezunic',
+    bairroId: 'tijuca',
+    address: 'Rua Mariz e Barros, 821',
     overallFactor: 0.97,
-    categoryFactors: { 'Carnes e Frios': 0.9, 'Laticínios': 0.96 },
+    categoryFactors: { 'Carnes e Frios': 0.92, 'Laticínios': 0.96 },
     promotions: [
-      { productId: 'frango-kg', discountPct: 12 },
+      { productId: 'presunto-200g', discountPct: 12 },
       { productId: 'leite-1l', discountPct: 8 },
     ],
     unavailable: [],
   },
-  {
-    id: 'feiralivre-leste',
-    name: 'Feira Livre Leste',
-    regionId: 'zona-leste',
-    address: 'Praça do Mercado, s/n',
-    overallFactor: 1.0,
-    categoryFactors: { 'Hortifrúti': 0.78 },
-    promotions: [
-      { productId: 'tomate-kg', discountPct: 15 },
-      { productId: 'batata-kg', discountPct: 10 },
-    ],
-    unavailable: [
-      'refri-2l', 'cerveja-lata', 'sabao-po-1kg', 'agua-sanitaria-1l',
-      'amaciante-2l', 'esponja-4un', 'papel-hig-12', 'sabonete-90g',
-      'creme-dental', 'shampoo-350ml', 'desodorante', 'pao-forma', 'bolo-pronto',
-    ],
-  },
 
-  // Zona Oeste
+  // Centro
   {
-    id: 'bompreco-oeste',
-    name: 'Bom Preço Supermercados',
-    regionId: 'zona-oeste',
-    address: 'Av. das Torres, 2100',
-    overallFactor: 1.01,
-    categoryFactors: { 'Básicos': 0.95, 'Bebidas': 0.94 },
+    id: 'guanabara-centro',
+    name: 'Supermercados Guanabara',
+    bairroId: 'centro',
+    address: 'Rua da Alfândega, 156',
+    overallFactor: 0.89,
+    categoryFactors: { 'Básicos': 0.93, 'Higiene': 0.95 },
     promotions: [
-      { productId: 'refri-2l', discountPct: 15 },
-      { productId: 'macarrao-500g', discountPct: 10 },
-    ],
-    unavailable: [],
-  },
-  {
-    id: 'economax-oeste',
-    name: 'Economax',
-    regionId: 'zona-oeste',
-    address: 'Rua do Comércio, 640',
-    overallFactor: 0.95,
-    categoryFactors: { 'Hortifrúti': 1.05, 'Higiene': 0.93 },
-    promotions: [
-      { productId: 'shampoo-350ml', discountPct: 20 },
-      { productId: 'creme-dental', discountPct: 15 },
+      { productId: 'acucar-1kg', discountPct: 15 },
+      { productId: 'sabonete-90g', discountPct: 20 },
     ],
     unavailable: ['pao-frances-kg'],
   },
   {
-    id: 'gourmetmax-oeste',
-    name: 'GourmetMax',
-    regionId: 'zona-oeste',
-    address: 'Shopping Oeste, loja 12',
-    overallFactor: 1.15,
-    categoryFactors: { 'Padaria': 0.87, 'Carnes e Frios': 0.96 },
-    promotions: [{ productId: 'mussarela-200g', discountPct: 12 }],
+    id: 'mundial-centro',
+    name: 'Supermercados Mundial',
+    bairroId: 'centro',
+    address: 'Rua Sete de Setembro, 135',
+    overallFactor: 0.94,
+    categoryFactors: { 'Hortifrúti': 0.9, 'Bebidas': 0.94 },
+    promotions: [{ productId: 'agua-1500ml', discountPct: 15 }],
+    unavailable: [],
+  },
+  {
+    id: 'assai-centro',
+    name: 'Assaí Atacadista',
+    bairroId: 'centro',
+    address: 'Av. Brasil, 500 (Caju)',
+    overallFactor: 0.86,
+    categoryFactors: { 'Hortifrúti': 1.12, 'Padaria': 1.25, 'Carnes e Frios': 0.95 },
+    promotions: [
+      { productId: 'papel-hig-12', discountPct: 14 },
+      { productId: 'oleo-900ml', discountPct: 12 },
+      { productId: 'cerveja-lata', discountPct: 16 },
+    ],
+    unavailable: ['alface-un', 'pao-frances-kg', 'bolo-pronto', 'iogurte-170g'],
+  },
+
+  // Méier
+  {
+    id: 'guanabara-meier',
+    name: 'Supermercados Guanabara',
+    bairroId: 'meier',
+    address: 'Rua Dias da Cruz, 255',
+    overallFactor: 0.87,
+    categoryFactors: { 'Básicos': 0.92, 'Carnes e Frios': 0.95 },
+    promotions: [
+      { productId: 'arroz-5kg', discountPct: 15 },
+      { productId: 'frango-kg', discountPct: 14 },
+      { productId: 'sabao-po-1kg', discountPct: 12 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'prezunic-meier',
+    name: 'Prezunic',
+    bairroId: 'meier',
+    address: 'Rua Arquias Cordeiro, 312',
+    overallFactor: 0.95,
+    categoryFactors: { 'Carnes e Frios': 0.91, 'Padaria': 0.94 },
+    promotions: [
+      { productId: 'contra-file-kg', discountPct: 14 },
+      { productId: 'linguica-kg', discountPct: 10 },
+    ],
+    unavailable: [],
+  },
+  {
+    id: 'mundial-meier',
+    name: 'Supermercados Mundial',
+    bairroId: 'meier',
+    address: 'Av. Amaro Cavalcanti, 35',
+    overallFactor: 0.92,
+    categoryFactors: { 'Hortifrúti': 0.87, 'Bebidas': 0.94 },
+    promotions: [
+      { productId: 'banana-kg', discountPct: 15 },
+      { productId: 'suco-1l', discountPct: 10 },
+    ],
     unavailable: [],
   },
 ];
 
-export function marketsInRegion(regionId: string): Market[] {
-  return MARKETS.filter((m) => m.regionId === regionId);
-}
-
-export function getRegion(regionId: string): Region {
-  const r = REGIONS.find((x) => x.id === regionId);
-  if (!r) throw new Error(`Região desconhecida: ${regionId}`);
-  return r;
+/**
+ * Mercados alcançáveis a partir de um bairro (o próprio + vizinhos),
+ * com distância e custo estimado de deslocamento (ida e volta).
+ */
+export function marketsNear(homeBairroId: string, costPerKm: number): NearbyMarket[] {
+  const result: NearbyMarket[] = [];
+  for (const market of MARKETS) {
+    const km = distanceKm(homeBairroId, market.bairroId);
+    if (km === null) continue;
+    result.push({
+      market,
+      bairroName: getBairro(market.bairroId).name,
+      distanceKm: km,
+      travelCost: Math.round(2 * km * costPerKm * 100) / 100,
+    });
+  }
+  return result;
 }

@@ -1,7 +1,7 @@
 import {
   ComparisonResult,
-  Market,
   MarketQuote,
+  NearbyMarket,
   PlanStop,
   QuoteLine,
   ShoppingItem,
@@ -12,13 +12,13 @@ import { effectiveUnitPrice, fullUnitPrice, promotionFor, quoteMarket } from './
 export interface PlannerOptions {
   /** Número máximo de mercados no plano dividido. */
   maxStops: number;
-  /** Custo estimado (R$) de deslocamento por mercado adicional visitado. */
-  extraStopCost: number;
+  /** Custo estimado (R$/km) de deslocamento — combustível/tempo. */
+  costPerKm: number;
 }
 
 export const DEFAULT_PLANNER_OPTIONS: PlannerOptions = {
   maxStops: 3,
-  extraStopCost: 8,
+  costPerKm: 1.5,
 };
 
 function round(value: number): number {
@@ -26,13 +26,13 @@ function round(value: number): number {
 }
 
 /**
- * Ordena orçamentos: primeiro maior cobertura da lista, depois menor total.
- * Um mercado que não tem 3 itens da lista não pode "vencer" só por isso.
+ * Ordena orçamentos por custo-benefício: primeiro maior cobertura da lista,
+ * depois menor custo efetivo (itens + deslocamento).
  */
 export function rankQuotes(quotes: MarketQuote[]): MarketQuote[] {
   return [...quotes].sort((a, b) => {
     if (a.coverage !== b.coverage) return b.coverage - a.coverage;
-    return a.availableTotal - b.availableTotal;
+    return a.effectiveTotal - b.effectiveTotal;
   });
 }
 
@@ -50,30 +50,27 @@ function subsetsUpTo<T>(items: T[], maxSize: number): T[][] {
 }
 
 interface SubsetEvaluation {
-  markets: Market[];
-  assignment: Map<string, { market: Market; item: ShoppingItem }[]>;
+  used: NearbyMarket[];
+  assignment: Map<string, ShoppingItem[]>;
   itemsTotal: number;
+  travelCost: number;
   missing: string[];
   effectiveTotal: number;
   coveredCount: number;
 }
 
-function evaluateSubset(
-  markets: Market[],
-  list: ShoppingItem[],
-  extraStopCost: number,
-): SubsetEvaluation {
-  const assignment = new Map<string, { market: Market; item: ShoppingItem }[]>();
+function evaluateSubset(subset: NearbyMarket[], list: ShoppingItem[]): SubsetEvaluation {
+  const assignment = new Map<string, ShoppingItem[]>();
   const missing: string[] = [];
   let itemsTotal = 0;
-  const usedMarkets = new Set<string>();
+  const usedIds = new Set<string>();
 
   for (const item of list) {
-    let best: { market: Market; price: number } | null = null;
-    for (const market of markets) {
-      const price = effectiveUnitPrice(market, item.productId);
+    let best: { nearby: NearbyMarket; price: number } | null = null;
+    for (const nearby of subset) {
+      const price = effectiveUnitPrice(nearby.market, item.productId);
       if (price !== null && (best === null || price < best.price)) {
-        best = { market, price };
+        best = { nearby, price };
       }
     }
     if (!best) {
@@ -81,39 +78,42 @@ function evaluateSubset(
       continue;
     }
     itemsTotal += best.price * item.quantity;
-    usedMarkets.add(best.market.id);
-    const bucket = assignment.get(best.market.id) ?? [];
-    bucket.push({ market: best.market, item });
-    assignment.set(best.market.id, bucket);
+    usedIds.add(best.nearby.market.id);
+    const bucket = assignment.get(best.nearby.market.id) ?? [];
+    bucket.push(item);
+    assignment.set(best.nearby.market.id, bucket);
   }
 
-  const stopCost = Math.max(0, usedMarkets.size - 1) * extraStopCost;
+  const used = subset.filter((n) => usedIds.has(n.market.id));
+  const travelCost = round(used.reduce((sum, n) => sum + n.travelCost, 0));
   return {
-    markets: markets.filter((m) => usedMarkets.has(m.id)),
+    used,
     assignment,
     itemsTotal: round(itemsTotal),
+    travelCost,
     missing,
-    effectiveTotal: round(itemsTotal + stopCost),
+    effectiveTotal: round(itemsTotal + travelCost),
     coveredCount: list.length - missing.length,
   };
 }
 
 /**
- * Plano inteligente: testa todas as combinações de até `maxStops` mercados,
- * atribui cada item ao mercado mais barato da combinação e escolhe a
- * combinação com maior cobertura e menor custo efetivo (itens + deslocamento).
+ * Plano inteligente: testa todas as combinações de até `maxStops` mercados
+ * próximos, atribui cada item ao mercado mais barato da combinação e escolhe
+ * a combinação com maior cobertura e menor custo efetivo, já somando o
+ * deslocamento até cada mercado visitado.
  */
 export function buildSmartPlan(
-  regionMarkets: Market[],
+  nearby: NearbyMarket[],
   list: ShoppingItem[],
   options: PlannerOptions,
-  bestSingleTotal: number | null,
+  bestSingleEffectiveTotal: number | null,
 ): SmartPlan | null {
-  if (list.length === 0 || regionMarkets.length === 0) return null;
+  if (list.length === 0 || nearby.length === 0) return null;
 
   let best: SubsetEvaluation | null = null;
-  for (const subset of subsetsUpTo(regionMarkets, options.maxStops)) {
-    const evaluated = evaluateSubset(subset, list, options.extraStopCost);
+  for (const subset of subsetsUpTo(nearby, options.maxStops)) {
+    const evaluated = evaluateSubset(subset, list);
     if (
       best === null ||
       evaluated.coveredCount > best.coveredCount ||
@@ -125,56 +125,61 @@ export function buildSmartPlan(
   }
   if (!best) return null;
 
-  const stops: PlanStop[] = best.markets.map((market) => {
-    const entries = best!.assignment.get(market.id) ?? [];
-    const lines: QuoteLine[] = entries.map(({ item }) => {
-      const unitPrice = effectiveUnitPrice(market, item.productId)!;
+  const stops: PlanStop[] = best.used.map((n) => {
+    const items = best!.assignment.get(n.market.id) ?? [];
+    const lines: QuoteLine[] = items.map((item) => {
+      const unitPrice = effectiveUnitPrice(n.market, item.productId)!;
       return {
         productId: item.productId,
         quantity: item.quantity,
         unitPrice,
-        fullUnitPrice: fullUnitPrice(market, item.productId),
-        discountPct: promotionFor(market, item.productId),
+        fullUnitPrice: fullUnitPrice(n.market, item.productId),
+        discountPct: promotionFor(n.market, item.productId),
         lineTotal: round(unitPrice * item.quantity),
       };
     });
     return {
-      market,
+      market: n.market,
+      bairroName: n.bairroName,
+      distanceKm: n.distanceKm,
+      travelCost: n.travelCost,
       lines,
       subtotal: round(lines.reduce((sum, l) => sum + l.lineTotal, 0)),
     };
   });
   stops.sort((a, b) => b.subtotal - a.subtotal);
 
-  const stopCost = Math.max(0, stops.length - 1) * options.extraStopCost;
   return {
     stops,
     itemsTotal: best.itemsTotal,
-    stopCost: round(stopCost),
+    travelCost: best.travelCost,
     effectiveTotal: best.effectiveTotal,
     missing: best.missing,
     savingsVsBestSingle:
-      bestSingleTotal === null ? 0 : round(bestSingleTotal - best.effectiveTotal),
+      bestSingleEffectiveTotal === null ? 0 : round(bestSingleEffectiveTotal - best.effectiveTotal),
   };
 }
 
-/** Comparação completa: orçamento por mercado + melhor mercado único + plano dividido. */
-export function compareRegion(
-  regionMarkets: Market[],
+/**
+ * Comparação completa a partir do bairro do usuário: orçamento por mercado
+ * próximo (custo-benefício = itens + deslocamento) + plano dividido ótimo.
+ */
+export function compareNearby(
+  nearby: NearbyMarket[],
   list: ShoppingItem[],
   options: PlannerOptions = DEFAULT_PLANNER_OPTIONS,
 ): ComparisonResult {
-  const quotes = rankQuotes(regionMarkets.map((m) => quoteMarket(m, list)));
+  const quotes = rankQuotes(nearby.map((n) => quoteMarket(n, list)));
   const bestSingle = quotes.length > 0 && list.length > 0 ? quotes[0] : null;
 
   const complete = quotes.filter((q) => q.missing.length === 0);
   const worstComplete = complete.length > 1 ? complete[complete.length - 1] : null;
 
   const plan = buildSmartPlan(
-    regionMarkets,
+    nearby,
     list,
     options,
-    bestSingle ? bestSingle.availableTotal : null,
+    bestSingle ? bestSingle.effectiveTotal : null,
   );
 
   return { quotes, bestSingle, worstComplete, plan };
