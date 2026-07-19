@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Restituição de ITBI — Pagou imposto a maior?</title>
+<meta name="description" content="Pagou ITBI calculado sobre valor maior do que o preço do seu imóvel? O STJ decidiu que o imposto deve incidir sobre o valor da transação. Calcule gratuitamente quanto você pode recuperar.">
+<style>
+  :root{
+    --navy:#1f3864; --navy-dark:#152744; --gold:#c9a227; --gold-light:#e8d9a0;
+    --bg:#f7f8fb; --text:#2b2f36; --muted:#6b7280; --card:#ffffff; --ok:#1a7f4e; --warn:#b3261e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Georgia,'Times New Roman',serif;color:var(--text);background:var(--bg);line-height:1.65}
+  .sans{font-family:Arial,Helvetica,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px}
+  header{background:var(--navy);color:#fff;padding:14px 0}
+  header .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .brand{font-size:1.1rem;letter-spacing:.04em}
+  .brand small{display:block;font-size:.72rem;color:var(--gold-light);letter-spacing:.12em}
+  .hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-dark) 100%);color:#fff;padding:64px 0 72px;text-align:center}
+  .hero h1{font-size:clamp(1.6rem,4vw,2.5rem);font-weight:normal;max-width:760px;margin:0 auto 18px}
+  .hero p{max-width:640px;margin:0 auto 30px;color:#d7dce8;font-size:1.05rem}
+  .btn{display:inline-block;background:var(--gold);color:var(--navy-dark);padding:14px 34px;border-radius:6px;
+       text-decoration:none;font-weight:bold;font-family:Arial,sans-serif;border:none;font-size:1rem;cursor:pointer}
+  .btn:hover{filter:brightness(1.08)}
+  section{padding:56px 0}
+  h2{color:var(--navy);font-size:1.6rem;font-weight:normal;text-align:center;margin-bottom:8px}
+  .sub{text-align:center;color:var(--muted);max-width:620px;margin:0 auto 36px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+  .step{background:var(--card);border:1px solid #e4e7ee;border-radius:10px;padding:26px}
+  .step .num{width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);
+             display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-weight:bold;margin-bottom:14px}
+  .step h3{color:var(--navy);font-size:1.05rem;margin-bottom:8px;font-weight:bold}
+  .step p{font-size:.95rem;color:var(--muted)}
+  .calc{background:var(--card);border:1px solid #e4e7ee;border-radius:12px;padding:34px;max-width:640px;margin:0 auto;
+        box-shadow:0 6px 24px rgba(31,56,100,.08)}
+  .calc label{display:block;font-family:Arial,sans-serif;font-size:.85rem;font-weight:bold;color:var(--navy);margin:16px 0 6px}
+  .calc input,.calc select{width:100%;padding:12px;border:1px solid #cbd2de;border-radius:6px;font-size:1rem;font-family:Arial,sans-serif}
+  .calc input:focus,.calc select:focus{outline:2px solid var(--gold);border-color:transparent}
+  .calc .btn{width:100%;margin-top:24px}
+  #resultado{display:none;margin-top:26px;border-radius:8px;padding:22px;font-family:Arial,sans-serif}
+  #resultado.ok{display:block;background:#eef8f2;border:1px solid #bfe3cf}
+  #resultado.nada{display:block;background:#fdf6ec;border:1px solid #ecd9b0}
+  #resultado .valor{font-size:1.9rem;color:var(--ok);font-weight:bold}
+  #resultado .aviso-prescricao{color:var(--warn);font-weight:bold;margin-top:10px;font-size:.9rem}
+  #resultado p{font-size:.92rem;margin-top:8px;color:var(--text)}
+  .base-legal{background:var(--navy);color:#dfe4ef}
+  .base-legal h2{color:#fff}
+  .base-legal .wrap>p{max-width:760px;margin:0 auto 16px;font-size:1rem}
+  .base-legal strong{color:var(--gold-light)}
+  .faq details{background:var(--card);border:1px solid #e4e7ee;border-radius:8px;margin-bottom:12px;padding:18px 22px}
+  .faq summary{cursor:pointer;color:var(--navy);font-weight:bold;font-family:Arial,sans-serif;font-size:.98rem}
+  .faq details p{margin-top:12px;font-size:.95rem;color:var(--text)}
+  footer{background:var(--navy-dark);color:#9aa4b8;padding:36px 0;font-size:.8rem;font-family:Arial,sans-serif}
+  footer p{max-width:820px;margin:0 auto 10px;text-align:center}
+  @media (max-width:600px){ .calc{padding:22px} }
+</style>
+</head>
+<body>
+<!-- ============================================================
+     EDITE AQUI: dados do escritório usados em toda a página.
+     Substitua também [NOME DO ESCRITÓRIO] e [OAB/UF n.º 000.000]
+     no cabeçalho e no rodapé abaixo.
+     ============================================================ -->
+<script>
+  const CONFIG = {
+    whatsapp: "5511999990000",              // somente números, com DDI+DDD
+    email: "contato@seuescritorio.adv.br",
+    aliquotaPadrao: 0.03                    // alíquota mais comum do município-alvo
+  };
+</script>
+
+<header class="sans">
+  <div class="wrap">
+    <div class="brand">[NOME DO ESCRITÓRIO]<small>ADVOCACIA TRIBUTÁRIA</small></div>
+    <a class="btn" href="#calculadora" style="padding:10px 20px;font-size:.85rem">Calcular restituição</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Comprou um imóvel e pagou ITBI sobre um valor <em>maior</em> do que o preço da compra?</h1>
+    <p>O Superior Tribunal de Justiça decidiu, em precedente de observância obrigatória, que o ITBI deve
+       incidir sobre o valor da transação declarado pelo comprador — e não sobre o "valor venal de referência"
+       arbitrado pela prefeitura. Quem pagou a mais nos últimos 5 anos pode pedir a restituição, com correção.</p>
+    <a class="btn" href="#calculadora">Calcule gratuitamente quanto pagou a mais</a>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Como funciona</h2>
+    <p class="sub">Análise documental simples e objetiva — em três passos.</p>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h3>Envie dois documentos</h3>
+        <p>A guia de ITBI paga e a escritura (ou compromisso de compra e venda). É tudo o que precisamos para verificar a diferença.</p></div>
+      <div class="step"><div class="num">2</div><h3>Análise de viabilidade</h3>
+        <p>Comparamos o valor declarado da compra com a base de cálculo cobrada pela prefeitura e verificamos o prazo de 5 anos.</p></div>
+      <div class="step"><div class="num">3</div><h3>Pedido de restituição</h3>
+        <p>Sendo viável, ajuizamos a ação de repetição de indébito para reaver a diferença, atualizada. Se a guia ainda não foi paga, é possível agir antes do pagamento.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="calculadora" style="background:#eef1f7">
+  <div class="wrap">
+    <h2>Calculadora de restituição de ITBI</h2>
+    <p class="sub">Preencha com os dados da sua compra. O resultado é uma <strong>estimativa informativa</strong>, sem valor de proposta ou promessa de resultado.</p>
+    <div class="calc">
+      <label for="valorDeclarado">Preço de compra declarado na escritura (R$)</label>
+      <input type="text" id="valorDeclarado" inputmode="decimal" placeholder="Ex.: 400.000,00">
+
+      <label for="baseCobrada">Base de cálculo usada pela prefeitura na guia de ITBI (R$)</label>
+      <input type="text" id="baseCobrada" inputmode="decimal" placeholder="Ex.: 550.000,00 (chamada de 'valor venal de referência')">
+
+      <label for="aliquota">Alíquota do ITBI no seu município</label>
+      <select id="aliquota">
+        <option value="0.02">2%</option>
+        <option value="0.025">2,5%</option>
+        <option value="0.03" selected>3%</option>
+      </select>
+
+      <label for="dataPagamento">Data do pagamento do ITBI</label>
+      <input type="date" id="dataPagamento">
+
+      <button class="btn" onclick="calcular()">Calcular</button>
+
+      <div id="resultado"></div>
+    </div>
+  </div>
+</section>
+
+<section class="base-legal">
+  <div class="wrap">
+    <h2>Qual é a base legal?</h2>
+    <p>Em 2022, a Primeira Seção do STJ julgou o <strong>Tema Repetitivo 1.113</strong> (REsp 1.937.821/SP) e fixou três teses:
+       a base de cálculo do ITBI é o valor do imóvel em condições normais de mercado; <strong>o valor declarado pelo
+       contribuinte presume-se verdadeiro</strong>, e só pode ser afastado pelo município mediante <strong>processo administrativo
+       próprio</strong> (art. 148 do Código Tributário Nacional); e o município <strong>não pode arbitrar previamente</strong> a base de
+       cálculo com valor de referência fixado unilateralmente.</p>
+    <p>Por se tratar de julgamento em recursos repetitivos, a tese é de observância obrigatória por todos os juízes e
+       tribunais do país. Quem recolheu ITBI calculado sobre base superior ao preço declarado pode pedir a devolução da
+       diferença paga nos últimos <strong>5 anos</strong> (art. 168, I, do CTN), com atualização.</p>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <h2>Perguntas frequentes</h2>
+    <p class="sub">&nbsp;</p>
+    <details><summary>Comprei o imóvel abaixo do valor de mercado. Ainda assim tenho direito?</summary>
+      <p>Em regra, sim. O STJ decidiu que o valor declarado da transação goza de presunção de veracidade. A prefeitura
+         só pode questioná-lo instaurando processo administrativo específico contra você — o que raramente ocorre. Sem
+         esse processo, prevalece o preço efetivamente pago.</p></details>
+    <details><summary>Arrematei o imóvel em leilão. A tese se aplica?</summary>
+      <p>Sim — e nesses casos a diferença costuma ser ainda maior, porque o ITBI deve incidir sobre o valor da
+         arrematação, que em geral fica bem abaixo da avaliação usada pelas prefeituras.</p></details>
+    <details><summary>Paguei o ITBI há mais de 5 anos. Posso pedir de volta?</summary>
+      <p>Infelizmente não: o prazo para pedir a restituição é de 5 anos contados do pagamento. Por isso vale verificar o
+         quanto antes — cada mês que passa pode consumir parte do período recuperável.</p></details>
+    <details><summary>Ainda não paguei a guia. O que fazer?</summary>
+      <p>Melhor ainda: é possível questionar a cobrança antes do pagamento, para recolher o imposto já sobre o valor
+         correto da transação. Fale conosco antes de pagar.</p></details>
+    <details><summary>Quanto custa a análise?</summary>
+      <p>A análise de viabilidade dos seus documentos é gratuita e sem compromisso. As condições de contratação são
+         apresentadas de forma transparente antes de qualquer decisão.</p></details>
+  </div>
+</section>
+
+<section style="text-align:center;padding-top:0">
+  <div class="wrap">
+    <h2>Quer saber se o seu caso é viável?</h2>
+    <p class="sub">Envie sua guia de ITBI e a escritura para uma análise gratuita.</p>
+    <a class="btn" id="ctaWhats" href="#">Falar no WhatsApp</a>
+    <p class="sans" style="margin-top:14px;font-size:.85rem;color:var(--muted)">ou escreva para <a id="ctaEmail" href="#" style="color:var(--navy)">e-mail do escritório</a></p>
+  </div>
+</section>
+
+<footer>
+  <p><strong>[NOME DO ESCRITÓRIO] — [OAB/UF n.º 000.000]</strong></p>
+  <p>Conteúdo meramente informativo, elaborado em conformidade com o Provimento n.º 205/2021 do Conselho Federal da OAB.
+     Os valores apresentados pela calculadora são estimativas e não constituem promessa de resultado, proposta de
+     honorários ou garantia de êxito. Cada caso depende de análise individual dos documentos e da jurisprudência
+     aplicável ao município competente.</p>
+  <p>Este site não solicita pagamentos antecipados nem dados bancários.</p>
+</footer>
+
+<script>
+  function brl(n){ return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+  function parseBRL(s){
+    s = (s||'').replace(/[R$\s.]/g,'').replace(',','.');
+    const n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+  function calcular(){
+    const vd = parseBRL(document.getElementById('valorDeclarado').value);
+    const bc = parseBRL(document.getElementById('baseCobrada').value);
+    const aliq = parseFloat(document.getElementById('aliquota').value);
+    const dt = document.getElementById('dataPagamento').value;
+    const box = document.getElementById('resultado');
+    if(vd===null || bc===null){
+      box.className='nada';
+      box.innerHTML='<p>Preencha o preço de compra e a base de cálculo da guia para calcular.</p>';
+      return;
+    }
+    const diff = (bc - vd) * aliq;
+    let prescrito=false, urgente=false;
+    if(dt){
+      const pago = new Date(dt+'T12:00:00');
+      const limite = new Date(pago); limite.setFullYear(limite.getFullYear()+5);
+      const dias = Math.floor((limite - new Date())/86400000);
+      prescrito = dias < 0;
+      urgente = !prescrito && dias < 180;
+    }
+    if(diff <= 0){
+      box.className='nada';
+      box.innerHTML='<p>Pelos dados informados, a base de cálculo cobrada não superou o preço declarado — neste caso não há indébito a restituir por esta tese. Se tiver dúvida sobre os valores da sua guia, fale conosco.</p>';
+      return;
+    }
+    if(prescrito){
+      box.className='nada';
+      box.innerHTML='<p><strong>Atenção:</strong> o pagamento informado ocorreu há mais de 5 anos, prazo máximo para pedir a restituição. Pela data informada, o direito provavelmente está prescrito. Se tiver outras aquisições mais recentes, vale verificá-las.</p>';
+      return;
+    }
+    box.className='ok';
+    box.innerHTML =
+      '<p class="sans" style="font-size:.85rem;color:var(--muted)">Estimativa de valor pago a maior (sem correção):</p>' +
+      '<div class="valor">'+brl(diff)+'</div>' +
+      '<p>Sobre esse valor ainda incide atualização desde o pagamento, o que pode aumentar o total a recuperar.</p>' +
+      (urgente ? '<p class="aviso-prescricao">O prazo de 5 anos do seu pagamento está próximo do fim — recomendamos verificar o caso com urgência.</p>' : '') +
+      '<a class="btn" style="margin-top:16px" href="'+whatsLink(diff)+'">Quero uma análise gratuita</a>';
+  }
+  function whatsLink(valor){
+    const msg = encodeURIComponent('Olá! Usei a calculadora de ITBI e o resultado estimado foi '+ (valor?brl(valor):'') +'. Gostaria de uma análise gratuita do meu caso.');
+    return 'https://wa.me/'+CONFIG.whatsapp+'?text='+msg;
+  }
+  document.getElementById('ctaWhats').href = whatsLink(null);
+  document.getElementById('ctaEmail').href = 'mailto:'+CONFIG.email;
+  document.getElementById('ctaEmail').textContent = CONFIG.email;
+  document.getElementById('aliquota').value = String(CONFIG.aliquotaPadrao);
+</script>
+</body>
+</html>
