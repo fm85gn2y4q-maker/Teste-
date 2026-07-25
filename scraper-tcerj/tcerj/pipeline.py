@@ -16,6 +16,17 @@ log = logging.getLogger(__name__)
 _PAGINACAO_POR_DESLOCAMENTO = {"offset", "inicio", "start", "first", "from"}
 
 
+def paginacao_no_caminho(url: str | None) -> bool:
+    """Indica se a paginação vai embutida na própria URL.
+
+    Alguns endpoints do TCE-RJ recebem página e tamanho como segmentos do
+    caminho (`.../consulta/pagina/2/tamanhoPagina/50`) e simplesmente ignoram
+    os mesmos valores enviados como parâmetro. Nesse caso a URL configurada
+    traz os marcadores `{pagina}` e `{tamanho}`.
+    """
+    return bool(url) and ("{pagina}" in url or "{tamanho}" in url)
+
+
 def caminhar(dados: Any, caminho: str) -> Any:
     """Percorre um caminho pontilhado dentro de estruturas aninhadas.
 
@@ -56,6 +67,7 @@ async def coletar_via_api(
         )
 
     por_deslocamento = api.campo_pagina.lower() in _PAGINACAO_POR_DESLOCAMENTO
+    no_caminho = paginacao_no_caminho(api.url)
     emitidos = 0
     total_informado: int | None = None
 
@@ -67,11 +79,22 @@ async def coletar_via_api(
         )
 
         parametros = {**api.parametros, **(filtros or {})}
-        corpo = dict(api.corpo) if api.corpo else None
+        # Um corpo vazio (`{}`) é diferente de "sem corpo": há endpoints que
+        # exigem o objeto JSON mesmo sem nenhum filtro.
+        corpo = dict(api.corpo) if api.corpo is not None else None
+        url = api.url
 
         # O parâmetro de paginação vai no corpo quando a requisição original o
         # levava lá; caso contrário, na query string.
-        if corpo is not None and api.campo_pagina in corpo:
+        if no_caminho:
+            url = api.url.format(pagina=valor_pagina, tamanho=api.tamanho_pagina)
+            if corpo is not None:
+                # O termo acompanha o corpo, e não a query string, para não
+                # ser enviado duas vezes.
+                if filtros:
+                    corpo.update(filtros)
+                parametros = dict(api.parametros)
+        elif corpo is not None and api.campo_pagina in corpo:
             corpo[api.campo_pagina] = valor_pagina
             corpo[api.campo_tamanho] = api.tamanho_pagina
             if filtros:
@@ -83,7 +106,7 @@ async def coletar_via_api(
         try:
             resposta = await cliente.requisitar(
                 api.metodo,
-                api.url,
+                url,
                 params=parametros or None,
                 json_body=corpo,
                 headers=api.cabecalhos or None,
@@ -93,7 +116,7 @@ async def coletar_via_api(
             log.error("Falha na página %d: %s", indice, erro)
             break
         except ValueError:
-            log.error("Resposta não-JSON na página %d de %s", indice, api.url)
+            log.error("Resposta não-JSON na página %d de %s", indice, url)
             break
 
         if total_informado is None:

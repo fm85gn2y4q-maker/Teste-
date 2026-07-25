@@ -51,11 +51,18 @@ _RE_PROCESSO_SOLTO = re.compile(r"\b\d{3}\.\d{3}-\d(?:\s*/\s*\d{2,4})?\b")
 # O nome do relator nunca atravessa a quebra de linha: só espaço horizontal é
 # aceito entre os tokens, senão a captura invade o rótulo seguinte
 # ("Relator: Fulano\nSessão de ...").
+#
+# O trecho do nome fica em `(?-i:...)`: o rótulo ("Relator", "Rel.", "Cons.")
+# pode vir em qualquer caixa, mas o nome tem de começar por maiúscula. Sob o
+# `re.IGNORECASE` global, `[A-Z]` também casaria minúsculas e a expressão
+# capturava prosa corrente — "…retirada de pauta pelo relator antes de
+# iniciada a sessão" virava o relator "antes de iniciada a".
 _RE_RELATOR = re.compile(
     r"(?:relator[ao]?|rel\.?)[^\S\n]*[:\-–]?[^\S\n]*"
     r"(?:(?:conselheir[oa]|cons)\.?[^\S\n]+(?:substitut[oa][^\S\n]+)?)?"
-    r"(?P<nome>[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][\wÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç'.]*"
-    r"(?:[^\S\n]+(?:d[aeo]s?[^\S\n]+)?[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][\wÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç'.]*){0,5})",
+    r"(?P<nome>(?-i:[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][\wÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç'.]*"
+    r"(?:[^\S\n]+(?:[dD][aeo]s?[^\S\n]+)?"
+    r"[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][\wÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç'.]*){0,5}))",
     re.IGNORECASE,
 )
 
@@ -139,6 +146,22 @@ def corrigir_mojibake(texto: str) -> str:
     return texto
 
 
+# Sequência literal de dois caracteres (barra invertida + "n"), não a quebra.
+_RE_QUEBRA_ESCAPADA = re.compile(r"\\r\\n|\\n|\\r")
+
+
+def desescapar_quebras(texto: str | None) -> str | None:
+    """Converte quebras de linha escapadas em quebras de verdade.
+
+    A base de Jurisprudência Selecionada guarda o separador entre os
+    descritores e a tese como a sequência literal `\\n`: a barra invertida
+    atravessa a serialização JSON e apareceria crua no meio da ementa.
+    """
+    if not texto:
+        return texto
+    return _RE_QUEBRA_ESCAPADA.sub("\n", texto)
+
+
 def html_para_texto(html: str) -> str:
     """Converte HTML em texto legível, preservando quebras de parágrafo."""
     sopa = BeautifulSoup(html, "lxml")
@@ -157,7 +180,10 @@ def parse_data(valor: str | None) -> date | None:
         return None
     texto = valor.strip()
 
-    iso = re.search(r"\b(\d{4})-(\d{2})-(\d{2})\b", texto)
+    # O limite não pode ser `\b`: as datas da API vêm como carimbo ISO
+    # ("2026-05-25T00:00:00-03:00") e o "T" colado ao dia anula a fronteira de
+    # palavra. Basta garantir que não há dígito antes nem depois.
+    iso = re.search(r"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)", texto)
     if iso:
         try:
             return date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
@@ -220,6 +246,23 @@ def extrair_processo(texto: str) -> str | None:
 
 def _normalizar_processo(numero: str) -> str:
     return re.sub(r"\s*/\s*", "/", re.sub(r"\s+", "", numero))
+
+
+def formatar_processo(valor: str | None) -> str | None:
+    """Devolve o número de processo na forma usada pelo Tribunal.
+
+    Os endpoints internos entregam o número achatado ("21973182025"), mas o
+    próprio portal o exibe como "219.731-8/2025" — que é também a forma que as
+    expressões de extração por texto reconhecem. A conversão só se aplica ao
+    bloco de onze dígitos; qualquer outro formato passa intacto.
+    """
+    if not valor:
+        return None
+    texto = valor.strip()
+    digitos = re.sub(r"\D", "", texto)
+    if len(digitos) != 11 or re.search(r"[./-]", texto):
+        return _normalizar_processo(texto)
+    return f"{digitos[:3]}.{digitos[3:6]}-{digitos[6]}/{digitos[7:]}"
 
 
 def extrair_relator(texto: str) -> str | None:
@@ -357,6 +400,16 @@ def _datas_rotuladas(texto: str) -> dict[str, date | None]:
     return resultado
 
 
+def _numero_ou_nada(valor: str | None) -> str | None:
+    """Só os dígitos do número, descartando o zero de 'não informado'."""
+    if not valor:
+        return None
+    digitos = re.sub(r"\D", "", valor)
+    if not digitos or int(digitos) == 0:
+        return None
+    return digitos
+
+
 def documento_de_registro(
     registro: dict,
     *,
@@ -370,35 +423,67 @@ def documento_de_registro(
     def pegar(*chaves: str) -> str | None:
         for chave in chaves:
             for real, valor in registro.items():
-                if normalizar(real) == normalizar(chave) and valor not in (None, ""):
-                    return str(valor)
+                if normalizar(real) != normalizar(chave) or valor in (None, ""):
+                    continue
+                # Vários campos vêm de colunas CHAR e chegam preenchidos com
+                # espaços à direita ("José Gomes Graciosa            ").
+                limpo = str(valor).strip()
+                if limpo:
+                    return limpo
         return None
 
     numero = pegar("numero", "numeroAcordao", "nrDocumento", "numeroDocumento", "num")
-    ano_bruto = pegar("ano", "exercicio", "anoDocumento")
-    texto = pegar("inteiroTeor", "textoIntegral", "conteudo", "texto", "corpo")
-    ementa = pegar("ementa", "resumo", "descricao")
+    ano_bruto = pegar("ano", "anoAcordao", "exercicio", "anoDocumento")
+    texto = desescapar_quebras(pegar(
+        "inteiroTeor", "textoIntegral", "conteudo", "texto", "corpo",
+        "dispositivoCompleto", "tese",
+    ))
+    # "dispositivo(Completo)" é como a Jurisprudência Selecionada nomeia a
+    # ementa; "enunciado", como as Súmulas; "assunto", as Questões de Ordem.
+    ementa = desescapar_quebras(pegar(
+        "ementa", "ementaReduzida", "enunciado", "dispositivoCompleto", "dispositivo",
+        "assunto", "resumo", "descricao",
+    ))
 
     tipo = TipoDocumento.de_texto(
-        pegar("tipo", "tipoDocumento", "especie", "natureza", "tipoAto")
+        pegar("tipo", "tipoDocumento", "especie", "natureza", "tipoAto", "label", "titulo")
     )
     if tipo is TipoDocumento.INDEFINIDO and tipo_esperado:
         tipo = tipo_esperado
 
     documento = Documento(
         tipo=tipo,
-        numero=re.sub(r"\D", "", numero) or None if numero else None,
-        ano=_expandir_ano(int(ano_bruto)) if ano_bruto and ano_bruto.isdigit() else None,
-        processo=pegar("processo", "numeroProcesso", "nrProcesso", "proc"),
+        # Zero não é número de documento: é como a base marca a ementa ainda
+        # não vinculada a um acórdão publicado. Tratado como ausente, para não
+        # virar "Acórdão 0/2000" na citação.
+        numero=_numero_ou_nada(numero),
+        ano=(
+            _expandir_ano(int(ano_bruto))
+            if ano_bruto and ano_bruto.isdigit() and int(ano_bruto) != 0
+            else None
+        ),
+        processo=formatar_processo(
+            pegar(
+                "processo", "numeroProcessoFormatado", "numeroDoProcessoFormatado",
+                "numeroProcesso", "numeroDoProcesso", "nrProcesso", "proc",
+            )
+        ),
         relator=pegar("relator", "nomeRelator", "conselheiroRelator"),
         orgao_julgador=pegar("orgao", "orgaoJulgador", "colegiado", "sessaoTipo"),
-        data_sessao=parse_data(pegar("dataSessao", "dataJulgamento", "data")),
-        data_publicacao=parse_data(pegar("dataPublicacao", "dtPublicacao")),
+        data_sessao=parse_data(
+            pegar(
+                "dataSessao", "dataDaSessao", "sessaoData", "dataDoVoto",
+                "dataJulgamento", "data",
+            )
+        ),
+        data_publicacao=parse_data(pegar("dataPublicacao", "dtPublicacao", "publicacao")),
         ementa=ementa,
         inteiro_teor=texto,
+        assuntos=[a for a in (pegar("macroTemaNome", "macroTema", "tema"),) if a],
         url=pegar("url", "link", "urlDocumento"),
         url_pdf=pegar("urlPdf", "linkPdf", "arquivo", "pdf"),
         fonte="tcerj",
+        id_fonte=pegar("jurisprudenciaId", "id", "idDocumento", "codigo"),
         bruto=registro,
     )
 
@@ -406,4 +491,9 @@ def documento_de_registro(
     base = texto or ementa
     if base:
         documento.mesclar(documento_de_texto(base, tipo_esperado=tipo_esperado))
+
+    # Súmulas e respostas a consulta não trazem campo de ano; a data da sessão
+    # que as aprovou é o ano de referência usado na citação.
+    if documento.ano is None and documento.data_sessao is not None:
+        documento.ano = documento.data_sessao.year
     return documento

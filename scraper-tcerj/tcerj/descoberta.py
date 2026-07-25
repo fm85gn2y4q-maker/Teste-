@@ -10,6 +10,7 @@ devolve uma configuração pronta para o modo `api`.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -26,7 +27,9 @@ log = logging.getLogger(__name__)
 _CABECALHOS_SENSIVEIS = {"cookie", "authorization", "set-cookie", "x-xsrf-token"}
 
 _CHAVES_PAGINA = ("page", "pagina", "pageNumber", "offset", "inicio", "start", "_page")
-_CHAVES_TAMANHO = ("size", "tamanho", "pageSize", "limit", "qtd", "quantidade", "rows")
+_CHAVES_TAMANHO = (
+    "size", "tamanho", "tamanhoPagina", "pageSize", "limit", "qtd", "quantidade", "rows",
+)
 _CHAVES_TOTAL = (
     "totalElements", "total", "totalRegistros", "totalCount", "numFound", "recordsTotal",
 )
@@ -182,6 +185,35 @@ def pontuar(chamada: ChamadaCapturada) -> ChamadaCapturada:
     return chamada
 
 
+def marcar_paginacao_no_caminho(caminho: str) -> tuple[str, int | None, int | None]:
+    """Substitui por marcadores os valores de paginação embutidos no caminho.
+
+    Endpoints no estilo `/consulta/pagina/2/tamanhoPagina/50` não aceitam
+    página e tamanho como parâmetro: eles fazem parte da própria rota. A URL
+    é devolvida com `{pagina}`/`{tamanho}` no lugar dos números, junto com os
+    valores que estavam ali — que são a primeira página e o tamanho usados
+    pelo portal.
+    """
+    segmentos = caminho.split("/")
+    paginas = {c.lower() for c in _CHAVES_PAGINA}
+    tamanhos = {c.lower() for c in _CHAVES_TAMANHO}
+    pagina = tamanho = None
+
+    for i in range(len(segmentos) - 1):
+        nome, valor = segmentos[i].lower(), segmentos[i + 1]
+        if not valor.isdigit():
+            continue
+        # Tamanho antes de página: "tamanhoPagina" também termina em "pagina".
+        if nome in tamanhos:
+            tamanho = max(int(valor), 1)
+            segmentos[i + 1] = "{tamanho}"
+        elif nome in paginas:
+            pagina = int(valor)
+            segmentos[i + 1] = "{pagina}"
+
+    return "/".join(segmentos), pagina, tamanho
+
+
 def inferir_api(chamada: ChamadaCapturada, termo: str | None = None) -> ConfigApi:
     """Converte a chamada vencedora em configuração reutilizável.
 
@@ -207,10 +239,26 @@ def inferir_api(chamada: ChamadaCapturada, termo: str | None = None) -> ConfigAp
     if isinstance(valor_tamanho, (int, str)) and str(valor_tamanho).isdigit():
         tamanho = max(int(valor_tamanho), 1)
 
-    campo_termo = _campo_com_valor(fonte_parametros, termo) or "termo"
+    caminho, pagina_na_rota, tamanho_na_rota = marcar_paginacao_no_caminho(partes.path)
+    if pagina_na_rota is not None:
+        primeira = pagina_na_rota
+    if tamanho_na_rota is not None:
+        tamanho = tamanho_na_rota
+
+    identificado = _campo_com_valor(fonte_parametros, termo)
+    campo_termo = identificado or "termo"
+
+    # A busca-sonda usou um termo qualquer só para fazer o portal reagir.
+    # Guardá-lo na configuração filtraria toda coleta futura em silêncio. Só
+    # se remove o campo que comprovadamente carregava esse valor — se a sonda
+    # não o identificou, nada aqui é palpite.
+    if identificado:
+        query = {k: v for k, v in query.items() if k != identificado}
+        if corpo is not None:
+            corpo = {k: v for k, v in corpo.items() if k != identificado}
 
     return ConfigApi(
-        url=f"{partes.scheme}://{partes.netloc}{partes.path}",
+        url=f"{partes.scheme}://{partes.netloc}{caminho}",
         metodo=chamada.metodo.upper(),
         cabecalhos={
             k: v
@@ -277,10 +325,23 @@ async def descobrir(
         )
         pagina = await contexto.new_page()
 
-        # Os corpos são lidos depois da navegação; aqui só guardamos as
-        # respostas JSON que vieram de chamadas assíncronas da aplicação.
-        pendentes: list[Any] = []
-        pagina.on("response", lambda r: pendentes.append(r) if _e_json(r) else None)
+        # O corpo precisa ser lido enquanto a resposta ainda existe: assim que
+        # a página navega para o portal seguinte, o Chromium a descarta e
+        # `text()` falha. Adiar essa leitura para o fim da varredura só
+        # preservava as chamadas do último portal visitado.
+        capturas: list[ChamadaCapturada] = []
+        leituras: list[asyncio.Task] = []
+
+        async def registrar(resposta) -> None:
+            chamada = await _capturar(resposta, limite_amostra)
+            if chamada is not None:
+                capturas.append(chamada)
+
+        def ao_receber(resposta) -> None:
+            if _e_json(resposta):
+                leituras.append(asyncio.create_task(registrar(resposta)))
+
+        pagina.on("response", ao_receber)
 
         for caminho in config.portais:
             url = config.url_absoluta(caminho)
@@ -295,10 +356,19 @@ async def descobrir(
                 log.warning("Falha ao visitar %s", mensagem)
                 relatorio.erros.append(mensagem)
 
-        for resposta in pendentes:
-            chamada = await _capturar(resposta, limite_amostra)
-            if chamada is not None:
-                relatorio.chamadas.append(pontuar(chamada))
+            # Esvazia as leituras deste portal antes de navegar para o próximo.
+            if leituras:
+                await asyncio.gather(*leituras, return_exceptions=True)
+                leituras.clear()
+
+        for chamada in capturas:
+            # Pontua sobre a resposta inteira e só então encolhe para o
+            # relatório: encolher antes fazia toda listagem valer 3 itens,
+            # apagando o sinal de tamanho e mentindo no "itens por página"
+            # que se lê para julgar a escolha.
+            pontuar(chamada)
+            chamada.amostra = _encolher(chamada.amostra)
+            relatorio.chamadas.append(chamada)
 
         await contexto.close()
         await navegador.close()
@@ -345,7 +415,7 @@ async def _capturar(resposta, limite: int) -> ChamadaCapturada | None:
         corpo_requisicao=corpo_requisicao,
         status=resposta.status,
         tipo_conteudo=(resposta.headers or {}).get("content-type", ""),
-        amostra=_encolher(amostra),
+        amostra=amostra,
     )
 
 

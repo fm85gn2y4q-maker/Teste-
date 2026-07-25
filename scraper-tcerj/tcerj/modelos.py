@@ -81,6 +81,8 @@ class Documento:
     url: str | None = None
     url_pdf: str | None = None
     fonte: str | None = None
+    # Identificador do registro na origem, quando o endpoint expõe um.
+    id_fonte: str | None = None
     coletado_em: str | None = None
     bruto: dict[str, Any] = field(default_factory=dict)
 
@@ -90,9 +92,22 @@ class Documento:
             partes = [self.tipo.value, so_digitos_e_letras(self.numero)]
             if self.ano:
                 partes.append(str(self.ano))
+            # Espécie + número + ano não é chave única em toda base: um mesmo
+            # acórdão rende várias ementas na Jurisprudência Selecionada, uma
+            # por tese/macro-tema. Sem o identificador de origem, a segunda
+            # tese sobrescreveria a primeira em silêncio.
+            if self.id_fonte:
+                partes.append(so_digitos_e_letras(self.id_fonte))
             return "-".join(partes)
 
-        semente = self.url or self.inteiro_teor or self.ementa or ""
+        # Sem número, a identidade vem do que houver de estável: o id de
+        # origem entra junto com a URL/texto porque, sozinho, ele só é único
+        # dentro da base que o emitiu.
+        semente = "|".join(
+            parte
+            for parte in (self.id_fonte, self.url, self.inteiro_teor or self.ementa)
+            if parte
+        )
         if not semente:
             raise ValueError(
                 "Documento sem número, URL ou texto: impossível gerar identificador estável"

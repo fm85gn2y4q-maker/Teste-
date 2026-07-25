@@ -145,6 +145,37 @@ def test_campo_do_termo_cai_no_padrao_quando_nao_identificado():
     assert inferir_api(pontuar(chamada()), termo=None).campo_termo == "termo"
 
 
+def test_inferir_api_marca_paginacao_embutida_na_rota():
+    """O portal do TCE-RJ pagina pelo caminho, não por parâmetro."""
+    api = inferir_api(
+        pontuar(
+            chamada(
+                url="https://www.tcerj.tc.br/liana-processo-webapi/consulta"
+                    "/pagina/1/tamanhoPagina/10",
+                corpo_requisicao={"texto": "licitação"},
+            )
+        ),
+        termo="licitação",
+    )
+    assert api.url == (
+        "https://www.tcerj.tc.br/liana-processo-webapi/consulta"
+        "/pagina/{pagina}/tamanhoPagina/{tamanho}"
+    )
+    assert api.primeira_pagina == 1
+    assert api.tamanho_pagina == 10
+    # O termo da sonda não pode ficar gravado filtrando a coleta.
+    assert api.corpo == {}
+    assert api.campo_termo == "texto"
+
+
+def test_inferir_api_preserva_filtros_que_nao_sao_o_termo():
+    api = inferir_api(
+        pontuar(chamada(corpo_requisicao={"page": 0, "size": 20, "orgao": "plenario"})),
+        termo="licitação",
+    )
+    assert api.corpo["orgao"] == "plenario"
+
+
 def test_inferir_api_nao_propaga_cabecalhos_sensiveis():
     api = inferir_api(pontuar(chamada()))
     assert "cookie" not in {k.lower() for k in api.cabecalhos}

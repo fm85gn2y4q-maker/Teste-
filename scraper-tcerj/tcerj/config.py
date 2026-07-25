@@ -16,13 +16,17 @@ from typing import Any
 
 BASE_PADRAO = "https://www.tcerj.tc.br"
 
-# Páginas conhecidas do Tribunal. `descobrir` visita cada uma para achar as
+# Páginas de consulta do Tribunal. `descobrir` visita cada uma para achar as
 # chamadas de rede que alimentam as listagens.
+#
+# Precisam ser as telas de consulta em si, não o índice: o
+# `/portal-jurisprudencia` é só um menu de links e não dispara busca nenhuma —
+# apontar para ele fazia a descoberta capturar apenas combos de apoio.
 PORTAIS_PADRAO: tuple[str, ...] = (
-    "/sistema-jurisprudencia/public/consultas",
-    "/cadastro-publicacoes/public/portal-jurisprudencia",
-    "/consulta-processo/Acordaos",
-    "/consulta-processo/PesquisaTextual/",
+    "/cadastro-publicacoes/public/jurisprudencia-selecionada",
+    "/cadastro-publicacoes/public/sumulas",
+    "/cadastro-publicacoes/public/consultas",
+    "/cadastro-publicacoes/public/questao-ordem",
 )
 
 

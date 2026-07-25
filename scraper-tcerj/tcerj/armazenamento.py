@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     url               TEXT,
     url_pdf           TEXT,
     fonte             TEXT,
+    id_fonte          TEXT,
     coletado_em       TEXT NOT NULL,
     bruto             TEXT
 );
@@ -59,7 +60,7 @@ USING fts5(id UNINDEXED, ementa, inteiro_teor, tokenize='unicode61 remove_diacri
 _COLUNAS = (
     "id", "tipo", "numero", "ano", "processo", "relator", "orgao_julgador",
     "data_sessao", "data_publicacao", "ementa", "inteiro_teor", "assuntos",
-    "url", "url_pdf", "fonte", "coletado_em", "bruto",
+    "url", "url_pdf", "fonte", "id_fonte", "coletado_em", "bruto",
 )
 
 
@@ -72,7 +73,21 @@ class Armazenamento:
         self.conexao.execute("PRAGMA journal_mode=WAL")
         self.conexao.execute("PRAGMA synchronous=NORMAL")
         self.conexao.executescript(_ESQUEMA)
+        self._migrar()
         self.conexao.commit()
+
+    def _migrar(self) -> None:
+        """Acrescenta colunas novas a bancos criados por versões anteriores.
+
+        `CREATE TABLE IF NOT EXISTS` não altera uma tabela que já existe, então
+        um banco antigo continuaria sem as colunas acrescentadas depois.
+        """
+        existentes = {
+            linha["name"] for linha in self.conexao.execute("PRAGMA table_info(documentos)")
+        }
+        for coluna in ("id_fonte",):
+            if coluna not in existentes:
+                self.conexao.execute(f"ALTER TABLE documentos ADD COLUMN {coluna} TEXT")
 
     def __enter__(self) -> "Armazenamento":
         return self
@@ -214,6 +229,7 @@ def _linha_para_documento(linha: sqlite3.Row) -> Documento:
         url=linha["url"],
         url_pdf=linha["url_pdf"],
         fonte=linha["fonte"],
+        id_fonte=linha["id_fonte"],
         coletado_em=linha["coletado_em"],
         bruto=json.loads(linha["bruto"] or "{}"),
     )
