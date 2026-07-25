@@ -181,6 +181,49 @@ verdade:
   que passava a capturar prosa corrente ("relator antes de iniciada a").
 - `numeroAcordao`/`anoAcordao` iguais a zero viravam "Acórdão 0/2000".
 
+## Ementário — o acervo como ferramenta de IA (MCP)
+
+`ementario/` expõe o acervo coletado a assistentes de IA pelo protocolo MCP,
+para consultar a jurisprudência do TCE-RJ de dentro do Claude ou do ChatGPT.
+
+```bash
+python -m ementario            # stdio — é o que o Claude consome
+python -m ementario --http     # HTTP em 127.0.0.1:8765 — é o que o ChatGPT exige
+```
+
+Ferramentas: `pesquisar_jurisprudencia`, `obter_documento`, `listar_documentos`,
+`cobertura_do_acervo`, mais `search`/`fetch` no formato que a pesquisa profunda
+do ChatGPT exige.
+
+A busca é pensada para pergunta de gente, não para sintaxe: ignora acento,
+descarta palavras vazias ("posso", "qual", "em") e, se exigir todos os termos
+não achar nada, repete aceitando qualquer um — avisando que a correspondência
+foi parcial. O banco é aberto **somente para leitura**.
+
+### Link de conferência
+
+Cada resultado traz o endereço para conferir a fonte — uma ementa é resumo
+oficial, não o acórdão:
+
+| Campo | O que abre | Cobertura |
+|---|---|---|
+| `url_inteiro_teor` | PDF do acórdão, com o voto integral | 1.065 acórdãos |
+| `url_processo` | Consulta processual no portal | 1.642 de 1.671 |
+| `url_portal` | Tela pública da espécie | todos |
+
+Os endpoints de listagem não devolvem esses links; eles são montados a partir
+do número e do ano, que já vêm na coleta:
+
+```
+https://www.tcerj.tc.br/documento-webapi-externo/api/documento/acordao/{numero}/{ano}?votoInteiro=true
+https://www.tcerj.tc.br/consulta-processo/Processo/List?numeroProcesso={numero}-{dv}/{ano}
+```
+
+Súmulas não têm processo nem acórdão — para elas só resta a tela pública, o que
+é suficiente, já que o enunciado coletado é o texto integral. As respostas a
+consulta têm `arquivoId` no payload, mas o endpoint de download correspondente
+não foi identificado; elas ficam com o link do processo.
+
 ## O que estas bases não entregam
 
 Nenhum dos quatro endpoints devolve `url`, `url_pdf` ou órgão julgador — os
