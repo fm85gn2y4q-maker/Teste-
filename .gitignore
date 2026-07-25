@@ -39,3 +39,18 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Python (scraper-tcerj)
+__pycache__/
+*.py[cod]
+.venv/
+.venv-scraper/
+.pytest_cache/
+
+# saída da coleta
+dados/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+descoberta.json
+config.json

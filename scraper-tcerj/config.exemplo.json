@@ -1,0 +1,40 @@
+{
+  "base_url": "https://www.tcerj.tc.br",
+  "portais": [
+    "/sistema-jurisprudencia/public/consultas",
+    "/cadastro-publicacoes/public/portal-jurisprudencia",
+    "/consulta-processo/Acordaos",
+    "/consulta-processo/PesquisaTextual/"
+  ],
+  "backend": "navegador",
+  "api": {
+    "url": null,
+    "metodo": "GET",
+    "cabecalhos": {},
+    "parametros": {},
+    "corpo": null,
+    "campo_pagina": "page",
+    "campo_tamanho": "size",
+    "campo_termo": "termo",
+    "primeira_pagina": 0,
+    "tamanho_pagina": 50,
+    "caminho_itens": "content",
+    "caminho_total": "totalElements"
+  },
+  "seletores": {
+    "campo_busca": "input[type='search'], input[type='text']",
+    "botao_buscar": "button[type='submit']",
+    "item_resultado": "table tbody tr, .resultado, .card, li.item",
+    "link_detalhe": "a[href]",
+    "proxima_pagina": "a[rel='next'], .pagination .next, button[aria-label*='rox']",
+    "corpo_detalhe": "main, .conteudo, article, body"
+  },
+  "intervalo_seg": 1.5,
+  "concorrencia": 2,
+  "timeout_seg": 45.0,
+  "tentativas": 4,
+  "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36 (pesquisa-academica; contato via repositorio)",
+  "respeitar_robots": true,
+  "diretorio_saida": "dados",
+  "caminho_navegador": null
+}
