@@ -7,25 +7,36 @@ SQLite consultável, exportável para JSONL e CSV.
 
 ## Estado atual — leia antes de usar
 
-O código foi escrito e testado **sem acesso de rede ao site do TCE-RJ**: o
-ambiente onde ele foi desenvolvido bloqueia o domínio `tcerj.tc.br`. Em termos
-práticos:
+**Calibrado contra o site real em 25/07/2026.** Até então o código nunca havia
+sido executado contra `tcerj.tc.br`, e o endereço do endpoint era só hipótese.
 
-| Parte | Situação |
-|---|---|
-| Extração de metadados (número, processo, relator, ementa, datas, assuntos) | Testada, 101 testes |
-| Armazenamento, deduplicação, retomada, exportação, busca textual | Testados |
-| Paginação da API (índice, deslocamento, POST com corpo) | Testada com servidor simulado |
-| Navegação, busca, paginação e leitura de detalhe no navegador | Testadas contra um portal falso local, com Chromium real |
-| **Endereço e formato do endpoint real do TCE-RJ** | **Não verificado — descoberto em tempo de execução** |
+A descoberta revelou que **não existe um endpoint, e sim quatro bases
+distintas**, cada uma com formato próprio. Todas foram percorridas de ponta a
+ponta:
 
-Por isso a ferramenta **não chuta** o endereço da API. O comando `descobrir`
-abre o portal num navegador de verdade, executa uma busca, grava as chamadas de
-rede que a aplicação dispara e deduz a configuração a partir delas. É um passo
-único, e depois a coleta roda direto contra o endpoint.
+| Base | Endpoint | Registros |
+|---|---|---|
+| Jurisprudência Selecionada (ementas de acórdãos) | `POST /liana-processo-webapi/consulta/pagina/{pagina}/tamanhoPagina/{tamanho}` | 1.067 |
+| Respostas às Consultas | `POST /cadastro-publicacoes-webapi/api/Consulta/listar` | 572 |
+| Súmulas | `GET /cadastro-publicacoes-webapi/api/Sumula` | 28 |
+| Questões de Ordem | `POST /liana-processo-webapi/questaoordem/consulta/pagina/{pagina}/tamanhoPagina/{tamanho}` | 4 |
 
-Se a descoberta não achar nada, o modo `navegador` funciona sem endpoint algum:
-ele lê o que a aplicação renderiza na tela.
+Duas ressalvas que mudam a expectativa sobre o acervo:
+
+- A Jurisprudência Selecionada é **curadoria**, não o acervo integral: são as
+  ementas escolhidas pelo Serviço de Jurisprudência, não todos os acórdãos do
+  Tribunal.
+- **Deliberações e Resoluções não ficam neste portal.** O menu redireciona para
+  `atosoficiais.com.br`, um serviço de terceiro. Não há coleta delas aqui.
+
+Não existe base própria de "enunciado" (o enunciado é o conteúdo da súmula) nem
+de "parecer prévio".
+
+O comando `descobrir` continua sendo o caminho quando o portal mudar: abre as
+telas de consulta num navegador de verdade, executa uma busca, grava as
+chamadas de rede e deduz a configuração — inclusive quando a paginação vem
+embutida na rota, como é o caso aqui. Se ele não achar nada, o modo `navegador`
+funciona sem endpoint algum, lendo o que a aplicação renderiza na tela.
 
 ## Instalação
 
@@ -69,17 +80,34 @@ cookie ou cabeçalho de sessão é gravado no relatório.
 
 ### 2. Coletar
 
-```bash
-# usando o endpoint descoberto
-python -m tcerj -c config.json coletar --tipo acordao --max-paginas 20
+Cada base tem sua configuração; as quatro já vêm calibradas no repositório. O
+`--tipo` **não filtra no servidor**, apenas rotula o que veio — por isso a
+config e o tipo andam sempre juntos:
 
-# sem endpoint: lendo a tela, funciona de qualquer forma
+```bash
+python -m tcerj -c config.json               coletar --tipo acordao           --max-paginas 50
+python -m tcerj -c config-consultas.json     coletar --tipo resposta_consulta --max-paginas 50
+python -m tcerj -c config-sumulas.json       coletar --tipo sumula            --max-paginas 1
+python -m tcerj -c config-questao-ordem.json coletar --max-paginas 5
+```
+
+`config.json` não é versionado — é o arquivo que `descobrir` sobrescreve. Se
+não existir, rode `descobrir` ou copie `config.exemplo.json` ajustando a URL
+conforme a tabela acima. As súmulas vêm num único array, sem paginação: daí o
+`--max-paginas 1`.
+
+Sem endpoint algum, lendo a tela, também funciona:
+
+```bash
 python -m tcerj coletar --backend navegador --termo "dispensa de licitação"
 ```
 
 A coleta é **retomável**: cada URL lida fica registrada, então interromper com
 `Ctrl+C` e rodar de novo continua de onde parou, sem duplicar. Um documento que
 apareça primeiro na listagem e depois no detalhe é completado, não sobrescrito.
+Como estes endpoints não devolvem URL por item, a deduplicação se apoia no
+identificador do documento — inclusive o `id_fonte`, sem o qual duas ementas do
+mesmo acórdão colapsariam numa só.
 
 Opções úteis: `--tipo` (acordao, sumula, enunciado, deliberacao, resolucao,
 decisao, parecer_previo, resposta_consulta, voto), `--max-documentos`,
@@ -134,18 +162,67 @@ pytest                      # tudo
 pytest -m "not integracao"  # sem navegador, roda em segundos
 ```
 
-Os testes de integração sobem um portal falso em `localhost` e o percorrem com
-Chromium de verdade — foi assim que apareceram dois defeitos reais: números de
-quatro dígitos truncados ("1234" lido como "123") e páginas servidas sem
-charset, que chegavam como `ACÃ“RDÃƒO` e quebravam toda a extração.
+São 113. Os testes de integração sobem um portal falso em `localhost` e o
+percorrem com Chromium de verdade — foi assim que apareceram dois defeitos
+reais: números de quatro dígitos truncados ("1234" lido como "123") e páginas
+servidas sem charset, que chegavam como `ACÃ“RDÃƒO` e quebravam toda a extração.
+
+A primeira execução contra o site real rendeu outros cinco, todos hoje cobertos
+por teste — vale como aviso de que portal simulado não substitui portal de
+verdade:
+
+- Carimbo de data ISO com `T` (`2026-05-25T00:00:00`) não casava o regex, e
+  `data_sessao` vinha vazia em **todos** os registros.
+- A quebra de linha da ementa é a sequência literal `\n`, que aparecia crua.
+- `tipo+número+ano` **não é chave única**: um mesmo acórdão rende várias
+  ementas selecionadas, uma por macro-tema, e a segunda sobrescrevia a primeira
+  em silêncio. Daí o `id_fonte`.
+- O `re.IGNORECASE` global anulava a exigência de maiúscula no nome do relator,
+  que passava a capturar prosa corrente ("relator antes de iniciada a").
+- `numeroAcordao`/`anoAcordao` iguais a zero viravam "Acórdão 0/2000".
+
+## O que estas bases não entregam
+
+Nenhum dos quatro endpoints devolve `url`, `url_pdf` ou órgão julgador — os
+campos ficam vazios porque não existem no payload, não por falha de extração.
+Os acórdãos não trazem data de publicação (só a data do voto); as súmulas não
+têm processo nem relator, o que é correto.
+
+## Pesquisa Textual — mapeada, ainda não coletada
+
+É a base do **inteiro teor dos votos e acórdãos**, e a mais valiosa que ficou
+de fora. O formulário vive num *iframe* (`/pesquisa-textual/app`), razão pela
+qual `descobrir` não o enxerga: ele inspeciona apenas o quadro principal.
+
+```
+POST /liana-pesquisa-externo/api/pesquisatextual/pagina/{pagina}/tamanhoPagina/{tamanho}
+corpo: {"comTodasAsPalavras": "...", "bases": {"votos": true, "acordaos": false, ...},
+        "retornaTextoDocumento": true, "pagina": 1, "quantidadePorPagina": 20}
+```
+
+O texto integral vem em `resultados[].resultados[].texto`, junto de `categoria`
+("VOTO") e `idDocumento`. Coletá-la exige três coisas que o pipeline ainda não
+faz:
+
+1. **Achatar a lista aninhada.** O item externo é o *processo*; os documentos
+   ficam um nível abaixo, e `caminho_itens` só percorre um nível.
+2. **Remover a marcação de destaque.** O servidor injeta `<mark
+   class="highlight">` em torno de cada ocorrência do termo, inclusive dentro
+   de palavras (`DECISÃO` volta como `<mark>DE</mark>CISÃO`).
+3. **Mapear os campos de outro jeito.** O `numero` do registro é o número do
+   *processo*, não do documento; usar a lista de apelidos atual produziria
+   citações falsas como "Acórdão 228647/2026".
+
+Some-se a isso que a base **não é enumerável**: exige termo de busca e devolve
+sempre `quantidadeTotal: 10000`, um teto fixo, não a contagem real.
 
 ## Limitações conhecidas
 
-- O endpoint real ainda não foi visto; a primeira execução de `descobrir` é o
-  que valida (ou não) essa parte.
-- Os seletores padrão de `config.json` são genéricos. Se o modo `navegador`
-  trouxer pouca coisa, ajuste `item_resultado` e `proxima_pagina` para o layout
-  real.
+- A pontuação de `descobrir` premia vocabulário jurídico e tamanho da lista,
+  então pode eleger uma base menor: as quatro legítimas aparecem no topo, mas a
+  escolha ainda merece revisão humana, como a saída do comando avisa.
+- Os seletores padrão são genéricos. Se o modo `navegador` trouxer pouca coisa,
+  ajuste `item_resultado` e `proxima_pagina` para o layout real.
 - Documentos que só existem em PDF são registrados com a URL do arquivo
   (`url_pdf`), sem extração do texto — falta um passo de OCR/parse de PDF.
 - Não há agendamento embutido para coleta incremental periódica.
