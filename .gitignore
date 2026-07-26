@@ -54,3 +54,8 @@ dados/
 *.sqlite-shm
 descoberta.json
 config.json
+
+# empacotamento da extensão (leva o acervo e as dependências dentro)
+build/
+dist/
+*.mcpb

@@ -201,22 +201,24 @@ descarta palavras vazias ("posso", "qual", "em") e, se exigir todos os termos
 não achar nada, repete aceitando qualquer um — avisando que a correspondência
 foi parcial. O banco é aberto **somente para leitura**.
 
-### Ligar ao Claude (local, stdio)
+### Ligar ao Claude
 
-Em `%APPDATA%\Claude\claude_desktop_config.json`, e reiniciar o aplicativo:
+**O bloco `mcpServers` do `claude_desktop_config.json` não funciona nas versões
+recentes do Claude Desktop.** Comprovado na build 1.24012.9 (Microsoft Store,
+com Cowork): a chave é lida e ignorada — nenhum `mcp-*.log` é gerado e o
+`main.log` não menciona o servidor. As sessões dessa build rodam em VM na
+nuvem, que não alcança um processo `stdio` na máquina; os plugins nativos são
+todos `{"type": "http"}` apontando para endereços remotos.
 
-```json
-{
-  "mcpServers": {
-    "ementario": {
-      "command": "<projeto>\\scraper-tcerj\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "ementario"],
-      "cwd": "<projeto>\\scraper-tcerj",
-      "env": { "PYTHONPATH": "<projeto>\\scraper-tcerj", "PYTHONUTF8": "1" }
-    }
-  }
-}
-```
+Restam dois caminhos:
+
+1. **Conector HTTP** — o mesmo do ChatGPT (abaixo). Um endereço serve aos dois.
+2. **Extensão `.mcpb`** — `python empacotar_mcpb.py` gera
+   `dist/ementario.mcpb`, que se instala arrastando para Configurações →
+   Extensões. Roda por stdio, sem túnel e sem depender de a máquina estar
+   publicando nada. O pacote leva as dependências e o acervo dentro (≈17 MB),
+   porque o Claude Desktop não instala nada — só executa o que está lá; exige
+   apenas um Python 3.10+ no PATH.
 
 ### Ligar ao ChatGPT (remoto, HTTPS)
 
