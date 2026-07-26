@@ -188,7 +188,8 @@ para consultar a jurisprudência do TCE-RJ de dentro do Claude ou do ChatGPT.
 
 ```bash
 python -m ementario            # stdio — é o que o Claude consome
-python -m ementario --http     # HTTP em 127.0.0.1:8765 — é o que o ChatGPT exige
+python -m ementario --http     # HTTP em 127.0.0.1:8765
+python -m ementario.publicar   # HTTP + túnel HTTPS público — para o ChatGPT
 ```
 
 Ferramentas: `pesquisar_jurisprudencia`, `obter_documento`, `listar_documentos`,
@@ -199,6 +200,43 @@ A busca é pensada para pergunta de gente, não para sintaxe: ignora acento,
 descarta palavras vazias ("posso", "qual", "em") e, se exigir todos os termos
 não achar nada, repete aceitando qualquer um — avisando que a correspondência
 foi parcial. O banco é aberto **somente para leitura**.
+
+### Ligar ao Claude (local, stdio)
+
+Em `%APPDATA%\Claude\claude_desktop_config.json`, e reiniciar o aplicativo:
+
+```json
+{
+  "mcpServers": {
+    "ementario": {
+      "command": "<projeto>\\scraper-tcerj\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "ementario"],
+      "cwd": "<projeto>\\scraper-tcerj",
+      "env": { "PYTHONPATH": "<projeto>\\scraper-tcerj", "PYTHONUTF8": "1" }
+    }
+  }
+}
+```
+
+### Ligar ao ChatGPT (remoto, HTTPS)
+
+O ChatGPT não enxerga `localhost`: só conversa com servidor remoto. E o SDK
+bloqueia por padrão qualquer Host que não seja local — proteção contra DNS
+rebinding, sem a qual um site malicioso poderia falar com o servidor pelo
+navegador de quem o executa. Servir para fora exige **declarar o domínio**:
+
+```bash
+python -m ementario --http --dominio meu-endereco.exemplo.com
+```
+
+`python -m ementario.publicar` faz isso sozinho: levanta um túnel do
+Cloudflare, lê o endereço sorteado, sobe o servidor já autorizando aquele
+domínio e imprime a URL (`…/mcp`) para colar em Configurações → Conectores.
+Não pede conta, mas o endereço dura enquanto o processo estiver no ar e muda a
+cada execução — para URL fixa, é caso de hospedar o servidor e o SQLite.
+
+A liberação é por domínio exato, não curinga: publicar não abre o servidor para
+o resto do mundo, e o acesso local continua valendo.
 
 ### Link de conferência
 

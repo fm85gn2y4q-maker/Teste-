@@ -12,8 +12,44 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from .acervo import ROTULOS, Acervo
+
+# Hosts sempre aceitos: é por onde o servidor é usado na própria máquina.
+_LOCAIS = ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
+
+
+def seguranca_de_transporte(dominios: list[str] | None) -> TransportSecuritySettings:
+    """Monta a política de Host/Origin aceitos.
+
+    O SDK bloqueia por padrão qualquer Host que não seja local — é proteção
+    contra DNS rebinding, e sem ela um site malicioso poderia falar com o
+    servidor pelo navegador da vítima. Servir através de um túnel ou de um
+    endereço público exige declarar esse domínio aqui; não há curinga, a
+    comparação é exata.
+    """
+    hosts = list(_LOCAIS)
+    origens = [f"http://{h}" for h in _LOCAIS if "*" not in h]
+
+    for dominio in dominios or []:
+        limpo = dominio.strip().removeprefix("https://").removeprefix("http://")
+        limpo = limpo.rstrip("/")
+        if not limpo:
+            continue
+        hosts += [limpo, f"{limpo}:*"]
+        origens.append(f"https://{limpo}")
+
+    if dominios:
+        # O conector do ChatGPT chama de servidor, sem Origin, mas o painel de
+        # testes chama do navegador.
+        origens += ["https://chatgpt.com", "https://chat.openai.com"]
+
+    return TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=hosts,
+        allowed_origins=origens,
+    )
 
 INSTRUCOES = """
 Acervo de jurisprudência do Tribunal de Contas do Estado do Rio de Janeiro
@@ -53,9 +89,18 @@ def _caminho_padrao() -> Path:
     return Path(__file__).resolve().parent.parent / "dados" / "tcerj.sqlite"
 
 
-def construir(banco: str | Path | None = None, **ajustes: Any) -> FastMCP:
+def construir(
+    banco: str | Path | None = None,
+    dominios: list[str] | None = None,
+    **ajustes: Any,
+) -> FastMCP:
     acervo = Acervo(banco or _caminho_padrao())
-    mcp = FastMCP("ementario", instructions=INSTRUCOES, **ajustes)
+    mcp = FastMCP(
+        "ementario",
+        instructions=INSTRUCOES,
+        transport_security=seguranca_de_transporte(dominios),
+        **ajustes,
+    )
 
     @mcp.tool()
     def pesquisar_jurisprudencia(

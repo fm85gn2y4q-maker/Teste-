@@ -179,6 +179,31 @@ def test_servidor_expoe_as_ferramentas(acervo):
     assert {"search", "fetch"} <= nomes
 
 
+def test_sem_dominio_declarado_so_passa_requisicao_local():
+    """Padrão trancado: servir para fora exige dizer por onde."""
+    from ementario.servidor import seguranca_de_transporte
+
+    s = seguranca_de_transporte(None)
+    assert s.enable_dns_rebinding_protection is True
+    assert "localhost" in s.allowed_hosts
+    assert not any("cloudflare" in h or "chatgpt" in h for h in s.allowed_hosts)
+
+
+def test_dominio_declarado_e_liberado_sem_abrir_para_os_demais():
+    from ementario.servidor import seguranca_de_transporte
+
+    s = seguranca_de_transporte(["https://abc-def.trycloudflare.com/"])
+    # Aceita a URL completa e guarda só o host.
+    assert "abc-def.trycloudflare.com" in s.allowed_hosts
+    assert "https://abc-def.trycloudflare.com" in s.allowed_origins
+    assert "https://chatgpt.com" in s.allowed_origins
+    # Não vira curinga: o resto do mundo continua de fora.
+    assert "invasor.example.com" not in s.allowed_hosts
+    assert "*" not in s.allowed_hosts
+    # O acesso local não se perde ao publicar.
+    assert "localhost" in s.allowed_hosts
+
+
 def test_servidor_avisa_o_modelo_sobre_os_limites_da_base(acervo):
     from ementario.servidor import INSTRUCOES
 
