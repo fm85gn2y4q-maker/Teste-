@@ -67,8 +67,17 @@ CREATE TABLE IF NOT EXISTS documentos_oficiais (
     processo      TEXT,
     url           TEXT,
     paginas_total INTEGER NOT NULL DEFAULT 0,
-    -- Não entra na identidade; serve de controle de integridade.
+    -- Não entra na identidade; serve de controle de integridade e permite
+    -- reescrever o banco só quando o conteúdo de fato mudou.
     impressao     TEXT,
+    -- O estado da coleta é dado, não linha de log: distingue ausência
+    -- estrutural (o Tribunal não publicou) de falha passageira (a rede caiu),
+    -- e é o que permite retentar só o que faz sentido retentar.
+    --   ok | http_404 | sem_numero_acordao | erro_temporario | sem_texto
+    status_coleta    TEXT NOT NULL DEFAULT 'ok',
+    detalhe_status   TEXT,
+    ultima_tentativa TEXT,
+    ultima_coleta_ok TEXT,
     coletado_em   TEXT NOT NULL
 );
 
@@ -85,9 +94,31 @@ CREATE TABLE IF NOT EXISTS paginas (
 
 CREATE INDEX IF NOT EXISTS ix_paginas_documento ON paginas(documento_id);
 
+-- `content='paginas'` faz o índice apontar para a tabela original em vez de
+-- guardar uma segunda cópia do texto. Medido neste acervo: 131,9 -> 81,3 MB,
+-- sem perder `snippet()`. Em troca, o índice não se atualiza sozinho — daí os
+-- gatilhos abaixo, que são o padrão documentado para esse modo.
 CREATE VIRTUAL TABLE IF NOT EXISTS paginas_fts
 USING fts5(documento_id UNINDEXED, pagina UNINDEXED, texto,
+           content='paginas', content_rowid='rowid',
            tokenize='unicode61 remove_diacritics 2');
+
+CREATE TRIGGER IF NOT EXISTS paginas_apos_inserir AFTER INSERT ON paginas BEGIN
+    INSERT INTO paginas_fts(rowid, documento_id, pagina, texto)
+    VALUES (new.rowid, new.documento_id, new.pagina, new.texto);
+END;
+
+CREATE TRIGGER IF NOT EXISTS paginas_apos_remover AFTER DELETE ON paginas BEGIN
+    INSERT INTO paginas_fts(paginas_fts, rowid, documento_id, pagina, texto)
+    VALUES ('delete', old.rowid, old.documento_id, old.pagina, old.texto);
+END;
+
+CREATE TRIGGER IF NOT EXISTS paginas_apos_atualizar AFTER UPDATE ON paginas BEGIN
+    INSERT INTO paginas_fts(paginas_fts, rowid, documento_id, pagina, texto)
+    VALUES ('delete', old.rowid, old.documento_id, old.pagina, old.texto);
+    INSERT INTO paginas_fts(rowid, documento_id, pagina, texto)
+    VALUES (new.rowid, new.documento_id, new.pagina, new.texto);
+END;
 """
 
 _COLUNAS = (
@@ -121,6 +152,50 @@ class Armazenamento:
         for coluna in ("id_fonte",):
             if coluna not in existentes:
                 self.conexao.execute(f"ALTER TABLE documentos ADD COLUMN {coluna} TEXT")
+
+        oficiais = {
+            linha["name"]
+            for linha in self.conexao.execute("PRAGMA table_info(documentos_oficiais)")
+        }
+        if oficiais:
+            for coluna, definicao in (
+                ("status_coleta", "TEXT NOT NULL DEFAULT 'ok'"),
+                ("detalhe_status", "TEXT"),
+                ("ultima_tentativa", "TEXT"),
+                ("ultima_coleta_ok", "TEXT"),
+            ):
+                if coluna not in oficiais:
+                    self.conexao.execute(
+                        f"ALTER TABLE documentos_oficiais ADD COLUMN {coluna} {definicao}"
+                    )
+
+        self._migrar_indice_externo()
+
+    def _migrar_indice_externo(self) -> None:
+        """Converte o índice antigo, que guardava cópia do texto, no externo.
+
+        `CREATE VIRTUAL TABLE IF NOT EXISTS` não recria um índice já existente,
+        então um banco anterior manteria o formato antigo — e o dobro do
+        tamanho — para sempre.
+        """
+        linha = self.conexao.execute(
+            "SELECT sql FROM sqlite_master WHERE name = 'paginas_fts'"
+        ).fetchone()
+        if not linha or "content=" in (linha["sql"] or ""):
+            return
+
+        self.conexao.execute("DROP TABLE paginas_fts")
+        self.conexao.executescript(
+            """
+            CREATE VIRTUAL TABLE paginas_fts USING fts5(
+                documento_id UNINDEXED, pagina UNINDEXED, texto,
+                content='paginas', content_rowid='rowid',
+                tokenize='unicode61 remove_diacritics 2');
+            INSERT INTO paginas_fts(paginas_fts) VALUES('rebuild');
+            INSERT INTO paginas_fts(paginas_fts) VALUES('optimize');
+            """
+        )
+        self.conexao.commit()
 
     def __enter__(self) -> "Armazenamento":
         return self
@@ -186,17 +261,51 @@ class Armazenamento:
         ano: int,
         processo: str | None,
         url: str | None,
-        paginas_total: int,
-        impressao: str | None,
+        paginas_total: int = 0,
+        impressao: str | None = None,
+        status: str = "ok",
+        detalhe: str | None = None,
     ) -> None:
+        agora = datetime.now(timezone.utc).isoformat()
+        anterior = self.conexao.execute(
+            "SELECT ultima_coleta_ok, coletado_em FROM documentos_oficiais WHERE id = ?",
+            (identificador,),
+        ).fetchone()
+        # Uma tentativa que falha não apaga a data da última coleta bem
+        # sucedida: são informações diferentes.
+        coleta_ok = agora if status == "ok" else (
+            anterior["ultima_coleta_ok"] if anterior else None
+        )
+        primeiro = anterior["coletado_em"] if anterior else agora
+
         self.conexao.execute(
             "INSERT OR REPLACE INTO documentos_oficiais "
-            "(id, tipo, numero, ano, processo, url, paginas_total, impressao, coletado_em) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "(id, tipo, numero, ano, processo, url, paginas_total, impressao, "
+            " status_coleta, detalhe_status, ultima_tentativa, ultima_coleta_ok, "
+            " coletado_em) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (identificador, tipo, numero, ano, processo, url, paginas_total,
-             impressao, datetime.now(timezone.utc).isoformat()),
+             impressao, status, detalhe, agora, coleta_ok, primeiro),
         )
         self.conexao.commit()
+
+    def impressao_de(self, identificador: str) -> str | None:
+        linha = self.conexao.execute(
+            "SELECT impressao FROM documentos_oficiais WHERE id = ?", (identificador,)
+        ).fetchone()
+        return linha["impressao"] if linha else None
+
+    def pendencias(self) -> list[dict[str, Any]]:
+        """Documentos oficiais que ainda não têm inteiro teor, e por quê."""
+        return [
+            dict(l)
+            for l in self.conexao.execute(
+                "SELECT id, tipo, numero, ano, processo, status_coleta, "
+                "       detalhe_status, ultima_tentativa "
+                "FROM documentos_oficiais WHERE status_coleta <> 'ok' "
+                "ORDER BY ano DESC, CAST(numero AS INTEGER) DESC"
+            )
+        ]
 
     def oficiais_com_texto(self) -> set[str]:
         return {
@@ -213,20 +322,15 @@ class Armazenamento:
         documento recoletado com outra extração não fica com páginas das duas
         versões misturadas.
         """
+        # Os gatilhos mantêm o índice em dia: com conteúdo externo, mexer no
+        # índice à mão além disso o deixaria fora de sincronia.
         self.conexao.execute("DELETE FROM paginas WHERE documento_id = ?", (documento_id,))
-        self.conexao.execute(
-            "DELETE FROM paginas_fts WHERE documento_id = ?", (documento_id,)
-        )
         total = 0
         for pagina in paginas:
             self.conexao.execute(
                 "INSERT INTO paginas (documento_id, pagina, folha, texto) "
                 "VALUES (?, ?, ?, ?)",
                 (documento_id, pagina.numero, pagina.folha, pagina.texto),
-            )
-            self.conexao.execute(
-                "INSERT INTO paginas_fts (documento_id, pagina, texto) VALUES (?, ?, ?)",
-                (documento_id, pagina.numero, pagina.texto),
             )
             total += 1
         self.conexao.commit()

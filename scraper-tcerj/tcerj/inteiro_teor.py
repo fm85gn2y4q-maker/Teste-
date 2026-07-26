@@ -198,75 +198,108 @@ async def coletar(
     *,
     tipo=None,
     max_documentos: int | None = None,
+    reverificar: bool = False,
     ao_progresso=None,
-) -> tuple[int, int, int]:
-    """Baixa o inteiro teor dos documentos já catalogados que ainda não o têm.
+) -> dict[str, int]:
+    """Atualiza o inteiro teor: o que falta, o que ficou pendente, e só isso.
 
-    Retorna (documentos, páginas, falhas). É retomável por construção: a fila
-    é montada a partir do que falta, então interromper e recomeçar continua de
-    onde parou.
+    O portal não oferece `ETag` nem aceita `HEAD` — verificar se um documento
+    mudou custa o mesmo que rebaixá-lo. Por isso o padrão é **não** reconferir
+    o que já está guardado: `reverificar` existe para quando se quiser fazê-lo
+    de propósito. Nesse caso a impressão digital evita reescrever o banco
+    quando nada mudou, o que importa porque cada reescrita vira um arquivo
+    novo no histórico.
     """
     from .http import Cliente, ErroHttp
 
-    pendentes = armazenamento.oficiais_sem_texto(tipo=tipo)
-    if max_documentos is not None:
-        pendentes = pendentes[:max_documentos]
+    fila = armazenamento.oficiais_sem_texto(tipo=tipo)
+    if reverificar:
+        ja_tem = armazenamento.oficiais_com_texto()
+        conhecidos = {p["oficial"] for p in fila}
+        for linha in armazenamento.conexao.execute(
+            "SELECT id AS oficial, tipo, numero, ano, processo "
+            "FROM documentos_oficiais WHERE status_coleta = 'ok'"
+        ):
+            if linha["oficial"] in ja_tem and linha["oficial"] not in conhecidos:
+                fila.append(dict(linha))
 
-    log.info("Documentos oficiais sem inteiro teor: %d", len(pendentes))
-    documentos = paginas_gravadas = falhas = 0
+    if max_documentos is not None:
+        fila = fila[:max_documentos]
+
+    log.info("Documentos na fila: %d%s", len(fila),
+             " (incluindo reverificação)" if reverificar else "")
+    contagem = {"novos": 0, "atualizados": 0, "inalterados": 0,
+                "paginas": 0, "falhas": 0}
 
     async with Cliente(config) as cliente:
-        for pendente in pendentes:
+        for pendente in fila:
             oficial = pendente["oficial"]
             url = url_do_acordao(pendente["numero"], pendente["ano"])
+            comum = dict(
+                tipo=pendente["tipo"], numero=str(pendente["numero"]),
+                ano=pendente["ano"], processo=pendente["processo"], url=url,
+            )
+
+            def anotar(status: str, detalhe: str | None = None) -> None:
+                armazenamento.registrar_oficial(
+                    oficial, **comum, status=status, detalhe=detalhe
+                )
+
             try:
                 resposta = await cliente.obter(url)
             except ErroHttp as erro:
+                # 404 é ausência estrutural — o Tribunal não publicou. Os
+                # demais são transitórios e merecem nova tentativa depois.
+                estrutural = getattr(erro, "status", None) == 404
+                anotar("http_404" if estrutural else "erro_temporario", str(erro))
                 log.warning("Falha em %s: %s", oficial, erro)
-                armazenamento.marcar_visitado(url, "erro", str(erro))
-                falhas += 1
+                contagem["falhas"] += 1
                 continue
 
-            tipo_conteudo = resposta.headers.get("content-type", "")
-            if "pdf" not in tipo_conteudo.lower():
+            if "pdf" not in resposta.headers.get("content-type", "").lower():
                 # O portal responde 200 com página de erro quando o documento
                 # não está publicado; sem esta checagem, ela viraria "texto".
-                log.warning("%s não devolveu PDF (%s)", oficial, tipo_conteudo)
-                armazenamento.marcar_visitado(url, "sem_pdf", tipo_conteudo)
-                falhas += 1
+                anotar("sem_texto", resposta.headers.get("content-type"))
+                contagem["falhas"] += 1
                 continue
 
             try:
                 paginas = paginas_do_pdf(resposta.content)
             except Exception as erro:  # noqa: BLE001 - PDF de terceiro, formato imprevisível
-                log.warning("Não foi possível ler o PDF de %s: %s", oficial, erro)
-                armazenamento.marcar_visitado(url, "ilegivel", str(erro))
-                falhas += 1
+                anotar("erro_temporario", f"PDF ilegível: {erro}")
+                log.warning("PDF ilegível em %s: %s", oficial, erro)
+                contagem["falhas"] += 1
                 continue
 
             if not paginas:
-                log.warning("%s: PDF sem texto aproveitável", oficial)
-                armazenamento.marcar_visitado(url, "sem_texto")
-                falhas += 1
+                anotar("sem_texto", "PDF sem texto aproveitável")
+                contagem["falhas"] += 1
                 continue
 
-            paginas_gravadas += armazenamento.gravar_paginas(oficial, paginas)
+            impressao = impressao_digital(paginas)
+            if impressao == armazenamento.impressao_de(oficial):
+                # Mesmo conteúdo: não se toca no banco, só na data da conferência.
+                armazenamento.registrar_oficial(
+                    oficial, **comum, paginas_total=len(paginas),
+                    impressao=impressao, status="ok",
+                )
+                contagem["inalterados"] += 1
+                continue
+
+            novo = not armazenamento.impressao_de(oficial)
+            contagem["paginas"] += armazenamento.gravar_paginas(oficial, paginas)
             armazenamento.registrar_oficial(
-                oficial,
-                tipo=pendente["tipo"],
-                numero=str(pendente["numero"]),
-                ano=pendente["ano"],
-                processo=pendente["processo"],
-                url=url,
-                paginas_total=len(paginas),
-                impressao=impressao_digital(paginas),
+                oficial, **comum, paginas_total=len(paginas),
+                impressao=impressao, status="ok",
             )
             armazenamento.marcar_visitado(url, "ok")
-            documentos += 1
-            if ao_progresso and documentos % 25 == 0:
-                ao_progresso(documentos, paginas_gravadas, falhas)
+            contagem["novos" if novo else "atualizados"] += 1
 
-    return documentos, paginas_gravadas, falhas
+            feitos = contagem["novos"] + contagem["atualizados"]
+            if ao_progresso and feitos and feitos % 25 == 0:
+                ao_progresso(feitos, contagem["paginas"], contagem["falhas"])
+
+    return contagem
 
 
 # ---------------------------------------------------------------------------
@@ -313,8 +346,7 @@ def reparar(armazenamento, ao_progresso=None) -> dict[str, int]:
             Pagina(numero=linha["pagina"], folha=linha["folha"], texto=linha["texto"]),
         )
 
-    conexao.execute("DELETE FROM paginas")
-    conexao.execute("DELETE FROM paginas_fts")
+    conexao.execute("DELETE FROM paginas")  # os gatilhos limpam o índice
     conexao.commit()
 
     documentos = paginas_finais = 0

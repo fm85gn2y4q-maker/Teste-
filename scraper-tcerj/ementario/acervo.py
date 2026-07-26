@@ -381,12 +381,22 @@ class Acervo:
         relator: str | None,
         limite: int,
     ) -> list[Trecho]:
+        # O índice tem conteúdo externo: junta-se por rowid, e não por chave.
+        # E a página pertence ao documento oficial, do qual pendem uma ou mais
+        # ementas — pega-se uma delas para compor a citação, sem multiplicar o
+        # mesmo trecho por cada curadoria.
         sql = [
-            "SELECT d.*, f.pagina, p.folha,",
+            "SELECT d.*, o.numero AS numero_oficial, o.ano AS ano_oficial,",
+            "       o.processo AS processo_oficial, o.tipo AS tipo_oficial,",
+            "       p.pagina, p.folha,",
             "       snippet(paginas_fts, 2, '\x02', '\x03', ' … ', 32) AS trecho",
             "FROM paginas_fts f",
-            "JOIN documentos d ON d.id = f.documento_id",
-            "JOIN paginas p ON p.documento_id = f.documento_id AND p.pagina = f.pagina",
+            "JOIN paginas p ON p.rowid = f.rowid",
+            "JOIN documentos_oficiais o ON o.id = p.documento_id",
+            "LEFT JOIN documentos d ON d.id = (",
+            "    SELECT x.id FROM documentos x",
+            "    WHERE x.tipo = o.tipo AND x.numero = o.numero AND x.ano = o.ano",
+            "    ORDER BY x.id LIMIT 1)",
             "WHERE paginas_fts MATCH ?",
         ]
         parametros: list[Any] = [expressao]
@@ -407,6 +417,8 @@ class Acervo:
 
         achados = []
         for linha in self.conexao.execute(" ".join(sql), parametros):
+            if linha["id"] is None:
+                continue  # documento oficial sem ementa catalogada
             base = self._resultado(linha, "")
             bruto = linha["trecho"] or ""
             # Os delimitadores invisíveis marcam o que casou; extraí-los diz ao
@@ -429,12 +441,20 @@ class Acervo:
         """Páginas contíguas de um documento — para ler o argumento inteiro.
 
         O raciocínio jurídico atravessa a quebra de página; ler só a página que
-        casou frequentemente mostra a conclusão sem a premissa.
+        casou frequentemente mostra a conclusão sem a premissa. Aceita tanto o
+        identificador do documento oficial quanto o de uma de suas ementas.
         """
+        oficial = identificador
+        registro = self.conexao.execute(
+            "SELECT tipo, numero, ano FROM documentos WHERE id = ?", (identificador,)
+        ).fetchone()
+        if registro and registro["numero"]:
+            oficial = f"{registro['tipo']}-{registro['numero']}-{registro['ano']}"
+
         linhas = self.conexao.execute(
             "SELECT pagina, folha, texto FROM paginas "
             "WHERE documento_id = ? AND pagina BETWEEN ? AND ? ORDER BY pagina",
-            (identificador, inicio, fim),
+            (oficial, inicio, fim),
         ).fetchall()
         return [
             {"pagina": l["pagina"], "folha": l["folha"], "texto": l["texto"]}

@@ -131,20 +131,28 @@ def cmd_inteiro_teor(args: argparse.Namespace) -> int:
               flush=True)
 
     with Armazenamento(banco) as armazenamento:
-        documentos, paginas, falhas = asyncio.run(
+        contagem = asyncio.run(
             coletar(
                 config,
                 armazenamento,
                 tipo=_tipo(args.tipo),
                 max_documentos=args.max_documentos,
+                reverificar=args.reverificar,
                 ao_progresso=progresso,
             )
         )
         resumo = armazenamento.estatisticas_inteiro_teor()
+        pendentes = armazenamento.pendencias()
 
-    print(f"\nInteiro teor: {documentos} documentos, {paginas} páginas, {falhas} falhas.")
+    print(f"\nNovos: {contagem['novos']} | atualizados: {contagem['atualizados']} "
+          f"| inalterados: {contagem['inalterados']} | falhas: {contagem['falhas']}")
+    print(f"Páginas gravadas nesta execução: {contagem['paginas']}")
     print(f"Acumulado: {resumo['documentos']} documentos, {resumo['paginas']} páginas, "
           f"{resumo['caracteres']:,} caracteres.")
+    if pendentes:
+        print(f"\nPendências registradas ({len(pendentes)}):")
+        for p in pendentes[:10]:
+            print(f"  {p['tipo']} {p['numero']}/{p['ano']}: {p['status_coleta']}")
     return 0
 
 
@@ -289,6 +297,13 @@ def construir_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-documentos", type=int)
     p.add_argument("--intervalo", type=float, help="segundos entre requisições")
     p.add_argument("--banco")
+    p.add_argument(
+        "--reverificar",
+        action="store_true",
+        help="rebaixa também o que já está guardado, para conferir se mudou. "
+             "O portal não oferece meio barato de checar isso, então é o "
+             "mesmo custo de uma coleta — use quando houver motivo.",
+    )
     p.set_defaults(func=cmd_inteiro_teor)
 
     p = sub.add_parser(
