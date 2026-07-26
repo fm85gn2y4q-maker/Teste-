@@ -1,0 +1,19 @@
+# Configuração do Ementário no Render.
+#
+# O nome do serviço define o endereço público (https://NOME.onrender.com) e
+# precisa ser único entre todos os usuários do Render. Se trocar o `name`,
+# troque também o `EMENTARIO_DOMINIOS` abaixo: o servidor recusa Host que não
+# conheça, e a proteção não usa curinga.
+services:
+  - type: web
+    name: ementario-tcerj
+    runtime: docker
+    rootDir: scraper-tcerj
+    dockerfilePath: ./Dockerfile
+    plan: free
+    # Entre as regiões do plano gratuito, virginia é a de menor latência para
+    # o Brasil.
+    region: virginia
+    envVars:
+      - key: EMENTARIO_DOMINIOS
+        value: ementario-tcerj.onrender.com

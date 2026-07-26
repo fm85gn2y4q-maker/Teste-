@@ -48,12 +48,16 @@ __pycache__/
 .pytest_cache/
 
 # saída da coleta
-dados/
-*.sqlite
+**/dados/*
 *.sqlite-wal
 *.sqlite-shm
 descoberta.json
 config.json
+
+# O acervo é exceção: a hospedagem constrói a imagem a partir do repositório,
+# então o banco precisa estar versionado. São ~10 MB de atos públicos do
+# TCE-RJ, já disponíveis no portal do Tribunal.
+!**/dados/tcerj.sqlite
 
 # empacotamento da extensão (leva o acervo e as dependências dentro)
 build/

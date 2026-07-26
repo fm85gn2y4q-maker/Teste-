@@ -23,14 +23,99 @@ pagamento por você. Os passos de console e os comandos são seus; a preparaçã
 não conheça — proteção contra DNS rebinding. Então são dois passos: publicar,
 descobrir a URL, declarar a URL, republicar. Não dá para inverter a ordem.
 
-## Google Cloud Run — o caminho recomendado
+## Render — sem cartão, publicando a partir do GitHub
 
-Foi o que você perguntou, e é de fato o que melhor serve aqui: escala a zero
-(não paga por ficar parado), nível gratuito permanente e região em São Paulo.
+O Render tem uma vantagem sobre o Cloud Run aqui: **o endereço é previsível**
+(`https://NOME.onrender.com`). Dá para declarar o domínio antes de publicar, e
+o vai-e-volta descrito acima desaparece.
 
-O nível gratuito cobre folgadamente um uso pessoal, mas **exige conta de
-faturamento com cartão** — mesmo sem cobrar. Se isso for impeditivo, veja as
-alternativas mais abaixo.
+Em troca, duas limitações reais do plano gratuito:
+
+- **O serviço dorme.** Depois de ~15 minutos sem uso ele desliga, e a primeira
+  consulta seguinte demora perto de um minuto para responder — tempo de subir o
+  contêiner de novo. As consultas seguintes são imediatas. Para pesquisa
+  pontual, incomoda; para uso contínuo numa mesma sessão, não.
+- **Publica a partir de um repositório Git.** Não há envio de pasta local, o
+  que traz a decisão abaixo.
+
+### O banco precisa estar no repositório
+
+O Render constrói a imagem a partir do que está no Git, e a imagem carrega o
+acervo. São ~10 MB.
+
+Se o repositório for **público**, o acervo fica público junto. Para a
+jurisprudência do TCE-RJ isso não é problema: são atos públicos, já
+disponíveis no portal do Tribunal, e o que existe aqui é uma cópia organizada.
+Ainda assim é uma escolha sua, e há alternativa: criar um repositório privado
+só para publicação — o plano gratuito do Render também constrói a partir de
+repositório privado.
+
+O `.gitignore` já abre exceção para `dados/tcerj.sqlite` e mantém de fora o
+resto (banco de teste, exports).
+
+### 1. Enviar o repositório
+
+```bash
+git add scraper-tcerj/dados/tcerj.sqlite render.yaml .gitignore
+```
+
+```bash
+git commit -m "Acervo e configuracao do Render para publicacao"
+```
+
+```bash
+git push
+```
+
+### 2. Criar o serviço
+
+Em <https://render.com>, entre com a conta do GitHub e autorize o acesso ao
+repositório. Então **New → Blueprint**, aponte para o repositório e confirme: o
+`render.yaml` já traz nome, região, plano e variável de ambiente.
+
+Se o nome `ementario-tcerj` estiver ocupado, o Render avisa. Escolha outro e
+**troque nos dois lugares** do `render.yaml` — o `name` e o `EMENTARIO_DOMINIOS`
+— antes de confirmar. Eles têm de bater.
+
+Preferindo configurar na mão: **New → Web Service**, repositório, *Root
+Directory* `scraper-tcerj`, *Runtime* Docker, plano Free, e a variável
+`EMENTARIO_DOMINIOS` com `NOME.onrender.com` (sem `https://`, sem barra final).
+
+### 3. Conferir
+
+A primeira construção leva alguns minutos. Quando o painel mostrar *Live*:
+
+```bash
+curl -s -X POST https://SEU-NOME.onrender.com/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"teste\",\"version\":\"1\"}}}"
+```
+
+Tem que voltar `"serverInfo":{"name":"ementario"...}`.
+
+**421** significa que `EMENTARIO_DOMINIOS` não bate com o endereço — quase
+sempre por ter ficado o nome antigo depois de trocar o do serviço.
+
+### 4. Ligar ao Claude
+
+**Configurações → Conectores → Adicionar conector personalizado**, com
+`https://SEU-NOME.onrender.com/mcp` e autenticação **Nenhuma**.
+
+### Atualizar o acervo depois
+
+Nova coleta muda o `dados/tcerj.sqlite`. Basta versionar e enviar: o Render
+reconstrói sozinho a cada envio para o repositório.
+
+```bash
+git add scraper-tcerj/dados/tcerj.sqlite && git commit -m "Atualiza o acervo" && git push
+```
+
+## Google Cloud Run — quando o cartão não for problema
+
+Tecnicamente é o melhor dos dois: escala a zero, nível gratuito permanente,
+região em São Paulo e sem o sono de 15 minutos do Render — o tempo de partida
+a frio é de segundos, não de um minuto.
+
+O preço é **exigir conta de faturamento com cartão**, mesmo sem cobrar nada
+dentro do nível gratuito.
 
 ### 1. Projeto e ferramenta
 
@@ -95,16 +180,24 @@ segundos a mais — o contêiner precisa subir. As seguintes são imediatas. Dá
 para eliminar isso mantendo uma instância mínima ligada, mas aí sai do
 gratuito.
 
-## Alternativas
+## Outras opções
 
-Se o cartão for impeditivo, há serviços que publicam contêiner sem exigir
-faturamento — o **Hugging Face Spaces** com SDK Docker é o mais direto deles, e
-o mesmo `Dockerfile` serve. **Render** e **Fly.io** também rodam este contêiner.
-
-Não descrevo os passos de cada um porque os termos dos níveis gratuitos mudam
-com frequência e eu não os verifiquei agora; confira as condições atuais antes
-de escolher. O que está pronto aqui — imagem, configuração por ambiente,
+**Hugging Face Spaces** com SDK Docker e **Fly.io** também rodam este mesmo
+contêiner. Não descrevo os passos porque os termos dos níveis gratuitos mudam
+com frequência e eu não os verifiquei; confira as condições atuais antes de
+escolher. O que está pronto aqui — imagem, configuração por ambiente,
 verificação — vale para qualquer um deles.
+
+## O que eu não verifiquei
+
+Não construí a imagem nem publiquei em nenhum destes serviços: não há Docker
+nesta máquina, e criar contas e inserir dados de pagamento é coisa sua. O que
+foi testado é o comportamento do servidor sob as variáveis de ambiente que a
+hospedagem define — porta lida de `PORT`, domínios de `EMENTARIO_DOMINIOS`,
+domínio não declarado recusado com 421.
+
+Os termos dos planos gratuitos (cartão, tempo de sono, regiões) mudam e valem
+pelo que estavam quando isto foi escrito. Confirme no serviço.
 
 ## Atualizar o acervo depois
 
