@@ -216,9 +216,27 @@ Restam dois caminhos:
 2. **Extensão `.mcpb`** — `python empacotar_mcpb.py` gera
    `dist/ementario.mcpb`, que se instala arrastando para Configurações →
    Extensões. Roda por stdio, sem túnel e sem depender de a máquina estar
-   publicando nada. O pacote leva as dependências e o acervo dentro (≈17 MB),
-   porque o Claude Desktop não instala nada — só executa o que está lá; exige
-   apenas um Python 3.10+ no PATH.
+   publicando nada.
+
+O pacote leva o acervo e as dependências dentro, porque o Claude Desktop não
+instala nada — só executa o que está lá. As dependências vão **separadas por
+versão de Python** (`lib/py312`, `lib/py313`, …): `pydantic_core` é binário
+compilado e o `.pyd` de uma versão não carrega em outra. O `pywin32` também
+precisa de ajuda, porque instalado com `pip --target` não roda seu
+pós-instalação e deixa `pywintypes` em `win32/lib` e as DLLs em
+`pywin32_system32`, fora do `sys.path` — o `main.py` gerado acrescenta os dois.
+
+O Claude Desktop resolve `python` pelo **PATH dele**, que pode não ser o seu. Se
+o primeiro que ele achar não servir, fixe um no manifesto:
+
+```bash
+python empacotar_mcpb.py --python "C:\caminho\para\python.exe"
+```
+
+O empacotador recusa um interpretador que não consiga importar o que o servidor
+usa. Vale a checagem: um Python com a biblioteca padrão incompleta responde
+`--version` sem reclamar e só falha quando o servidor sobe, dentro do Claude,
+onde o erro fica escondido num log.
 
 ### Ligar ao ChatGPT (remoto, HTTPS)
 

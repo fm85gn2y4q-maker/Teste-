@@ -27,15 +27,50 @@ CONSTRUCAO = RAIZ / "build" / "mcpb"
 DESTINO = RAIZ / "dist" / "ementario.mcpb"
 BANCO = RAIZ / "dados" / "tcerj.sqlite"
 
+# Versões de Python para as quais as dependências são empacotadas. O Claude
+# Desktop não usa o interpretador do projeto: ele pega o primeiro `python` do
+# PATH dele, que aqui é o 3.13. Como `pydantic_core` é binário compilado, um
+# .pyd de cp312 não carrega no 3.13 — daí um conjunto por versão.
+VERSOES = ("3.12", "3.13", "3.14")
+
 ENTRADA = '''"""Ponto de entrada da extensão: sobe o Ementário por stdio."""
 import os
 import sys
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-# As dependências viajam dentro do pacote; o Claude Desktop não instala nada.
-sys.path.insert(0, str(AQUI / "lib"))
+
+# As dependências viajam dentro do pacote, separadas por versão de Python:
+# `pydantic_core` é compilado, e o binário de uma versão não serve para outra.
+MARCA = f"py{sys.version_info.major}{sys.version_info.minor}"
+BIBLIOTECAS = AQUI / "lib" / MARCA
+if not BIBLIOTECAS.is_dir():
+    disponiveis = sorted(p.name for p in (AQUI / "lib").glob("py*"))
+    print(
+        f"Ementário: sem dependências para Python {sys.version_info.major}."
+        f"{sys.version_info.minor}. O pacote traz: {', '.join(disponiveis) or 'nenhuma'}.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+sys.path.insert(0, str(BIBLIOTECAS))
 sys.path.insert(0, str(AQUI))
+
+# O `mcp` importa `pywintypes` no Windows. Instalado com `pip --target`, o
+# pywin32 não roda seu pós-instalação: os módulos ficam em `win32/lib` e as
+# DLLs em `pywin32_system32`, nenhum dos dois alcançável por padrão.
+for _extra in ("win32", "pythonwin"):
+    _caminho = BIBLIOTECAS / _extra
+    if _caminho.is_dir():
+        sys.path.insert(0, str(_caminho))
+_lib_win32 = BIBLIOTECAS / "win32" / "lib"
+if _lib_win32.is_dir():
+    sys.path.insert(0, str(_lib_win32))
+
+_dlls = BIBLIOTECAS / "pywin32_system32"
+if _dlls.is_dir():
+    os.add_dll_directory(str(_dlls))
+    os.environ["PATH"] = str(_dlls) + os.pathsep + os.environ.get("PATH", "")
 
 os.environ.setdefault("EMENTARIO_BANCO", str(AQUI.parent / "dados" / "tcerj.sqlite"))
 
@@ -61,6 +96,10 @@ MANIFESTO = {
         "type": "python",
         "entry_point": "server/main.py",
         "mcp_config": {
+            # Trocado por um caminho absoluto quando se passa --python. O
+            # Claude Desktop resolve "python" pelo PATH dele, e o primeiro
+            # encontrado pode não servir — o desta máquina, 3.13, está com a
+            # biblioteca padrão incompleta.
             "command": "python",
             "args": ["${__dirname}/server/main.py"],
             "env": {"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
@@ -123,7 +162,36 @@ def validar(pasta: Path) -> bool:
     return True
 
 
-def empacotar() -> int:
+def conferir_interpretador(exe: str) -> bool:
+    """Recusa um interpretador que não consiga importar o que o servidor usa.
+
+    Um Python com a biblioteca padrão incompleta instala e roda `--version`
+    sem reclamar, e só falha quando o servidor sobe — dentro do Claude, onde o
+    erro fica escondido num log.
+    """
+    prova = "import html.entities, sqlite3, asyncio, json; print('ok')"
+    resultado = subprocess.run([exe, "-I", "-c", prova],
+                               capture_output=True, text=True)
+    if resultado.returncode == 0:
+        return True
+    print(f"  {exe}\n  não serve: "
+          f"{resultado.stderr.strip().splitlines()[-1][:110]}", file=sys.stderr)
+    return False
+
+
+def empacotar(python: str | None = None) -> int:
+    if python:
+        if not Path(python).exists():
+            print(f"Interpretador não encontrado: {python}", file=sys.stderr)
+            return 1
+        print("Conferindo o interpretador escolhido…")
+        if not conferir_interpretador(python):
+            return 1
+        MANIFESTO["server"]["mcp_config"]["command"] = python
+        versao = subprocess.run([python, "--version"], capture_output=True,
+                                text=True).stdout.strip()
+        print(f"  fixado em {versao}")
+
     if not BANCO.exists():
         print(f"Acervo não encontrado em {BANCO}. Rode a coleta antes.", file=sys.stderr)
         return 1
@@ -140,12 +208,26 @@ def empacotar() -> int:
     )
     (servidor / "main.py").write_text(ENTRADA, encoding="utf-8")
 
-    print("Instalando as dependências dentro do pacote…")
-    subprocess.run(
-        [sys.executable, "-m", "pip", "install", "--quiet", "--target",
-         str(servidor / "lib"), "mcp>=1.28"],
-        check=True,
-    )
+    for versao in VERSOES:
+        marca = "py" + versao.replace(".", "")
+        print(f"Instalando as dependências para Python {versao}…")
+        resultado = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "--quiet",
+             "--target", str(servidor / "lib" / marca),
+             "--python-version", versao, "--only-binary=:all:", "mcp>=1.28"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+        if resultado.returncode != 0:
+            # Uma versão sem rodas publicadas ainda não é motivo para desistir:
+            # o pacote continua servindo as demais.
+            print(f"  aviso: sem pacotes para {versao}, seguindo sem ela.")
+            shutil.rmtree(servidor / "lib" / marca, ignore_errors=True)
+
+    disponiveis = sorted(p.name for p in (servidor / "lib").glob("py*"))
+    if not disponiveis:
+        print("Nenhuma dependência empacotada.", file=sys.stderr)
+        return 1
+    print("  versões no pacote:", ", ".join(disponiveis))
 
     print("Copiando o acervo…")
     (CONSTRUCAO / "dados").mkdir()
@@ -176,4 +258,17 @@ def empacotar() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(empacotar())
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="python empacotar_mcpb.py",
+        description="Empacota o Ementário como extensão do Claude Desktop.",
+    )
+    parser.add_argument(
+        "--python",
+        metavar="EXE",
+        help="fixa o interpretador no manifesto, em vez de deixar o Claude "
+             "escolher pelo PATH. Use quando o Python que ele acha primeiro "
+             "não servir.",
+    )
+    raise SystemExit(empacotar(parser.parse_args().python))
