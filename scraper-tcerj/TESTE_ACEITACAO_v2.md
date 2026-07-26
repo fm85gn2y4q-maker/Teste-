@@ -119,4 +119,45 @@ Veredicto:
 
 # Resultados
 
-_A preencher._
+## Primeira rodada — 26/07/2026
+
+**Tentativa inválida, registrada porque a lição importa.** Os dois clientes
+tinham a v1 em cache: 6 ferramentas, sem `pesquisar_inteiro_teor`, e a
+cobertura ainda declarando "não há inteiro teor". Ambos responderam "não
+localizado" à pergunta 1. Foi preciso **remover e recriar o conector** — desligar
+e religar não bastou.
+
+## Segunda rodada — 26/07/2026, conectores recriados
+
+Critério de versão conferido antes: 1.042 documentos com inteiro teor.
+
+| | ChatGPT | Claude |
+|---|---|---|
+| 1. compensação | Passou muito bem | Passou |
+| 2. designação formal | **Passou muito bem** | Passou |
+| 3. projeto básico | Passou muito bem | Passou |
+| 4. subcontratação | Passou | **Falha moderada** |
+| 5. fiscal e medição | Passou muito bem | Passou |
+
+**Nenhuma falha grave.** Nenhum dos dois atribuiu razão de defesa ao Tribunal.
+Ambos marcaram inferência própria como inferência, e declararam o limite da
+curadoria sem serem lembrados. Todas as citações conferidas contra o acervo —
+nenhuma inventada; uma data errada no Claude (43632/2025).
+
+**A prova do ganho:** a pergunta 1 foi "não localizado" na v1 e, 40 minutos
+depois, veio com precedente, página e link — Acórdão 58739/2023, *"sem
+compensação entre eles"*. Única variável: o inteiro teor.
+
+### Duas pendências reais
+
+**A leitura além da página ainda não é reflexo.** Na pergunta 4, o Claude parou
+na página que casou e respondeu "Sim, é vedada", categórico. A ressalva —
+*"desde que evidenciada a supervisão e o controle do titular da notória
+especialização"* — está na página seguinte. O ChatGPT leu adiante e distinguiu
+núcleo de tarefa acessória. A instrução existe; não bastou.
+
+**Os casos-armadilha não foram alcançados.** Os Acórdãos 54691/2025 (defesa
+acolhida) e 6930/2025 (razões de defesa) não apareceram no ranqueamento —
+ambos estão no acervo, com 37 e 28 páginas. Os dois modelos acertaram sem
+enfrentar os casos que os testariam. O mecanismo de proveniência ainda não foi
+posto sob pressão.
