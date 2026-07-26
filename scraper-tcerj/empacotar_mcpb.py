@@ -79,8 +79,48 @@ MANIFESTO = {
         {"name": "fetch", "description": "Recupera um documento pelo identificador."},
     ],
     "keywords": ["jurisprudência", "TCE-RJ", "direito", "contas públicas"],
-    "compatibility": {"platforms": ["win32"], "python_version": ">=3.10"},
+    # `compatibility` fica de fora de propósito. É opcional, e foi o único
+    # ponto que o Claude Desktop recusou ("Unrecognized key(s): python_version").
+    # Sem um validador funcionando aqui para conferir a forma correta, declarar
+    # menos é mais seguro do que chutar outra chave e falhar de novo na
+    # instalação — que é onde o erro aparece.
 }
+
+
+def validar(pasta: Path) -> bool:
+    """Passa o manifesto pelo validador oficial, se houver Node por perto.
+
+    Empacotar não prova nada: um manifesto com uma chave fora do lugar zipa
+    igual e só falha na hora de instalar, com uma mensagem que aparece na tela
+    do usuário e não no build.
+
+    Validador indisponível não é manifesto inválido: se o `npx` não roda, o que
+    se sabe é que não se sabe — o pacote sai, com aviso.
+    """
+    npx = shutil.which("npx") or shutil.which("npx.cmd")
+    if not npx:
+        print("  aviso: npx ausente, manifesto NÃO validado.")
+        return True
+
+    resultado = subprocess.run(
+        [npx, "--yes", "@anthropic-ai/mcpb", "validate", str(pasta / "manifest.json")],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    saida = (resultado.stdout + resultado.stderr).strip()
+    if resultado.returncode == 0:
+        print("  manifesto válido.")
+        return True
+
+    veredito = any(
+        marca in saida.lower()
+        for marca in ("invalid manifest", "unrecognized key", "validation")
+    )
+    if veredito:
+        print("  " + "\n  ".join(saida.splitlines()[-8:]))
+        return False
+
+    print("  aviso: o validador não pôde ser executado; manifesto NÃO validado.")
+    return True
 
 
 def empacotar() -> int:
@@ -114,6 +154,11 @@ def empacotar() -> int:
     (CONSTRUCAO / "manifest.json").write_text(
         json.dumps(MANIFESTO, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+
+    print("Validando o manifesto…")
+    if not validar(CONSTRUCAO):
+        print("\nManifesto inválido; nada foi empacotado.", file=sys.stderr)
+        return 1
 
     DESTINO.parent.mkdir(parents=True, exist_ok=True)
     if DESTINO.exists():
