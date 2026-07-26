@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 
@@ -20,8 +21,13 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="serve por HTTP em vez de stdio (necessário para o ChatGPT)",
     )
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--porta", type=int, default=8765)
+    # Em hospedagem, host/porta/domínio vêm do ambiente: o serviço sorteia a
+    # porta (PORT é o padrão do Cloud Run e afins) e o endereço público só se
+    # conhece depois do primeiro deploy.
+    parser.add_argument("--host", default=os.environ.get("EMENTARIO_HOST", "127.0.0.1"))
+    parser.add_argument(
+        "--porta", type=int, default=int(os.environ.get("PORT", "8765"))
+    )
     parser.add_argument("--banco", help="caminho do SQLite (padrão: dados/tcerj.sqlite)")
     parser.add_argument(
         "--dominio",
@@ -34,15 +40,21 @@ def main(argv: list[str] | None = None) -> int:
 
     from .servidor import construir
 
+    # EMENTARIO_DOMINIOS aceita vários separados por vírgula: em hospedagem o
+    # endereço vem de fora, e não da linha de comando.
+    dominios = list(args.dominio or [])
+    do_ambiente = os.environ.get("EMENTARIO_DOMINIOS", "")
+    dominios += [d.strip() for d in do_ambiente.split(",") if d.strip()]
+
     ajustes = {"host": args.host, "port": args.porta} if args.http else {}
     try:
-        servidor = construir(args.banco, dominios=args.dominio, **ajustes)
+        servidor = construir(args.banco, dominios=dominios or None, **ajustes)
     except FileNotFoundError as erro:
         print(f"Erro: {erro}", file=sys.stderr)
         return 1
 
     if args.http:
-        alcance = ", ".join(args.dominio) if args.dominio else "somente local"
+        alcance = ", ".join(dominios) if dominios else "somente local"
         print(f"Ementário em http://{args.host}:{args.porta}/mcp  ({alcance})",
               file=sys.stderr)
 

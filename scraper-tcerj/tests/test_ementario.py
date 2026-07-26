@@ -141,6 +141,38 @@ def test_url_cai_para_o_melhor_endereco_disponivel(acervo):
     assert acordao.url == acordao.url_documento  # PDF tem precedência
 
 
+def test_separa_descritores_da_tese(acervo):
+    """Do que tratou o julgado e o que ele decidiu são coisas distintas."""
+    d = acervo.pesquisar("capital social")[0][0].para_dict()
+    assert d["descritores"] == ["LICITAÇÃO", "CAPITAL SOCIAL INTEGRALIZADO"]
+    assert d["tese"].startswith("A exigência de capital social")
+    assert "LICITAÇÃO." not in d["tese"]  # a indexação não é o entendimento
+
+
+def test_ementa_toda_em_caixa_alta_nao_e_dividida(acervo):
+    """Nas respostas a consulta não há tese em prosa: dividir inventaria uma."""
+    from ementario.acervo import separar_ementa
+
+    bruta = "CONSULTA. DÚVIDA A RESPEITO DO PRAZO.\nCONHECIMENTO. ARQUIVAMENTO."
+    descritores, tese = separar_ementa(bruta)
+    assert descritores == []
+    assert tese == bruta
+
+
+def test_sumula_sem_linha_de_descritores(acervo):
+    d = acervo.pesquisar("visita tecnica")[0][0].para_dict()
+    assert d["descritores"] == []
+    assert d["tese"].startswith("A previsão de obrigatoriedade")
+
+
+def test_instrucoes_exigem_explicacao_e_link():
+    from ementario.servidor import INSTRUCOES
+
+    for exigencia in ("Do que tratou", "como se aplica", "Link de conferência",
+                      "url_inteiro_teor", "contrário"):
+        assert exigencia in INSTRUCOES
+
+
 def test_cobertura_declara_volumes_e_limites(acervo):
     c = acervo.cobertura()
     assert c["total_de_documentos"] == 2

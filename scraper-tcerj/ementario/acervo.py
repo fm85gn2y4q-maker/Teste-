@@ -106,6 +106,38 @@ def montar_consulta_fts(texto: str, operador: str = "AND") -> str:
     return f" {operador} ".join(partes)
 
 
+def _quase_toda_maiuscula(texto: str) -> bool:
+    letras = [c for c in texto if c.isalpha()]
+    if not letras:
+        return False
+    return sum(1 for c in letras if c.isupper()) / len(letras) > 0.85
+
+
+def separar_ementa(ementa: str | None) -> tuple[list[str], str]:
+    """Divide a ementa em descritores e tese.
+
+    O padrão do TCE-RJ na Jurisprudência Selecionada é uma primeira linha de
+    descritores em caixa alta ("LICITAÇÃO. VISITA TÉCNICA. HABILITAÇÃO.")
+    seguida da tese em prosa. Separar os dois permite dizer *do que tratou* o
+    julgado antes de afirmar *o que ele decidiu* — e evita que a linha de
+    indexação seja lida como se fosse o entendimento firmado.
+
+    Nas respostas a consulta a ementa inteira vem em caixa alta; ali não há o
+    que separar, e forçar a divisão inventaria uma tese que não existe.
+    """
+    if not ementa:
+        return [], ""
+    texto = ementa.strip()
+    if _quase_toda_maiuscula(texto):
+        return [], texto
+
+    cabeca, _, resto = texto.partition("\n")
+    if resto.strip() and _quase_toda_maiuscula(cabeca):
+        descritores = [d.strip() for d in cabeca.split(".") if d.strip()]
+        return descritores, resto.strip()
+    return [], texto
+
+
 def montar_url_pdf(tipo: str, numero: str | None, ano: int | None) -> str | None:
     """Endereço do PDF do acórdão, quando a espécie tiver um."""
     if tipo != "acordao" or not numero or not ano:
@@ -142,11 +174,16 @@ class Resultado:
         return self.url_documento or self.url_processo or self.url_portal
 
     def para_dict(self) -> dict[str, Any]:
+        descritores, tese = separar_ementa(self.ementa)
         return {
             "id": self.id,
             "especie": ROTULOS.get(self.tipo, self.tipo),
             "citacao": self.citacao,
             "trecho": self.trecho,
+            # Do que tratou o julgado (indexação oficial do Tribunal).
+            "descritores": descritores,
+            # O que ficou decidido — é isto que fundamenta.
+            "tese": tese,
             "ementa": self.ementa,
             "relator": self.relator,
             "processo": self.processo,

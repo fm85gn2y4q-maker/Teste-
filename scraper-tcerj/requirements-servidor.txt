@@ -1,0 +1,4 @@
+# Só o que o servidor MCP precisa em produção.
+# A coleta (playwright, httpx, beautifulsoup4, lxml) roda na sua máquina e não
+# vai para a imagem: ela apenas serve o acervo já coletado.
+mcp>=1.28
