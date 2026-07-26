@@ -497,22 +497,57 @@ class Acervo:
         ]
         macro_temas = sorted({t.strip('[]"') for t in temas if t})
 
+        # Duas contagens que não podem ser confundidas: quantos documentos
+        # oficiais estão registrados e quantos têm o inteiro teor de fato
+        # guardado. A diferença são as pendências.
+        com_texto = self.conexao.execute(
+            "SELECT COUNT(DISTINCT documento_id) FROM paginas"
+        ).fetchone()[0]
+        paginas = self.conexao.execute("SELECT COUNT(*) FROM paginas").fetchone()[0]
+        caracteres = self.conexao.execute(
+            "SELECT COALESCE(SUM(LENGTH(texto)), 0) FROM paginas"
+        ).fetchone()[0]
+        pendencias = [
+            {"situacao": l["status_coleta"], "quantidade": l["n"]}
+            for l in self.conexao.execute(
+                "SELECT status_coleta, COUNT(*) n FROM documentos_oficiais "
+                "WHERE status_coleta <> 'ok' GROUP BY status_coleta"
+            )
+        ]
+
         return {
-            "total_de_documentos": total,
-            "por_especie": especies,
+            "ementas": {
+                "total": total,
+                "por_especie": especies,
+                "observacao": "Cada ementa é um ato de curadoria do Tribunal. Um mesmo "
+                              "acórdão pode render mais de uma, com teses distintas.",
+            },
+            "inteiro_teor": {
+                "documentos_com_inteiro_teor": com_texto,
+                "paginas": paginas,
+                "caracteres": caracteres,
+                "pendencias": pendencias,
+                "observacao": "Só acórdãos têm inteiro teor. Súmulas, respostas a "
+                              "consulta e questões de ordem existem apenas como ementa.",
+            },
             "relatores": relatores,
             "macro_temas": macro_temas,
+            # Mantido para quem lia o campo antigo; é o total de ementas.
+            "total_de_documentos": total,
             "limites_do_acervo": [
                 "A base de acórdãos é a Jurisprudência Selecionada do TCE-RJ: ementas "
                 "escolhidas pelo Serviço de Jurisprudência, NÃO o conjunto de todos os "
                 "acórdãos do Tribunal. Não afirme que uma tese inexiste só por não "
                 "constar aqui.",
-                "Não há inteiro teor de votos ou acórdãos: o que existe é a ementa "
-                "(descritores + tese).",
+                "O inteiro teor dos acórdãos está disponível e é pesquisável por "
+                "`pesquisar_inteiro_teor`, página a página. Não encontrando na ementa, "
+                "procure no voto antes de concluir que o Tribunal não se pronunciou.",
+                "O inteiro teor reúne, no mesmo documento, a decisão colegiada, o "
+                "relatório, as alegações de defesa, a instrução técnica, o parecer do "
+                "MPC, precedentes transcritos e o voto. Um trecho isolado pode ser o "
+                "oposto do que o Tribunal decidiu: verifique de onde ele vem.",
                 "Deliberações e Resoluções não estão no acervo — o TCE-RJ as publica "
                 "em atosoficiais.com.br, fora deste portal.",
-                "Os endpoints do Tribunal não devolvem link por documento; a URL "
-                "apontada é a tela pública de consulta da espécie.",
             ],
         }
 

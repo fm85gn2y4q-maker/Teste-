@@ -210,11 +210,28 @@ def test_instrucoes_exigem_verificar_a_proveniencia():
 def test_cobertura_declara_volumes_e_limites(acervo):
     c = acervo.cobertura()
     assert c["total_de_documentos"] == 2
-    assert {e["chave"] for e in c["por_especie"]} == {"acordao", "sumula"}
+    assert c["ementas"]["total"] == 2
+    assert {e["chave"] for e in c["ementas"]["por_especie"]} == {"acordao", "sumula"}
     assert c["macro_temas"] == ["Licitações e Contratos"]
-    # A base é curadoria: o modelo precisa saber disso para não extrapolar.
-    assert any("curadoria" in x.lower() or "não o conjunto" in x.lower()
-               or "NÃO o conjunto" in x for x in c["limites_do_acervo"])
+
+
+def test_cobertura_separa_ementas_de_inteiro_teor(acervo):
+    """Registros existentes e inteiro teor guardado são contagens distintas."""
+    c = acervo.cobertura()
+    assert "documentos_com_inteiro_teor" in c["inteiro_teor"]
+    assert c["inteiro_teor"]["documentos_com_inteiro_teor"] == 0  # fixture sem PDFs
+    assert c["inteiro_teor"]["paginas"] == 0
+
+
+def test_cobertura_nao_nega_a_existencia_do_inteiro_teor(acervo):
+    """O limite antigo dizia que só havia ementa — e virou mentira."""
+    limites = " ".join(acervo.cobertura()["limites_do_acervo"])
+    assert "Não há inteiro teor" not in limites
+    assert "pesquisar_inteiro_teor" in limites
+    # E precisa avisar que o documento mistura proveniências.
+    assert "alegações de defesa" in limites
+    # A base continua sendo curadoria: isso não podia se perder na reescrita.
+    assert "NÃO o conjunto de todos os acórdãos" in limites
 
 
 def test_acervo_e_somente_leitura(acervo):
