@@ -73,10 +73,55 @@ Diga sempre de onde veio a proposição. "Consta da ementa" e "consta do voto,
 dois você leu. Não encontrando na ementa, procure no inteiro teor antes de
 concluir que o Tribunal não se pronunciou.
 
-Antes de transcrever um trecho do voto, use `ler_paginas` para ver a página
-anterior e a seguinte: o raciocínio jurídico atravessa a quebra de página, e
-um trecho isolado pode trazer a conclusão sem a premissa — ou a tese vencida
-em vez da vencedora.
+PROVENIÊNCIA: A REGRA QUE NÃO PODE SER QUEBRADA
+
+O PDF do acórdão não é um texto homogêneo. Ele reúne, em sequência:
+
+    o acórdão (decisão colegiada certificada)
+    o relatório
+    as alegações de defesa do jurisdicionado
+    a instrução do corpo técnico
+    o parecer do Ministério Público de Contas
+    decisões anteriores transcritas (notificações, cautelares)
+    precedentes transcritos, adotados ou não
+    a fundamentação do relator
+    o dispositivo do voto
+
+Para a busca, tudo isso são caracteres iguais. Juridicamente, não são. Um
+trecho tirado das razões de defesa diz o que a **parte alegou ao Tribunal** —
+o oposto do que o Tribunal decidiu. Apresentá-lo como entendimento do TCE-RJ
+inverte o sentido do precedente.
+
+**Nunca afirme que um trecho representa o entendimento do TCE-RJ sem antes ler
+seu contexto e identificar de que parte do documento ele vem.** A rotina:
+
+1. `pesquisar_inteiro_teor` localiza a passagem.
+2. `ler_paginas` com `vizinhas=1` mostra o contexto imediato.
+3. Identifique a natureza do trecho pelos marcos do próprio documento:
+   "ACORDAM" e "ACÓRDÃO Nº" abrem a decisão colegiada; "É o Relatório"
+   encerra o relato e inicia a análise; "VOTO" abre a fundamentação;
+   "o jurisdicionado alega", "razões de defesa", "sustenta o responsável"
+   introduzem alegação de parte; "o Corpo Instrutivo", "a Coordenadoria
+   propôs" introduzem instrução técnica; "o Ministério Público de Contas
+   opinou" introduz o parecer.
+4. Continuando ambíguo, **expanda a leitura** — em especial quando o trecho
+   for alegação ou instrução: o que importa é o que o relator fez com aquilo,
+   e isso pode estar várias páginas adiante.
+5. Só então formule a tese.
+
+Verifique também o **estágio processual**. Um voto pode conter formulação
+jurídica robusta e, ao final, apenas notificar para defesa: a tese existe, o
+julgamento de mérito não. Nesse caso, diga que a questão foi posta, não que
+foi decidida.
+
+Ao apresentar, informe de onde vem o trecho: "consta do dispositivo do voto",
+"consta do acórdão", "é alegação da defesa, acolhida à p. X". Um precedente
+citado sem essa qualificação vale menos do que parece — e pode valer o
+contrário.
+
+Um único acórdão é um precedente, não a jurisprudência consolidada do
+Tribunal. Diga "nesse precedente", salvo quando houver súmula ou resposta a
+consulta, que têm força própria.
 
 COMO APRESENTAR CADA JULGADO — os quatro itens são obrigatórios, nesta ordem:
 
@@ -254,20 +299,28 @@ def construir(
         }
 
     @mcp.tool()
-    def ler_paginas(id: str, pagina: int, vizinhas: int = 1) -> dict[str, Any]:
-        """Lê páginas contíguas do inteiro teor, para ver o argumento completo.
+    def ler_paginas(
+        id: str, pagina: int, vizinhas: int = 1, adiante: int | None = None
+    ) -> dict[str, Any]:
+        """Lê páginas contíguas do inteiro teor, para saber de onde vem o trecho.
 
-        O raciocínio jurídico atravessa a quebra de página: a página que casou
-        pode trazer a conclusão sem a premissa. Use depois de localizar um
-        trecho, antes de transcrevê-lo.
+        Etapa obrigatória antes de tratar uma passagem como entendimento do
+        Tribunal: o documento reúne relatório, defesa, instrução, precedentes
+        transcritos e o voto, e a busca não distingue nenhum deles.
+
+        Sendo o trecho alegação de parte ou instrução técnica, o que importa
+        está adiante — use `adiante` para avançar até a análise do relator.
 
         Args:
-            id: identificador do documento.
+            id: identificador do documento ou de uma de suas ementas.
             pagina: página central.
-            vizinhas: quantas páginas antes e depois incluir (máximo 3).
+            vizinhas: páginas antes e depois (até 5).
+            adiante: quando informado, lê desta página até `pagina + adiante`
+                (até 15), para alcançar o que o relator decidiu sobre o ponto.
         """
-        margem = max(0, min(vizinhas, 3))
-        paginas = acervo.paginas_do_documento(id, pagina - margem, pagina + margem)
+        antes = max(0, min(vizinhas, 5))
+        depois = max(0, min(adiante, 15)) if adiante is not None else antes
+        paginas = acervo.paginas_do_documento(id, pagina - antes, pagina + depois)
         if not paginas:
             return {"erro": f"Sem inteiro teor para {id} na página {pagina}."}
         documento = acervo.obter(id)
@@ -275,6 +328,11 @@ def construir(
             "citacao": documento.citacao if documento else id,
             "url_inteiro_teor": documento.url_documento if documento else None,
             "paginas": paginas,
+            "lembrete": (
+                "Identifique a natureza de cada trecho antes de citar: acórdão, "
+                "relatório, alegação de parte, instrução técnica, parecer do MPC, "
+                "precedente transcrito, fundamentação ou dispositivo."
+            ),
         }
 
     @mcp.tool()

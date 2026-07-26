@@ -173,6 +173,17 @@ def test_instrucoes_exigem_explicacao_e_link():
         assert exigencia in INSTRUCOES
 
 
+def test_instrucoes_exigem_verificar_a_proveniencia():
+    """Trecho de defesa apresentado como decisão inverte o precedente."""
+    from ementario.servidor import INSTRUCOES
+
+    for exigencia in ("É o Relatório", "razões de defesa", "ACORDAM",
+                      "Ministério Público de Contas", "expanda a leitura",
+                      "estágio processual"):
+        assert exigencia in INSTRUCOES, exigencia
+    assert "sem antes ler" in INSTRUCOES
+
+
 def test_cobertura_declara_volumes_e_limites(acervo):
     c = acervo.cobertura()
     assert c["total_de_documentos"] == 2
