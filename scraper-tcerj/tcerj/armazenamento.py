@@ -56,6 +56,22 @@ CREATE TABLE IF NOT EXISTS visitados (
 CREATE VIRTUAL TABLE IF NOT EXISTS documentos_fts
 USING fts5(id UNINDEXED, ementa, inteiro_teor, tokenize='unicode61 remove_diacritics 2');
 
+-- O documento oficial, distinto do registro de ementa: um acórdão rende mais
+-- de uma ementa selecionada — teses diversas do mesmo julgamento —, e o
+-- inteiro teor pertence ao acórdão, não a cada curadoria sobre ele.
+CREATE TABLE IF NOT EXISTS documentos_oficiais (
+    id            TEXT PRIMARY KEY,
+    tipo          TEXT NOT NULL,
+    numero        TEXT NOT NULL,
+    ano           INTEGER NOT NULL,
+    processo      TEXT,
+    url           TEXT,
+    paginas_total INTEGER NOT NULL DEFAULT 0,
+    -- Não entra na identidade; serve de controle de integridade.
+    impressao     TEXT,
+    coletado_em   TEXT NOT NULL
+);
+
 -- Inteiro teor guardado página a página. É a página que permite conferir a
 -- passagem no documento oficial; um texto corrido de cinquenta páginas
 -- localiza o acórdão, mas não o trecho dentro dele.
@@ -161,6 +177,35 @@ class Armazenamento:
 
     # -- inteiro teor -----------------------------------------------------
 
+    def registrar_oficial(
+        self,
+        identificador: str,
+        *,
+        tipo: str,
+        numero: str,
+        ano: int,
+        processo: str | None,
+        url: str | None,
+        paginas_total: int,
+        impressao: str | None,
+    ) -> None:
+        self.conexao.execute(
+            "INSERT OR REPLACE INTO documentos_oficiais "
+            "(id, tipo, numero, ano, processo, url, paginas_total, impressao, coletado_em) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (identificador, tipo, numero, ano, processo, url, paginas_total,
+             impressao, datetime.now(timezone.utc).isoformat()),
+        )
+        self.conexao.commit()
+
+    def oficiais_com_texto(self) -> set[str]:
+        return {
+            linha[0]
+            for linha in self.conexao.execute(
+                "SELECT DISTINCT documento_id FROM paginas"
+            )
+        }
+
     def gravar_paginas(self, documento_id: str, paginas: Iterable) -> int:
         """Substitui o inteiro teor de um documento pelas páginas dadas.
 
@@ -193,20 +238,28 @@ class Armazenamento:
         )
         return cursor.fetchone() is not None
 
-    def sem_inteiro_teor(self, tipo: TipoDocumento | None = None) -> list[Documento]:
-        """Documentos já catalogados cujo inteiro teor ainda não foi baixado."""
+    def oficiais_sem_texto(self, tipo: TipoDocumento | None = None) -> list[dict[str, Any]]:
+        """Documentos oficiais ainda sem inteiro teor.
+
+        Agrupa por espécie, número e ano — e não por registro de ementa. Sem
+        isso, um acórdão com três ementas selecionadas seria baixado três
+        vezes e guardado três vezes, sendo um único documento.
+        """
         sql = [
-            "SELECT d.* FROM documentos d",
-            "LEFT JOIN paginas p ON p.documento_id = d.id",
-            "WHERE p.documento_id IS NULL AND d.numero IS NOT NULL AND d.ano IS NOT NULL",
+            "SELECT d.tipo, d.numero, d.ano, MIN(d.processo) processo,",
+            "       d.tipo || '-' || d.numero || '-' || d.ano AS oficial",
+            "FROM documentos d",
+            "WHERE d.numero IS NOT NULL AND d.ano IS NOT NULL",
         ]
         parametros: list[Any] = []
         if tipo:
             sql.append("AND d.tipo = ?")
             parametros.append(tipo.value)
-        sql.append("GROUP BY d.id ORDER BY d.ano DESC, CAST(d.numero AS INTEGER) DESC")
-        linhas = self.conexao.execute(" ".join(sql), parametros).fetchall()
-        return [_linha_para_documento(l) for l in linhas]
+        sql.append(
+            "GROUP BY oficial HAVING oficial NOT IN (SELECT documento_id FROM paginas)"
+        )
+        sql.append("ORDER BY d.ano DESC, CAST(d.numero AS INTEGER) DESC")
+        return [dict(l) for l in self.conexao.execute(" ".join(sql), parametros)]
 
     def estatisticas_inteiro_teor(self) -> dict[str, int]:
         (docs,) = self.conexao.execute(

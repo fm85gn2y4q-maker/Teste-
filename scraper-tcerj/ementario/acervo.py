@@ -67,6 +67,14 @@ _VAZIAS = {
     "o", "os", "ou", "para", "pela", "pelo", "por", "pode", "podem", "posso",
     "qual", "quais", "quando", "que", "quem", "se", "sem", "ser", "sao", "seu",
     "sob", "sobre", "sua", "tem", "ter", "um", "uma", "uns", "umas",
+    # Verbos que estruturam a pergunta sem carregar conceito. Ficam de fora
+    # desta lista, de propósito, os que PARECEM verbos de formulação mas são o
+    # que se procura: "compensar", "exigível", "autoriza", "responde". Medido:
+    # tirá-los devolve resultado de outro assunto — "exigível" sozinho traz
+    # "Exigível a Longo Prazo", que é termo contábil.
+    "aferir", "cabe", "considera", "deve", "devem", "entra", "faz", "fazer",
+    "gostaria", "haver", "justifica", "ocorre", "poderia", "precisa", "preciso",
+    "quero",
 }
 
 
@@ -150,6 +158,32 @@ def montar_url_processo(processo: str | None) -> str | None:
     if not processo:
         return None
     return URL_PROCESSO.format(processo=processo.replace(".", ""))
+
+
+@dataclass(slots=True)
+class Trecho:
+    """Uma passagem localizada no inteiro teor, com onde conferi-la."""
+
+    documento: "Resultado"
+    pagina: int
+    folha: int | None
+    trecho: str
+    termos: list[str]
+
+    def para_dict(self) -> dict[str, Any]:
+        d = self.documento.para_dict()
+        # A ementa inteira não interessa aqui: o que se pediu foi a passagem.
+        d.pop("ementa", None)
+        d.pop("descritores", None)
+        d.pop("tese", None)
+        return {
+            **d,
+            "pagina": self.pagina,
+            "folha_do_processo": self.folha,
+            "trecho": self.trecho,
+            "termos_encontrados": self.termos,
+            "onde": "inteiro teor (voto/acórdão)",
+        }
 
 
 @dataclass(slots=True)
@@ -307,6 +341,105 @@ class Acervo:
 
         linhas = self.conexao.execute(" ".join(sql), parametros).fetchall()
         return [self._resultado(l, (l["ementa"] or "")[:300]) for l in linhas]
+
+    # -- inteiro teor -----------------------------------------------------
+
+    def pesquisar_paginas(
+        self,
+        consulta: str,
+        *,
+        especie: str | None = None,
+        ano_min: int | None = None,
+        ano_max: int | None = None,
+        relator: str | None = None,
+        limite: int = 10,
+    ) -> tuple[list[Trecho], bool]:
+        """Procura nas páginas do inteiro teor, e não nas ementas.
+
+        A ementa é o resumo oficial; o voto é onde a tese é construída e
+        fundamentada. Separar as duas buscas é deliberado: saber se a
+        proposição veio de uma ou de outra é informação jurídica, não detalhe
+        de implementação.
+        """
+        for operador in ("AND", "OR"):
+            expressao = montar_consulta_fts(consulta, operador)
+            if not expressao:
+                return [], False
+            achados = self._consultar_paginas(
+                expressao, especie, ano_min, ano_max, relator, limite
+            )
+            if achados:
+                return achados, operador == "OR"
+        return [], False
+
+    def _consultar_paginas(
+        self,
+        expressao: str,
+        especie: str | None,
+        ano_min: int | None,
+        ano_max: int | None,
+        relator: str | None,
+        limite: int,
+    ) -> list[Trecho]:
+        sql = [
+            "SELECT d.*, f.pagina, p.folha,",
+            "       snippet(paginas_fts, 2, '\x02', '\x03', ' … ', 32) AS trecho",
+            "FROM paginas_fts f",
+            "JOIN documentos d ON d.id = f.documento_id",
+            "JOIN paginas p ON p.documento_id = f.documento_id AND p.pagina = f.pagina",
+            "WHERE paginas_fts MATCH ?",
+        ]
+        parametros: list[Any] = [expressao]
+        if especie:
+            sql.append("AND d.tipo = ?")
+            parametros.append(especie)
+        if ano_min is not None:
+            sql.append("AND d.ano >= ?")
+            parametros.append(ano_min)
+        if ano_max is not None:
+            sql.append("AND d.ano <= ?")
+            parametros.append(ano_max)
+        if relator:
+            sql.append("AND d.relator LIKE ?")
+            parametros.append(f"%{relator}%")
+        sql.append("ORDER BY rank LIMIT ?")
+        parametros.append(max(1, min(limite, 30)))
+
+        achados = []
+        for linha in self.conexao.execute(" ".join(sql), parametros):
+            base = self._resultado(linha, "")
+            bruto = linha["trecho"] or ""
+            # Os delimitadores invisíveis marcam o que casou; extraí-los diz ao
+            # advogado por que aquele trecho veio, e some do texto exibido.
+            termos = sorted({t.lower() for t in re.findall("\x02(.*?)\x03", bruto)})
+            achados.append(
+                Trecho(
+                    documento=base,
+                    pagina=linha["pagina"],
+                    folha=linha["folha"],
+                    trecho=re.sub(r"\s+", " ", bruto.replace("\x02", "").replace("\x03", "")).strip(),
+                    termos=termos,
+                )
+            )
+        return achados
+
+    def paginas_do_documento(
+        self, identificador: str, inicio: int, fim: int
+    ) -> list[dict[str, Any]]:
+        """Páginas contíguas de um documento — para ler o argumento inteiro.
+
+        O raciocínio jurídico atravessa a quebra de página; ler só a página que
+        casou frequentemente mostra a conclusão sem a premissa.
+        """
+        linhas = self.conexao.execute(
+            "SELECT pagina, folha, texto FROM paginas "
+            "WHERE documento_id = ? AND pagina BETWEEN ? AND ? ORDER BY pagina",
+            (identificador, inicio, fim),
+        ).fetchall()
+        return [
+            {"pagina": l["pagina"], "folha": l["folha"], "texto": l["texto"]}
+            for l in linhas
+        ]
 
     # -- cobertura --------------------------------------------------------
 

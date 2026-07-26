@@ -62,6 +62,22 @@ Como responder ao advogado:
 - Chame `cobertura_do_acervo` quando precisar saber o alcance da base, e
   declare os limites que afetem a resposta.
 
+DUAS BUSCAS, PROPOSITALMENTE SEPARADAS:
+- `pesquisar_jurisprudencia` procura nas **ementas** — o resumo oficial, com a
+  tese já destilada pelo Tribunal.
+- `pesquisar_inteiro_teor` procura dentro dos **votos e acórdãos**, e devolve
+  a página. É onde está a fundamentação.
+
+Diga sempre de onde veio a proposição. "Consta da ementa" e "consta do voto,
+à p. 27" têm pesos diferentes numa peça, e o advogado precisa saber qual dos
+dois você leu. Não encontrando na ementa, procure no inteiro teor antes de
+concluir que o Tribunal não se pronunciou.
+
+Antes de transcrever um trecho do voto, use `ler_paginas` para ver a página
+anterior e a seguinte: o raciocínio jurídico atravessa a quebra de página, e
+um trecho isolado pode trazer a conclusão sem a premissa — ou a tese vencida
+em vez da vencedora.
+
 COMO APRESENTAR CADA JULGADO — os quatro itens são obrigatórios, nesta ordem:
 
 1. **Citação.** Exatamente o campo `citacao`: espécie, número/ano, processo,
@@ -184,6 +200,81 @@ def construir(
             "correspondencia_parcial": parcial,
             "resultados": [r.para_dict() for r in achados],
             "observacao": observacao,
+        }
+
+    @mcp.tool()
+    def pesquisar_inteiro_teor(
+        consulta: str,
+        especie: str | None = None,
+        ano_min: int | None = None,
+        ano_max: int | None = None,
+        relator: str | None = None,
+        limite: int = 10,
+    ) -> dict[str, Any]:
+        """Procura dentro dos votos e acórdãos, não nas ementas.
+
+        A ementa é o resumo oficial; o voto é onde a tese é construída. Use
+        esta ferramenta quando a pergunta for sobre fundamentação, sobre um
+        argumento específico, ou quando a busca por ementa não achar nada.
+        Cada resultado traz a página, para conferência no documento oficial.
+
+        Args:
+            consulta: palavras ou expressão a procurar no texto dos votos.
+            especie: filtra a espécie — hoje só acórdãos têm inteiro teor.
+            ano_min: ano mais antigo aceito.
+            ano_max: ano mais recente aceito.
+            relator: nome, ou parte do nome, do conselheiro relator.
+            limite: quantos trechos devolver (máximo 30).
+        """
+        achados, parcial = acervo.pesquisar_paginas(
+            consulta, especie=especie, ano_min=ano_min, ano_max=ano_max,
+            relator=relator, limite=limite,
+        )
+        if not achados:
+            observacao = (
+                "Nada encontrado no inteiro teor. Vale tentar outra formulação: "
+                "a busca é literal, e o voto pode usar palavras diferentes das "
+                "da pergunta."
+            )
+        elif parcial:
+            observacao = (
+                "Nenhuma página reunia todos os termos; estas atendem a parte "
+                "deles, ordenadas por relevância. Verifique `termos_encontrados` "
+                "para saber o que de fato casou."
+            )
+        else:
+            observacao = None
+
+        return {
+            "consulta": consulta,
+            "quantidade": len(achados),
+            "correspondencia_parcial": parcial,
+            "resultados": [t.para_dict() for t in achados],
+            "observacao": observacao,
+        }
+
+    @mcp.tool()
+    def ler_paginas(id: str, pagina: int, vizinhas: int = 1) -> dict[str, Any]:
+        """Lê páginas contíguas do inteiro teor, para ver o argumento completo.
+
+        O raciocínio jurídico atravessa a quebra de página: a página que casou
+        pode trazer a conclusão sem a premissa. Use depois de localizar um
+        trecho, antes de transcrevê-lo.
+
+        Args:
+            id: identificador do documento.
+            pagina: página central.
+            vizinhas: quantas páginas antes e depois incluir (máximo 3).
+        """
+        margem = max(0, min(vizinhas, 3))
+        paginas = acervo.paginas_do_documento(id, pagina - margem, pagina + margem)
+        if not paginas:
+            return {"erro": f"Sem inteiro teor para {id} na página {pagina}."}
+        documento = acervo.obter(id)
+        return {
+            "citacao": documento.citacao if documento else id,
+            "url_inteiro_teor": documento.url_documento if documento else None,
+            "paginas": paginas,
         }
 
     @mcp.tool()

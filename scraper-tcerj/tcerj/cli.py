@@ -148,6 +148,32 @@ def cmd_inteiro_teor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_reparar(args: argparse.Namespace) -> int:
+    from .inteiro_teor import reparar
+
+    config = Config.carregar(args.config)
+    banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
+
+    def progresso(documentos: int, paginas: int) -> None:
+        print(f"  ... {documentos} documentos, {paginas} páginas", flush=True)
+
+    with Armazenamento(banco) as armazenamento:
+        resumo = reparar(armazenamento, ao_progresso=progresso)
+        print(f"\nDocumentos oficiais: {resumo['documentos_oficiais']}")
+        print(f"Páginas: {resumo['paginas_antes']} -> {resumo['paginas_depois']} "
+              f"({resumo['paginas_antes'] - resumo['paginas_depois']} redundantes "
+              f"eliminadas)")
+        if args.compactar:
+            print("Compactando o banco…")
+            armazenamento.conexao.execute("INSERT INTO paginas_fts(paginas_fts) "
+                                          "VALUES('optimize')")
+            armazenamento.conexao.execute("INSERT INTO documentos_fts(documentos_fts) "
+                                          "VALUES('optimize')")
+            armazenamento.conexao.commit()
+            armazenamento.conexao.execute("VACUUM")
+    return 0
+
+
 def cmd_exportar(args: argparse.Namespace) -> int:
     config = Config.carregar(args.config)
     banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
@@ -264,6 +290,16 @@ def construir_parser() -> argparse.ArgumentParser:
     p.add_argument("--intervalo", type=float, help="segundos entre requisições")
     p.add_argument("--banco")
     p.set_defaults(func=cmd_inteiro_teor)
+
+    p = sub.add_parser(
+        "reparar-inteiro-teor",
+        help="reagrupa as páginas por documento oficial e repassa a limpeza, "
+             "sem baixar nada de novo",
+    )
+    p.add_argument("--banco")
+    p.add_argument("--compactar", action="store_true",
+                   help="otimiza os índices e roda VACUUM ao final")
+    p.set_defaults(func=cmd_reparar)
 
     p = sub.add_parser("exportar", help="exporta o acervo para JSONL ou CSV")
     p.add_argument("saida", help="arquivo de destino")

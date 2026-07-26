@@ -69,6 +69,27 @@ _FRACAO_MOLDURA = 0.2
 _MAXIMO_MOLDURA = 90
 
 
+def normalizar_linha(linha: str) -> str:
+    """Forma canônica de uma linha, usada tanto para detectar quanto para tirar.
+
+    As duas operações precisam ver a mesma coisa: detectar a moldura no texto
+    bruto e removê-la no texto já com espaços colapsados deixava passar
+    "Gabinete  da Conselheira" — dois espaços na origem, um depois, e a
+    comparação falhava em silêncio.
+    """
+    return re.sub(r"[ \t\xa0]+", " ", linha).strip()
+
+
+def identidade_oficial(tipo: str, numero: str | int, ano: int) -> str:
+    """Identificador do documento oficial, distinto do registro de ementa.
+
+    Um acórdão rende mais de uma ementa selecionada — teses diferentes, sobre
+    macro-temas diferentes, do mesmo julgamento. As ementas não são
+    duplicatas; o inteiro teor é que é um só, e pertence ao acórdão.
+    """
+    return f"{tipo}-{numero}-{ano}"
+
+
 def _repetidas(paginas: list[str]) -> set[str]:
     """Linhas repetidas nas bordas das páginas: cabeçalho, rodapé, timbre.
 
@@ -81,7 +102,8 @@ def _repetidas(paginas: list[str]) -> set[str]:
     contagem: Counter[str] = Counter()
     for texto in paginas:
         # Só as bordas: uma frase repetida no miolo é conteúdo, não moldura.
-        linhas = [l.strip() for l in texto.splitlines() if l.strip()]
+        linhas = [normalizar_linha(l) for l in texto.splitlines()]
+        linhas = [l for l in linhas if l]
         contagem.update(set(linhas[:3] + linhas[-3:]))
 
     minimo = max(3, int(len(paginas) * _FRACAO_MOLDURA))
@@ -96,7 +118,7 @@ def _limpar(texto: str, moldura: set[str]) -> str:
     """Normalização mínima: tira moldura, junta a palavra partida, enxuga espaço."""
     linhas = []
     for linha in texto.splitlines():
-        enxuta = re.sub(r"[ \t\xa0]+", " ", linha).strip()
+        enxuta = normalizar_linha(linha)
         if not enxuta or _RE_LINHA_VAZIA.match(enxuta):
             continue
         if enxuta in moldura:
@@ -136,6 +158,35 @@ def paginas_do_pdf(conteudo: bytes) -> list[Pagina]:
     return paginas
 
 
+def relimpar(paginas: list[Pagina]) -> list[Pagina]:
+    """Repassa a remoção de moldura sobre páginas já extraídas.
+
+    Serve ao reparo de material já coletado: o defeito estava na comparação,
+    não na leitura do PDF, e rebaixar mil documentos por erro de programação
+    seria carregar o servidor do Tribunal à toa.
+    """
+    moldura = _repetidas([p.texto for p in paginas])
+    saida = []
+    for pagina in paginas:
+        limpa = _limpar(pagina.texto, moldura)
+        if limpa:
+            saida.append(Pagina(numero=pagina.numero, folha=pagina.folha, texto=limpa))
+    return saida
+
+
+def impressao_digital(paginas: list[Pagina]) -> str:
+    """Hash do texto integral normalizado.
+
+    Não entra na identidade — serve de controle: revela o mesmo documento
+    guardado sob identificadores diferentes, ou arquivo trocado pelo Tribunal
+    entre uma coleta e outra.
+    """
+    import hashlib
+
+    junto = "\n".join(p.texto for p in sorted(paginas, key=lambda p: p.numero))
+    return hashlib.sha256(junto.encode("utf-8")).hexdigest()[:32]
+
+
 # ---------------------------------------------------------------------------
 # Coleta
 # ---------------------------------------------------------------------------
@@ -157,20 +208,21 @@ async def coletar(
     """
     from .http import Cliente, ErroHttp
 
-    pendentes = armazenamento.sem_inteiro_teor(tipo=tipo)
+    pendentes = armazenamento.oficiais_sem_texto(tipo=tipo)
     if max_documentos is not None:
         pendentes = pendentes[:max_documentos]
 
-    log.info("Documentos sem inteiro teor: %d", len(pendentes))
+    log.info("Documentos oficiais sem inteiro teor: %d", len(pendentes))
     documentos = paginas_gravadas = falhas = 0
 
     async with Cliente(config) as cliente:
-        for documento in pendentes:
-            url = url_do_acordao(documento.numero, documento.ano)
+        for pendente in pendentes:
+            oficial = pendente["oficial"]
+            url = url_do_acordao(pendente["numero"], pendente["ano"])
             try:
                 resposta = await cliente.obter(url)
             except ErroHttp as erro:
-                log.warning("Falha em %s: %s", documento.id, erro)
+                log.warning("Falha em %s: %s", oficial, erro)
                 armazenamento.marcar_visitado(url, "erro", str(erro))
                 falhas += 1
                 continue
@@ -179,7 +231,7 @@ async def coletar(
             if "pdf" not in tipo_conteudo.lower():
                 # O portal responde 200 com página de erro quando o documento
                 # não está publicado; sem esta checagem, ela viraria "texto".
-                log.warning("%s não devolveu PDF (%s)", documento.id, tipo_conteudo)
+                log.warning("%s não devolveu PDF (%s)", oficial, tipo_conteudo)
                 armazenamento.marcar_visitado(url, "sem_pdf", tipo_conteudo)
                 falhas += 1
                 continue
@@ -187,21 +239,107 @@ async def coletar(
             try:
                 paginas = paginas_do_pdf(resposta.content)
             except Exception as erro:  # noqa: BLE001 - PDF de terceiro, formato imprevisível
-                log.warning("Não foi possível ler o PDF de %s: %s", documento.id, erro)
+                log.warning("Não foi possível ler o PDF de %s: %s", oficial, erro)
                 armazenamento.marcar_visitado(url, "ilegivel", str(erro))
                 falhas += 1
                 continue
 
             if not paginas:
-                log.warning("%s: PDF sem texto aproveitável", documento.id)
+                log.warning("%s: PDF sem texto aproveitável", oficial)
                 armazenamento.marcar_visitado(url, "sem_texto")
                 falhas += 1
                 continue
 
-            paginas_gravadas += armazenamento.gravar_paginas(documento.id, paginas)
+            paginas_gravadas += armazenamento.gravar_paginas(oficial, paginas)
+            armazenamento.registrar_oficial(
+                oficial,
+                tipo=pendente["tipo"],
+                numero=str(pendente["numero"]),
+                ano=pendente["ano"],
+                processo=pendente["processo"],
+                url=url,
+                paginas_total=len(paginas),
+                impressao=impressao_digital(paginas),
+            )
             armazenamento.marcar_visitado(url, "ok")
             documentos += 1
             if ao_progresso and documentos % 25 == 0:
                 ao_progresso(documentos, paginas_gravadas, falhas)
 
     return documentos, paginas_gravadas, falhas
+
+
+# ---------------------------------------------------------------------------
+# Reparo do que já foi coletado
+# ---------------------------------------------------------------------------
+
+
+def reparar(armazenamento, ao_progresso=None) -> dict[str, int]:
+    """Reagrupa as páginas por documento oficial e repassa a limpeza.
+
+    Transformação determinística sobre material já coletado: corrige um erro
+    de modelagem (páginas guardadas por registro de ementa, e não por acórdão)
+    e um de comparação (moldura detectada no texto bruto, removida no texto
+    normalizado) sem tocar no servidor do Tribunal.
+    """
+    conexao = armazenamento.conexao
+    antes_paginas = conexao.execute("SELECT COUNT(*) FROM paginas").fetchone()[0]
+
+    # De cada registro de ementa para o documento oficial correspondente.
+    mapa: dict[str, dict] = {}
+    for linha in conexao.execute(
+        "SELECT id, tipo, numero, ano, processo FROM documentos "
+        "WHERE numero IS NOT NULL AND ano IS NOT NULL"
+    ):
+        mapa[linha["id"]] = {
+            "oficial": identidade_oficial(linha["tipo"], linha["numero"], linha["ano"]),
+            "tipo": linha["tipo"], "numero": str(linha["numero"]),
+            "ano": linha["ano"], "processo": linha["processo"],
+        }
+
+    # Junta as páginas por documento oficial, mantendo a primeira versão de
+    # cada página: cópias do mesmo PDF são idênticas.
+    por_oficial: dict[str, dict[int, Pagina]] = {}
+    dados: dict[str, dict] = {}
+    for linha in conexao.execute(
+        "SELECT documento_id, pagina, folha, texto FROM paginas ORDER BY documento_id, pagina"
+    ):
+        info = mapa.get(linha["documento_id"])
+        oficial = info["oficial"] if info else linha["documento_id"]
+        if info:
+            dados.setdefault(oficial, info)
+        por_oficial.setdefault(oficial, {}).setdefault(
+            linha["pagina"],
+            Pagina(numero=linha["pagina"], folha=linha["folha"], texto=linha["texto"]),
+        )
+
+    conexao.execute("DELETE FROM paginas")
+    conexao.execute("DELETE FROM paginas_fts")
+    conexao.commit()
+
+    documentos = paginas_finais = 0
+    for oficial, paginas in por_oficial.items():
+        limpas = relimpar(sorted(paginas.values(), key=lambda p: p.numero))
+        if not limpas:
+            continue
+        paginas_finais += armazenamento.gravar_paginas(oficial, limpas)
+        info = dados.get(oficial, {})
+        armazenamento.registrar_oficial(
+            oficial,
+            tipo=info.get("tipo", "acordao"),
+            numero=info.get("numero", ""),
+            ano=info.get("ano", 0),
+            processo=info.get("processo"),
+            url=url_do_acordao(info.get("numero", ""), info.get("ano", 0)),
+            paginas_total=len(limpas),
+            impressao=impressao_digital(limpas),
+        )
+        documentos += 1
+        if ao_progresso and documentos % 100 == 0:
+            ao_progresso(documentos, paginas_finais)
+
+    return {
+        "documentos_oficiais": documentos,
+        "paginas_antes": antes_paginas,
+        "paginas_depois": paginas_finais,
+    }
