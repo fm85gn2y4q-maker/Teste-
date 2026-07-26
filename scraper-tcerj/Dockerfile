@@ -16,11 +16,15 @@ COPY ementario/ ./ementario/
 # O acervo é artefato de dados, não código: vem de um asset de release, com a
 # versão fixada. Assim o deploy é reproduzível, o rollback é trocar a versão, e
 # o histórico do Git não carrega uma cópia binária a cada atualização.
-ARG ACERVO_URL
-ARG ACERVO_SHA256=""
+#
+# A versão é declarada AQUI, como padrão do ARG, e não como argumento de
+# construção do serviço de hospedagem: nem todo serviço repassa argumentos de
+# build, e depender disso deixava a imagem sem acervo por um motivo invisível.
+# Publicar um acervo novo é trocar estas duas linhas.
+ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/acervo-v2.0.0/ementario-tcerj-v2.0.0.db.gz
+ARG ACERVO_SHA256=513fd3146272d98a71dfa8b98aba5ce27b6262ce2f260360cbd0e2d135bab395
 COPY baixar_acervo.py ./
-RUN test -n "$ACERVO_URL" || (echo "Defina ACERVO_URL na construção." && exit 1) \
- && python baixar_acervo.py "$ACERVO_URL" dados/tcerj.sqlite "$ACERVO_SHA256"
+RUN python baixar_acervo.py "$ACERVO_URL" dados/tcerj.sqlite "$ACERVO_SHA256"
 
 # O serviço define a porta; 8080 é o padrão do Cloud Run quando ele não define.
 ENV PORT=8080 \
