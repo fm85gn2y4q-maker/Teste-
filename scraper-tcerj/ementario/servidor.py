@@ -111,9 +111,21 @@ def _caminho_padrao() -> Path:
 def construir(
     banco: str | Path | None = None,
     dominios: list[str] | None = None,
+    url_publica: str | None = None,
+    segredo_oauth: str | None = None,
     **ajustes: Any,
 ) -> FastMCP:
     acervo = Acervo(banco or _caminho_padrao())
+
+    # O ChatGPT recusa servidor MCP sem OAuth; o Claude conecta sem. O fluxo
+    # só é montado quando há URL pública, porque os metadados precisam apontar
+    # para endereços que o cliente alcance.
+    if url_publica:
+        from .autenticacao import montar
+
+        provedor, definicoes = montar(url_publica, segredo_oauth)
+        ajustes |= {"auth_server_provider": provedor, "auth": definicoes}
+
     mcp = FastMCP(
         "ementario",
         instructions=INSTRUCOES,

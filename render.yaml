@@ -17,3 +17,8 @@ services:
     envVars:
       - key: EMENTARIO_DOMINIOS
         value: ementario-tcerj.onrender.com
+      # OAuth fica DESLIGADO de propósito. O ChatGPT aceita o servidor sem
+      # autenticação, e o Claude também; ligar o fluxo exigiria reconectar os
+      # dois. Para ativá-lo um dia, basta declarar EMENTARIO_URL_PUBLICA com o
+      # endereço público — o código está pronto e testado em ementario/
+      # autenticacao.py.

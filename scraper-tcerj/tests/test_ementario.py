@@ -236,6 +236,72 @@ def test_dominio_declarado_e_liberado_sem_abrir_para_os_demais():
     assert "localhost" in s.allowed_hosts
 
 
+# -- OAuth sem estado -------------------------------------------------------
+
+
+def test_selo_recusa_carga_adulterada():
+    from ementario.autenticacao import Selo
+
+    selo = Selo("segredo")
+    bom = selo.selar("acesso", {"c": "cliente-1"}, 60)
+    assert selo.abrir("acesso", bom)["c"] == "cliente-1"
+
+    corpo, assinatura = bom.split(".", 1)
+    assert selo.abrir("acesso", f"{corpo}x.{assinatura}") is None
+    assert selo.abrir("acesso", f"{corpo}.{assinatura[:-2]}xy") is None
+    assert selo.abrir("acesso", "lixo") is None
+
+
+def test_selo_recusa_chave_diferente():
+    from ementario.autenticacao import Selo
+
+    emitido = Selo("segredo-a").selar("acesso", {"c": "x"}, 60)
+    assert Selo("segredo-b").abrir("acesso", emitido) is None
+
+
+def test_codigo_de_autorizacao_nao_vale_como_token():
+    """Ambos são assinados pela mesma chave; só o tipo os distingue."""
+    from ementario.autenticacao import Selo
+
+    selo = Selo("segredo")
+    codigo = selo.selar("codigo", {"c": "x"}, 60)
+    assert selo.abrir("acesso", codigo) is None
+    assert selo.abrir("codigo", codigo) is not None
+
+
+def test_selo_expira():
+    from ementario.autenticacao import Selo
+
+    selo = Selo("segredo")
+    assert selo.abrir("acesso", selo.selar("acesso", {"c": "x"}, -1)) is None
+
+
+def test_cliente_e_reconstruido_sem_armazenamento():
+    """O serviço dorme e reinicia; o cadastro tem de sobreviver a isso."""
+    import asyncio
+
+    from mcp.shared.auth import OAuthClientInformationFull
+
+    from ementario.autenticacao import ProvedorOAuth, Selo
+
+    provedor = ProvedorOAuth(Selo("segredo"))
+    info = OAuthClientInformationFull(
+        client_id="ignorado",
+        redirect_uris=["https://chatgpt.com/retorno"],
+        client_name="ChatGPT",
+        token_endpoint_auth_method="client_secret_post",
+    )
+    asyncio.run(provedor.register_client(info))
+
+    # Outra instância, sem nenhuma memória da anterior.
+    recuperado = asyncio.run(ProvedorOAuth(Selo("segredo")).get_client(info.client_id))
+    assert recuperado is not None
+    assert str(recuperado.redirect_uris[0]) == "https://chatgpt.com/retorno"
+    assert recuperado.client_secret == info.client_secret
+
+    assert asyncio.run(ProvedorOAuth(Selo("outro")).get_client(info.client_id)) is None
+
+
 def test_servidor_avisa_o_modelo_sobre_os_limites_da_base(acervo):
     from ementario.servidor import INSTRUCOES
 

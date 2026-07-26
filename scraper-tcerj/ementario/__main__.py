@@ -36,6 +36,12 @@ def main(argv: list[str] | None = None) -> int:
         help="domínio público por onde o servidor será acessado (túnel ou "
              "hospedagem). Sem isto, só requisições locais passam. Pode repetir.",
     )
+    parser.add_argument(
+        "--url-publica",
+        metavar="URL",
+        help="endereço público completo. Ativa o fluxo OAuth, exigido pelo "
+             "ChatGPT. O Claude conecta sem isto.",
+    )
     args = parser.parse_args(argv)
 
     from .servidor import construir
@@ -46,9 +52,21 @@ def main(argv: list[str] | None = None) -> int:
     do_ambiente = os.environ.get("EMENTARIO_DOMINIOS", "")
     dominios += [d.strip() for d in do_ambiente.split(",") if d.strip()]
 
+    # Com URL pública declarada, o servidor também passa a ser servidor de
+    # autorização OAuth — exigência do ChatGPT, dispensável no Claude.
+    url_publica = args.url_publica or os.environ.get("EMENTARIO_URL_PUBLICA")
+    if url_publica and not url_publica.startswith(("http://", "https://")):
+        url_publica = f"https://{url_publica}"
+
     ajustes = {"host": args.host, "port": args.porta} if args.http else {}
     try:
-        servidor = construir(args.banco, dominios=dominios or None, **ajustes)
+        servidor = construir(
+            args.banco,
+            dominios=dominios or None,
+            url_publica=url_publica,
+            segredo_oauth=os.environ.get("EMENTARIO_SEGREDO_OAUTH"),
+            **ajustes,
+        )
     except FileNotFoundError as erro:
         print(f"Erro: {erro}", file=sys.stderr)
         return 1
