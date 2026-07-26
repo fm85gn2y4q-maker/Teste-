@@ -257,24 +257,25 @@ class Acervo:
         ano_max: int | None = None,
         relator: str | None = None,
         limite: int = 10,
-    ) -> tuple[list[Resultado], bool]:
-        """Busca por relevância. Devolve (resultados, houve_abrandamento).
+    ) -> tuple[list[Resultado], bool, str]:
+        """Busca por relevância. Devolve (resultados, abrandou, expressão).
 
         Tenta primeiro exigir todos os termos. Não achando nada, repete
         aceitando qualquer um deles: é preferível devolver o precedente mais
         próximo, avisando que a correspondência foi parcial, a devolver vazio
         porque a pergunta trazia uma palavra a mais.
         """
+        expressao = ""
         for operador in ("AND", "OR"):
             expressao = montar_consulta_fts(consulta, operador)
             if not expressao:
-                return [], False
+                return [], False, ""
             achados = self._consultar(
                 expressao, especie, ano_min, ano_max, relator, limite
             )
             if achados:
-                return achados, operador == "OR"
-        return [], False
+                return achados, operador == "OR", expressao
+        return [], False, expressao
 
     def _consultar(
         self,
@@ -353,24 +354,29 @@ class Acervo:
         ano_max: int | None = None,
         relator: str | None = None,
         limite: int = 10,
-    ) -> tuple[list[Trecho], bool]:
+    ) -> tuple[list[Trecho], bool, str]:
         """Procura nas páginas do inteiro teor, e não nas ementas.
 
         A ementa é o resumo oficial; o voto é onde a tese é construída e
         fundamentada. Separar as duas buscas é deliberado: saber se a
         proposição veio de uma ou de outra é informação jurídica, não detalhe
         de implementação.
+
+        Devolve também a expressão efetivamente executada: uma mesma pergunta
+        rende resultados diferentes conforme a formulação, e sem registrar qual
+        delas achou cada precedente não há como auditar a pesquisa depois.
         """
+        expressao = ""
         for operador in ("AND", "OR"):
             expressao = montar_consulta_fts(consulta, operador)
             if not expressao:
-                return [], False
+                return [], False, ""
             achados = self._consultar_paginas(
                 expressao, especie, ano_min, ano_max, relator, limite
             )
             if achados:
-                return achados, operador == "OR"
-        return [], False
+                return achados, operador == "OR", expressao
+        return [], False, expressao
 
     def _consultar_paginas(
         self,

@@ -56,7 +56,7 @@ def test_montar_consulta_fts(entrada, esperado):
 
 def test_pontuacao_nao_quebra_a_sintaxe_do_fts(acervo):
     """Sem aspas em cada termo, o MATCH rejeitaria a expressão inteira."""
-    achados, _ = acervo.pesquisar('prescrição - "marco (art. 74)" OR NOT x')
+    achados, _, _ = acervo.pesquisar('prescrição - "marco (art. 74)" OR NOT x')
     assert isinstance(achados, list)  # o que importa é não levantar erro
 
 
@@ -64,20 +64,20 @@ def test_pontuacao_nao_quebra_a_sintaxe_do_fts(acervo):
 
 
 def test_encontra_por_termo_sem_acento(acervo):
-    achados, parcial = acervo.pesquisar("visita tecnica")
+    achados, parcial, _ = acervo.pesquisar("visita tecnica")
     assert [r.tipo for r in achados] == ["sumula"]
     assert parcial is False
 
 
 def test_abranda_para_ou_quando_o_e_nao_acha_nada(acervo):
     """Uma palavra a mais na pergunta não pode zerar o resultado."""
-    achados, parcial = acervo.pesquisar("visita técnica em contrato de obra pública")
+    achados, parcial, _ = acervo.pesquisar("visita técnica em contrato de obra pública")
     assert achados
     assert parcial is True
 
 
 def test_busca_sem_correspondencia_devolve_vazio(acervo):
-    achados, parcial = acervo.pesquisar("terraplanagem marciana")
+    achados, parcial, _ = acervo.pesquisar("terraplanagem marciana")
     assert achados == []
     assert parcial is False
 
@@ -171,6 +171,29 @@ def test_instrucoes_exigem_explicacao_e_link():
     for exigencia in ("Do que tratou", "como se aplica", "Link de conferência",
                       "url_inteiro_teor", "contrário"):
         assert exigencia in INSTRUCOES
+
+
+def test_instrucoes_mandam_reformular_sem_presumir_a_resposta():
+    """Uma única tradução da pergunta falha por motivo lexical, não semântico."""
+    from ementario.servidor import INSTRUCOES
+
+    for exigencia in ("Preserve a consulta inicial", "Reformule quando",
+                      "expressao_executada", "controle cruzado",
+                      "procurar confirmação"):
+        assert exigencia in INSTRUCOES, exigencia
+
+
+def test_limite_de_leitura_nao_e_conclusao_juridica():
+    from ementario.servidor import INSTRUCOES
+
+    assert "operacional, não interpretativo" in INSTRUCOES
+    assert "não é conclusão jurídica" in INSTRUCOES
+
+
+def test_pesquisa_devolve_a_expressao_executada(acervo):
+    """Sem registrar a formulação, não há como auditar a pesquisa depois."""
+    _, _, expressao = acervo.pesquisar("visita tecnica")
+    assert expressao == '"visita" AND "tecnica"'
 
 
 def test_instrucoes_exigem_verificar_a_proveniencia():

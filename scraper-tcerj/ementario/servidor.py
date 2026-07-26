@@ -73,6 +73,41 @@ Diga sempre de onde veio a proposição. "Consta da ementa" e "consta do voto,
 dois você leu. Não encontrando na ementa, procure no inteiro teor antes de
 concluir que o Tribunal não se pronunciou.
 
+UMA PERGUNTA, VÁRIAS FORMULAÇÕES
+
+A busca é literal. Uma única tradução da pergunta em consulta pode falhar por
+motivo puramente lexical: termos genéricos como "projeto", "contrato" ou
+"aditivo" espalham a relevância por documentos densos mas juridicamente
+laterais, enquanto o precedente pertinente usa outro vocabulário. Medido neste
+acervo: "erro de projeto básico justifica aditivo?" não achou nada de útil;
+"deficiência do projeto básico" achou o precedente na primeira tentativa.
+
+1. **Preserve a consulta inicial.** As variantes acrescentam, não substituem.
+   A pergunta do advogado é o alvo; as variantes são caminhos até ele.
+
+2. **Reformule quando o resultado for fraco ou lateral.** Sinais: os primeiros
+   resultados tratam de assunto diverso; os termos aparecem dispersos sem
+   formar a relação jurídica perguntada; a busca caiu em correspondência
+   parcial casando só palavras genéricas; a leitura do melhor resultado mostra
+   que ele não responde. Outro sinal forte: a busca por ementa trouxe
+   precedente pertinente que o inteiro teor não recuperou — as duas servem de
+   controle cruzado uma da outra.
+
+3. **Variante é o mesmo problema com outro vocabulário, nunca a resposta
+   presumida.** Para "erro de projeto básico justifica aditivo?", valem
+   "deficiência projeto básico", "projeto básico incompleto aditivo", "falha
+   de planejamento termo aditivo". Não vale formular a variante já embutindo
+   a conclusão que se quer encontrar — isso é procurar confirmação, não
+   pesquisar.
+
+4. **Antes de dizer que não há precedente, tente ao menos uma variante.**
+   Dispensável apenas quando a consulta original já for literal e específica
+   (uma expressão exata entre aspas, por exemplo).
+
+Registre, para cada precedente que apresentar, por qual formulação ele
+apareceu — o campo `expressao_executada` traz a expressão de fato usada. Serve
+para o advogado saber como a pesquisa foi feita, e para refazê-la depois.
+
 PROVENIÊNCIA: A REGRA QUE NÃO PODE SER QUEBRADA
 
 O PDF do acórdão não é um texto homogêneo. Ele reúne, em sequência:
@@ -108,6 +143,13 @@ seu contexto e identificar de que parte do documento ele vem.** A rotina:
    for alegação ou instrução: o que importa é o que o relator fez com aquilo,
    e isso pode estar várias páginas adiante.
 5. Só então formule a tese.
+
+O limite de `adiante` é **operacional, não interpretativo**. Se ao fim da
+janela o trecho ainda estiver dentro das razões de defesa, da instrução ou de
+transcrição — ou se o posicionamento do relator não tiver aparecido —,
+continue lendo em nova chamada. "Acabou a janela" não é conclusão jurídica, e
+declarar o ponto indeterminado por esgotamento de leitura é erro pior do que
+demorar mais uma consulta.
 
 Verifique também o **estágio processual**. Um voto pode conter formulação
 jurídica robusta e, ao final, apenas notificar para defesa: a tese existe, o
@@ -217,7 +259,7 @@ def construir(
             relator: nome, ou parte do nome, do conselheiro relator.
             limite: quantos resultados devolver (máximo 50).
         """
-        achados, parcial = acervo.pesquisar(
+        achados, parcial, expressao = acervo.pesquisar(
             consulta,
             especie=especie,
             ano_min=ano_min,
@@ -241,6 +283,7 @@ def construir(
 
         return {
             "consulta": consulta,
+            "expressao_executada": expressao,
             "quantidade": len(achados),
             "correspondencia_parcial": parcial,
             "resultados": [r.para_dict() for r in achados],
@@ -271,15 +314,16 @@ def construir(
             relator: nome, ou parte do nome, do conselheiro relator.
             limite: quantos trechos devolver (máximo 30).
         """
-        achados, parcial = acervo.pesquisar_paginas(
+        achados, parcial, expressao = acervo.pesquisar_paginas(
             consulta, especie=especie, ano_min=ano_min, ano_max=ano_max,
             relator=relator, limite=limite,
         )
         if not achados:
             observacao = (
-                "Nada encontrado no inteiro teor. Vale tentar outra formulação: "
-                "a busca é literal, e o voto pode usar palavras diferentes das "
-                "da pergunta."
+                "Nada encontrado com esta formulação. Antes de concluir que o "
+                "Tribunal não se pronunciou, tente ao menos uma variante lexical "
+                "equivalente — a busca é literal, e o voto pode nomear o mesmo "
+                "problema com outras palavras."
             )
         elif parcial:
             observacao = (
@@ -292,6 +336,10 @@ def construir(
 
         return {
             "consulta": consulta,
+            # Registre esta expressão ao anotar por qual formulação cada
+            # precedente apareceu: a mesma pergunta, dita de outro modo,
+            # encontra documentos diferentes.
+            "expressao_executada": expressao,
             "quantidade": len(achados),
             "correspondencia_parcial": parcial,
             "resultados": [t.para_dict() for t in achados],
