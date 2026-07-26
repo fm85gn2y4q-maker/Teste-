@@ -162,6 +162,29 @@ def validar(pasta: Path) -> bool:
     return True
 
 
+def sem_espacos(caminho: str) -> str | None:
+    """Devolve o caminho na forma curta 8.3 quando ele tiver espaços.
+
+    O Claude Desktop quebra o `command` do manifesto nos espaços: um
+    interpretador em "C:\\Users\\Fulano Silva\\..." vira o comando
+    "C:\\Users\\Fulano" com o resto virando argumento. O nome curto do Windows
+    ("FULANO~1") contorna isso sem depender de aspas que não são interpretadas.
+    """
+    if " " not in caminho:
+        return caminho
+
+    import ctypes
+
+    buffer = ctypes.create_unicode_buffer(1024)
+    tamanho = ctypes.windll.kernel32.GetShortPathNameW(caminho, buffer, 1024)
+    curto = buffer.value if tamanho else ""
+    # A geração de nomes 8.3 pode estar desligada no volume: sem conferir, o
+    # que sai é um caminho que não existe.
+    if curto and " " not in curto and Path(curto).exists():
+        return curto
+    return None
+
+
 def conferir_interpretador(exe: str) -> bool:
     """Recusa um interpretador que não consiga importar o que o servidor usa.
 
@@ -187,8 +210,24 @@ def empacotar(python: str | None = None) -> int:
         print("Conferindo o interpretador escolhido…")
         if not conferir_interpretador(python):
             return 1
-        MANIFESTO["server"]["mcp_config"]["command"] = python
-        versao = subprocess.run([python, "--version"], capture_output=True,
+
+        comando = sem_espacos(python)
+        if comando is None:
+            print(
+                f"  O caminho tem espaços e não há nome curto 8.3 para ele:\n"
+                f"    {python}\n"
+                f"  O Claude Desktop quebraria o comando no primeiro espaço. "
+                f"Aponte um interpretador em caminho sem espaços.",
+                file=sys.stderr,
+            )
+            return 1
+        if comando != python:
+            print(f"  caminho tem espaço; usando o nome curto: {comando}")
+            if not conferir_interpretador(comando):
+                return 1
+
+        MANIFESTO["server"]["mcp_config"]["command"] = comando
+        versao = subprocess.run([comando, "--version"], capture_output=True,
                                 text=True).stdout.strip()
         print(f"  fixado em {versao}")
 
