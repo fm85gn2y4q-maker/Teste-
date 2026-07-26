@@ -38,33 +38,39 @@ Em troca, duas limitações reais do plano gratuito:
 - **Publica a partir de um repositório Git.** Não há envio de pasta local, o
   que traz a decisão abaixo.
 
-### O banco precisa estar no repositório
+### O acervo não vai no Git
 
-O Render constrói a imagem a partir do que está no Git, e a imagem carrega o
-acervo. São ~10 MB.
+O banco é **artefato de dados**, não código-fonte: é gerado por programa, muda
+em ritmo próprio e cresce a cada coleta. Versioná-lo faria o histórico carregar
+uma cópia binária inteira por atualização — e o GitHub avisa acima de 50 MiB e
+recusa objetos acima de 100 MiB.
 
-Se o repositório for **público**, o acervo fica público junto. Para a
-jurisprudência do TCE-RJ isso não é problema: são atos públicos, já
-disponíveis no portal do Tribunal, e o que existe aqui é uma cópia organizada.
-Ainda assim é uma escolha sua, e há alternativa: criar um repositório privado
-só para publicação — o plano gratuito do Render também constrói a partir de
-repositório privado.
+Ele vai comprimido como **asset de release**, e a imagem o baixa na construção
+com a versão fixada. Assim o deploy é reproduzível, o rollback é trocar uma
+linha, e uma coleta ruim não altera produção em silêncio.
 
-O `.gitignore` já abre exceção para `dados/tcerj.sqlite` e mantém de fora o
-resto (banco de teste, exports).
-
-### 1. Enviar o repositório
-
-```bash
-git add scraper-tcerj/dados/tcerj.sqlite render.yaml .gitignore
+```
+coletar → testar → VACUUM → comprimir → asset de release
+        → apontar a versão no render.yaml → Render reconstrói
 ```
 
-```bash
-git commit -m "Acervo e configuracao do Render para publicacao"
-```
+### 1. Gerar e publicar o acervo
+
+Depois de coletar, gere o arquivo comprimido e anote o `sha256`. Publique-o em
+**Releases → Draft a new release**, com uma tag por versão do acervo
+(`acervo-v2.0.0`), arrastando o `.db.gz` para os assets.
+
+Não use `latest` em produção: versão fixa é o que torna o deploy reproduzível
+e o rollback trivial.
+
+### 2. Apontar a versão e enviar o código
+
+No `render.yaml`, `ACERVO_URL` recebe o endereço do asset e `ACERVO_SHA256` a
+soma conferida na construção — se o arquivo mudar, o build falha em vez de
+subir um acervo diferente do esperado.
 
 ```bash
-git push
+git add render.yaml scraper-tcerj && git commit -m "Publica acervo v2.0.0" && git push
 ```
 
 ### 2. Criar o serviço

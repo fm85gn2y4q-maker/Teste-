@@ -54,10 +54,10 @@ __pycache__/
 descoberta.json
 config.json
 
-# O acervo é exceção: a hospedagem constrói a imagem a partir do repositório,
-# então o banco precisa estar versionado. São ~10 MB de atos públicos do
-# TCE-RJ, já disponíveis no portal do Tribunal.
-!**/dados/tcerj.sqlite
+# O acervo NÃO é versionado. Ele é artefato de dados, não código-fonte: é
+# gerado por um programa, muda em ritmo próprio e cresce a cada coleta. Vai
+# comprimido como asset de release, e a imagem o baixa na construção — assim o
+# histórico não carrega uma cópia binária inteira a cada atualização.
 
 # empacotamento da extensão (leva o acervo e as dependências dentro)
 build/

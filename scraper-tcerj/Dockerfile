@@ -12,7 +12,15 @@ COPY requirements-servidor.txt ./
 RUN pip install --no-cache-dir -r requirements-servidor.txt
 
 COPY ementario/ ./ementario/
-COPY dados/tcerj.sqlite ./dados/tcerj.sqlite
+
+# O acervo é artefato de dados, não código: vem de um asset de release, com a
+# versão fixada. Assim o deploy é reproduzível, o rollback é trocar a versão, e
+# o histórico do Git não carrega uma cópia binária a cada atualização.
+ARG ACERVO_URL
+ARG ACERVO_SHA256=""
+COPY baixar_acervo.py ./
+RUN test -n "$ACERVO_URL" || (echo "Defina ACERVO_URL na construção." && exit 1) \
+ && python baixar_acervo.py "$ACERVO_URL" dados/tcerj.sqlite "$ACERVO_SHA256"
 
 # O serviço define a porta; 8080 é o padrão do Cloud Run quando ele não define.
 ENV PORT=8080 \

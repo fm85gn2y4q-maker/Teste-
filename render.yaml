@@ -11,6 +11,12 @@ services:
     rootDir: scraper-tcerj
     dockerfilePath: ./Dockerfile
     plan: free
+    # O acervo entra na imagem a partir de um asset de release, com a versão
+    # fixada de propósito: trocar aqui é o que publica uma base nova, e voltar
+    # à anterior é rollback de uma linha.
+    dockerBuildArgs:
+      ACERVO_URL: https://github.com/fm85gn2y4q-maker/Teste-/releases/download/acervo-v2.0.0/ementario-tcerj-v2.0.0.db.gz
+      ACERVO_SHA256: 513fd3146272d98a71dfa8b98aba5ce27b6262ce2f260360cbd0e2d135bab395
     # Entre as regiões do plano gratuito, virginia é a de menor latência para
     # o Brasil.
     region: virginia
