@@ -118,6 +118,36 @@ def cmd_coletar(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_inteiro_teor(args: argparse.Namespace) -> int:
+    from .inteiro_teor import coletar
+
+    config = Config.carregar(args.config)
+    if args.intervalo is not None:
+        config.intervalo_seg = args.intervalo
+    banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
+
+    def progresso(documentos: int, paginas: int, falhas: int) -> None:
+        print(f"  ... {documentos} documentos, {paginas} páginas, {falhas} falhas",
+              flush=True)
+
+    with Armazenamento(banco) as armazenamento:
+        documentos, paginas, falhas = asyncio.run(
+            coletar(
+                config,
+                armazenamento,
+                tipo=_tipo(args.tipo),
+                max_documentos=args.max_documentos,
+                ao_progresso=progresso,
+            )
+        )
+        resumo = armazenamento.estatisticas_inteiro_teor()
+
+    print(f"\nInteiro teor: {documentos} documentos, {paginas} páginas, {falhas} falhas.")
+    print(f"Acumulado: {resumo['documentos']} documentos, {resumo['paginas']} páginas, "
+          f"{resumo['caracteres']:,} caracteres.")
+    return 0
+
+
 def cmd_exportar(args: argparse.Namespace) -> int:
     config = Config.carregar(args.config)
     banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
@@ -223,6 +253,17 @@ def construir_parser() -> argparse.ArgumentParser:
     p.add_argument("--intervalo", type=float, help="segundos entre requisições")
     p.add_argument("--mostrar-navegador", action="store_true")
     p.set_defaults(func=cmd_coletar)
+
+    p = sub.add_parser(
+        "inteiro-teor",
+        help="baixa o PDF oficial dos documentos já coletados e guarda o texto "
+             "por página",
+    )
+    p.add_argument("--tipo", help="restringe a espécie (padrão: todas)")
+    p.add_argument("--max-documentos", type=int)
+    p.add_argument("--intervalo", type=float, help="segundos entre requisições")
+    p.add_argument("--banco")
+    p.set_defaults(func=cmd_inteiro_teor)
 
     p = sub.add_parser("exportar", help="exporta o acervo para JSONL ou CSV")
     p.add_argument("saida", help="arquivo de destino")

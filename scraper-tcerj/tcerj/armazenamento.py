@@ -13,7 +13,7 @@ import sqlite3
 from contextlib import closing
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Any, Iterable, Iterator
 
 from .modelos import Documento, TipoDocumento
 
@@ -55,6 +55,23 @@ CREATE TABLE IF NOT EXISTS visitados (
 -- Busca textual sobre ementa e inteiro teor.
 CREATE VIRTUAL TABLE IF NOT EXISTS documentos_fts
 USING fts5(id UNINDEXED, ementa, inteiro_teor, tokenize='unicode61 remove_diacritics 2');
+
+-- Inteiro teor guardado página a página. É a página que permite conferir a
+-- passagem no documento oficial; um texto corrido de cinquenta páginas
+-- localiza o acórdão, mas não o trecho dentro dele.
+CREATE TABLE IF NOT EXISTS paginas (
+    documento_id  TEXT NOT NULL,
+    pagina        INTEGER NOT NULL,
+    folha         INTEGER,
+    texto         TEXT NOT NULL,
+    PRIMARY KEY (documento_id, pagina)
+);
+
+CREATE INDEX IF NOT EXISTS ix_paginas_documento ON paginas(documento_id);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS paginas_fts
+USING fts5(documento_id UNINDEXED, pagina UNINDEXED, texto,
+           tokenize='unicode61 remove_diacritics 2');
 """
 
 _COLUNAS = (
@@ -141,6 +158,65 @@ class Armazenamento:
             else:
                 atualizados += 1
         return novos, atualizados
+
+    # -- inteiro teor -----------------------------------------------------
+
+    def gravar_paginas(self, documento_id: str, paginas: Iterable) -> int:
+        """Substitui o inteiro teor de um documento pelas páginas dadas.
+
+        Substituir, e não acrescentar, é o que torna a reingestão segura: um
+        documento recoletado com outra extração não fica com páginas das duas
+        versões misturadas.
+        """
+        self.conexao.execute("DELETE FROM paginas WHERE documento_id = ?", (documento_id,))
+        self.conexao.execute(
+            "DELETE FROM paginas_fts WHERE documento_id = ?", (documento_id,)
+        )
+        total = 0
+        for pagina in paginas:
+            self.conexao.execute(
+                "INSERT INTO paginas (documento_id, pagina, folha, texto) "
+                "VALUES (?, ?, ?, ?)",
+                (documento_id, pagina.numero, pagina.folha, pagina.texto),
+            )
+            self.conexao.execute(
+                "INSERT INTO paginas_fts (documento_id, pagina, texto) VALUES (?, ?, ?)",
+                (documento_id, pagina.numero, pagina.texto),
+            )
+            total += 1
+        self.conexao.commit()
+        return total
+
+    def tem_inteiro_teor(self, documento_id: str) -> bool:
+        cursor = self.conexao.execute(
+            "SELECT 1 FROM paginas WHERE documento_id = ? LIMIT 1", (documento_id,)
+        )
+        return cursor.fetchone() is not None
+
+    def sem_inteiro_teor(self, tipo: TipoDocumento | None = None) -> list[Documento]:
+        """Documentos já catalogados cujo inteiro teor ainda não foi baixado."""
+        sql = [
+            "SELECT d.* FROM documentos d",
+            "LEFT JOIN paginas p ON p.documento_id = d.id",
+            "WHERE p.documento_id IS NULL AND d.numero IS NOT NULL AND d.ano IS NOT NULL",
+        ]
+        parametros: list[Any] = []
+        if tipo:
+            sql.append("AND d.tipo = ?")
+            parametros.append(tipo.value)
+        sql.append("GROUP BY d.id ORDER BY d.ano DESC, CAST(d.numero AS INTEGER) DESC")
+        linhas = self.conexao.execute(" ".join(sql), parametros).fetchall()
+        return [_linha_para_documento(l) for l in linhas]
+
+    def estatisticas_inteiro_teor(self) -> dict[str, int]:
+        (docs,) = self.conexao.execute(
+            "SELECT COUNT(DISTINCT documento_id) FROM paginas"
+        ).fetchone()
+        (paginas,) = self.conexao.execute("SELECT COUNT(*) FROM paginas").fetchone()
+        (caracteres,) = self.conexao.execute(
+            "SELECT COALESCE(SUM(LENGTH(texto)), 0) FROM paginas"
+        ).fetchone()
+        return {"documentos": docs, "paginas": paginas, "caracteres": caracteres}
 
     def marcar_visitado(self, url: str, status: str, detalhe: str | None = None) -> None:
         self.conexao.execute(
