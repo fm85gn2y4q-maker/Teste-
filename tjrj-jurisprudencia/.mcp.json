@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "jurisprudencia-tjrj": {
+      "command": "python",
+      "args": ["-m", "tjrj.mcp.server"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "TJRJ_BANCO": "${workspaceFolder}/dados/acervo.db"
+      }
+    }
+  }
+}

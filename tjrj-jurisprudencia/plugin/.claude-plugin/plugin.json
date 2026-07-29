@@ -1,0 +1,17 @@
+{
+  "name": "jurisprudencia-tjrj",
+  "version": "0.1.0",
+  "description": "Acervo de jurisprudência do TJRJ: ementas, inteiro teor paginado, órgão julgador, relator e composição do julgamento.",
+  "author": {
+    "name": "Matheus Menegatti"
+  },
+  "mcpServers": {
+    "jurisprudencia-tjrj": {
+      "command": "tjrj-mcp",
+      "args": [],
+      "env": {
+        "TJRJ_BANCO": "${TJRJ_BANCO:-${HOME}/tjrj/acervo.db}"
+      }
+    }
+  }
+}
