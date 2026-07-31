@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "initialized": false,
+  "_doc": "Fresh, uninitialized copy. On the first session, CLAUDE.md §0 routes to /setup then /onboarding, which fill this in and set initialized=true. Do not teach until then.",
+  "learner": {
+    "name": "",
+    "subject": "",
+    "goal": "",
+    "background": "",
+    "preferred_language": "",
+    "weekly_time_budget": "",
+    "started": ""
+  },
+  "current_stage": "",
+  "stats": {
+    "sessions": 0,
+    "study_minutes": 0,
+    "concepts_mastered": 0,
+    "flashcards_total": 0,
+    "flashcards_due": 0,
+    "exercises_solved": 0,
+    "quizzes_taken": 0,
+    "feynman_attempts": 0,
+    "streak_days": 0,
+    "last_session_date": ""
+  },
+  "review_tracking": {
+    "_doc": "Maintained by /review and read by the Consolidation Gate (review/CONSOLIDATION-GATE.md) to decide REVIEW vs LEARN.",
+    "last_review_date": "",
+    "last_review_accuracy": null,
+    "cards_consolidated": 0,
+    "consolidation_ratio": 1.0
+  },
+  "media": {
+    "_doc": "Set during /setup. enabled=false means NotebookLM media is off (the tutor still works fully). Never hardcode the notebook id elsewhere — resolve via `notebooklm list`.",
+    "enabled": false,
+    "notebook_title": "AI-TUTOR",
+    "notebook_id": ""
+  },
+  "stages": []
+}

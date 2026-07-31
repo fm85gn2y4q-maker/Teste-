@@ -39,3 +39,23 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+
+# Workspace build/run artifacts (any subject)
+workspace/**/__pycache__/
+workspace/**/node_modules/
+workspace/**/.venv/
+**/*.pyc
+
+# Playwright MCP isolated profile / traces (if any land here)
+.playwright-mcp/
+
+# Local first-run marker (optional)
+.tutor-initialized
+
+# Generated media can get large — uncomment to keep them out of Git:
+# materials/**/*.mp3
+# materials/**/*.mp4
