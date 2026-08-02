@@ -19,3 +19,7 @@ PDFs/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Empacotamento
+build/
+dist/
