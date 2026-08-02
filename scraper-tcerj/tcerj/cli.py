@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .armazenamento import Armazenamento, exportar_csv, exportar_jsonl
 from .config import Config
+from .http import ServidorRecusando
 from .modelos import ROTULOS, TipoDocumento
 
 log = logging.getLogger("tcerj")
@@ -409,6 +410,12 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:
         print("\nInterrompido. O progresso já gravado é preservado.", file=sys.stderr)
         return 130
+    except ServidorRecusando as erro:
+        # Código próprio: uma coleta longa costuma rodar destacada, e quem for
+        # ler o registro depois precisa distinguir "o servidor mandou parar" de
+        # um erro qualquer. Retomar sem antes conferir o portal é reincidir.
+        print(f"\nCOLETA ENCERRADA PELO SERVIDOR\n{erro}", file=sys.stderr)
+        return 75
     except (FileNotFoundError, ValueError) as erro:
         print(f"Erro: {erro}", file=sys.stderr)
         return 1

@@ -19,6 +19,42 @@ log = logging.getLogger(__name__)
 # problema na requisição e repetir só agrava.
 _STATUS_REPETIVEIS = {408, 429, 500, 502, 503, 504}
 
+# Respostas em que o servidor diz "não" a quem está coletando: excesso de
+# requisições e acesso negado.
+_RECUSAS = {403, 429}
+
+# Quantas recusas seguidas encerram a coleta inteira.
+#
+# A repetição por requisição já existe e resolve o caso isolado. O que ela não
+# resolve é o servidor passando a recusar tudo: a coleta falharia um documento,
+# marcaria e seguiria para o próximo, milhares de vezes. Numa fila de vinte e
+# três mil acórdãos isso é insistir por horas contra um servidor público que
+# está pedindo para parar.
+#
+# Dez é folgado o bastante para não disparar com oscilação — cada uma já veio
+# depois de quatro tentativas com espera crescente — e curto o bastante para
+# encerrar em minutos.
+_RECUSAS_SEGUIDAS_MAXIMAS = 10
+
+
+class ServidorRecusando(RuntimeError):
+    """O servidor recusou em série; a coleta para em vez de insistir.
+
+    Não herda de `ErroHttp` de propósito: quem coleta trata `ErroHttp` por
+    documento e segue adiante, que é o comportamento correto para uma falha
+    isolada e exatamente o errado aqui.
+    """
+
+    def __init__(self, url: str, status: int | None, seguidas: int) -> None:
+        super().__init__(
+            f"{seguidas} recusas seguidas do servidor (última: {status} em {url}). "
+            f"A coleta foi encerrada para não insistir. Verifique o portal antes "
+            f"de retomar — o que já foi gravado permanece, e a fila recomeça de onde parou."
+        )
+        self.url = url
+        self.status = status
+        self.seguidas = seguidas
+
 
 class LimitadorDeTaxa:
     """Garante um intervalo mínimo entre requisições, entre corrotinas."""
@@ -53,6 +89,8 @@ class Cliente:
         self._limitador = LimitadorDeTaxa(config.intervalo_seg)
         self._semaforo = asyncio.Semaphore(config.concorrencia)
         self._robots: dict[str, urllib.robotparser.RobotFileParser | None] = {}
+        self._recusas_seguidas = 0
+        self.recusas_maximas = _RECUSAS_SEGUIDAS_MAXIMAS
         self._cliente = httpx.AsyncClient(
             timeout=config.timeout_seg,
             follow_redirects=True,
@@ -127,7 +165,9 @@ class Cliente:
                 else:
                     if resposta.status_code not in _STATUS_REPETIVEIS:
                         if resposta.status_code >= 400:
+                            self._anotar_recusa(url, resposta.status_code)
                             raise ErroHttp(url, resposta.status_code, resposta.reason_phrase)
+                        self._recusas_seguidas = 0
                         return resposta
                     ultimo_erro = ErroHttp(url, resposta.status_code, resposta.reason_phrase)
                     log.warning(
@@ -141,7 +181,24 @@ class Cliente:
             if tentativa < self.config.tentativas:
                 await asyncio.sleep(2**tentativa)  # 2s, 4s, 8s, 16s
 
-        raise ErroHttp(url, getattr(ultimo_erro, "status", None), str(ultimo_erro))
+        status = getattr(ultimo_erro, "status", None)
+        self._anotar_recusa(url, status)
+        raise ErroHttp(url, status, str(ultimo_erro))
+
+    def _anotar_recusa(self, url: str, status: int | None) -> None:
+        """Conta recusas seguidas e encerra a coleta quando viram série.
+
+        Só 403 e 429 contam. Um 404 é resposta legítima — o Tribunal não
+        publicou aquele documento — e zera a contagem como qualquer sucesso:
+        um servidor que ainda distingue o que existe do que não existe não
+        está recusando acesso.
+        """
+        if status not in _RECUSAS:
+            self._recusas_seguidas = 0
+            return
+        self._recusas_seguidas += 1
+        if self._recusas_seguidas >= self.recusas_maximas:
+            raise ServidorRecusando(url, status, self._recusas_seguidas)
 
     async def obter(self, url: str, **kwargs) -> httpx.Response:
         return await self.requisitar("GET", url, **kwargs)
