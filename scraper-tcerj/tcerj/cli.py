@@ -156,6 +156,49 @@ def cmd_inteiro_teor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_descobrir_acordaos(args: argparse.Namespace) -> int:
+    from .http import Cliente
+    from .pesquisa_textual import TETO, descobrir
+
+    config = Config.carregar(args.config)
+    if args.intervalo is not None:
+        config.intervalo_seg = args.intervalo
+    banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
+
+    async def rodar(armazenamento) -> tuple[int, int, list[str]]:
+        novas = conhecidas = 0
+        saturadas = []
+        async with Cliente(config) as cliente:
+            for termo in args.termo:
+                referencias, total = await descobrir(
+                    cliente, termo, municipio=args.municipio,
+                    ano_min=args.ano_min, ano_max=args.ano_max,
+                )
+                n, c = armazenamento.registrar_descobertos(referencias)
+                novas += n
+                conhecidas += c
+                marca = " (NO TETO — recorte incompleto)" if total >= TETO else ""
+                print(f"  {termo}: {total} no servidor, {len(referencias)} lidos, "
+                      f"{n} novos{marca}", flush=True)
+                if total >= TETO:
+                    saturadas.append(termo)
+        return novas, conhecidas, saturadas
+
+    with Armazenamento(banco) as armazenamento:
+        novas, conhecidas, saturadas = asyncio.run(rodar(armazenamento))
+        pendentes = len(armazenamento.oficiais_sem_texto())
+
+    print(f"\nDescobertos: {novas} novos, {conhecidas} já conhecidos.")
+    print(f"Aguardando inteiro teor: {pendentes} documentos.")
+    if saturadas:
+        print("\nConsultas que bateram o teto e ficaram incompletas:")
+        for termo in saturadas:
+            print(f"  {termo}")
+        print("Estreite o recorte (--ano-min/--ano-max, --municipio) e repita.")
+    print("\nPara baixar: python -m tcerj -c config.json inteiro-teor")
+    return 0
+
+
 def cmd_reparar(args: argparse.Namespace) -> int:
     from .inteiro_teor import reparar
 
@@ -305,6 +348,22 @@ def construir_parser() -> argparse.ArgumentParser:
              "mesmo custo de uma coleta — use quando houver motivo.",
     )
     p.set_defaults(func=cmd_inteiro_teor)
+
+    p = sub.add_parser(
+        "descobrir-acordaos",
+        help="acha acórdãos pela Pesquisa Textual, além da curadoria do "
+             "Serviço de Jurisprudência",
+    )
+    p.add_argument("--termo", action="append", required=True,
+                   help="expressão a procurar. Pode repetir. Aspas fazem busca "
+                        "exata; ' E ', ' OU ' e ' -- ' são os operadores.")
+    p.add_argument("--municipio", type=int,
+                   help="id do ente federativo (ex.: 93 = Mesquita)")
+    p.add_argument("--ano-min", type=int, help="ano de sessão mais antigo")
+    p.add_argument("--ano-max", type=int, help="ano de sessão mais recente")
+    p.add_argument("--intervalo", type=float)
+    p.add_argument("--banco")
+    p.set_defaults(func=cmd_descobrir_acordaos)
 
     p = sub.add_parser(
         "reparar-inteiro-teor",

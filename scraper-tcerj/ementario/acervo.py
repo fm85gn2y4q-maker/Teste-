@@ -423,9 +423,14 @@ class Acervo:
 
         achados = []
         for linha in self.conexao.execute(" ".join(sql), parametros):
-            if linha["id"] is None:
-                continue  # documento oficial sem ementa catalogada
-            base = self._resultado(linha, "")
+            # Acórdão fora da curadoria não tem ementa: a citação se monta dos
+            # dados do documento oficial. Descartá-lo aqui tornaria invisível
+            # justamente o acervo que a Pesquisa Textual acrescentou.
+            base = (
+                self._resultado(linha, "")
+                if linha["id"] is not None
+                else self._resultado_sem_ementa(linha)
+            )
             bruto = linha["trecho"] or ""
             # Os delimitadores invisíveis marcam o que casou; extraí-los diz ao
             # advogado por que aquele trecho veio, e some do texto exibido.
@@ -552,6 +557,35 @@ class Acervo:
         }
 
     # -- montagem ---------------------------------------------------------
+
+    def _resultado_sem_ementa(self, linha: sqlite3.Row) -> "Resultado":
+        """Monta o resultado de um acórdão que não passou pela curadoria.
+
+        Sem ementa não há tese destilada pelo Tribunal, nem relator no
+        registro: o que existe é o documento e o que dele se lê. A citação sai
+        do próprio acórdão.
+        """
+        numero = linha["numero_oficial"]
+        ano = linha["ano_oficial"]
+        processo = linha["processo_oficial"]
+        citacao = f"TCE-RJ, Acórdão {numero}/{ano}"
+        if processo:
+            citacao += f", Processo {processo}"
+        return Resultado(
+            id=f"acordao-{numero}-{ano}",
+            tipo="acordao",
+            citacao=citacao,
+            ementa="",
+            trecho="",
+            relator=None,
+            processo=processo,
+            data_sessao=None,
+            ano=ano,
+            assuntos=[],
+            url_documento=montar_url_pdf("acordao", numero, ano),
+            url_processo=montar_url_processo(processo),
+            url_portal=PORTAIS.get("acordao", PORTAL_PADRAO),
+        )
 
     def _resultado(self, linha: sqlite3.Row, trecho: str) -> Resultado:
         import json

@@ -345,25 +345,70 @@ class Armazenamento:
     def oficiais_sem_texto(self, tipo: TipoDocumento | None = None) -> list[dict[str, Any]]:
         """Documentos oficiais ainda sem inteiro teor.
 
-        Agrupa por espécie, número e ano — e não por registro de ementa. Sem
-        isso, um acórdão com três ementas selecionadas seria baixado três
-        vezes e guardado três vezes, sendo um único documento.
+        Reúne duas origens: os acórdãos que têm ementa selecionada e os que
+        foram descobertos pela Pesquisa Textual, fora da curadoria. Agrupa por
+        espécie, número e ano — e não por registro de ementa. Sem isso, um
+        acórdão com três ementas seria baixado três vezes, sendo um documento.
         """
         sql = [
-            "SELECT d.tipo, d.numero, d.ano, MIN(d.processo) processo,",
-            "       d.tipo || '-' || d.numero || '-' || d.ano AS oficial",
-            "FROM documentos d",
-            "WHERE d.numero IS NOT NULL AND d.ano IS NOT NULL",
+            "SELECT tipo, numero, ano, MIN(processo) processo, oficial FROM (",
+            "  SELECT d.tipo, d.numero, d.ano, d.processo,",
+            "         d.tipo || '-' || d.numero || '-' || d.ano AS oficial",
+            "  FROM documentos d",
+            "  WHERE d.numero IS NOT NULL AND d.ano IS NOT NULL",
         ]
         parametros: list[Any] = []
         if tipo:
-            sql.append("AND d.tipo = ?")
+            sql.append("    AND d.tipo = ?")
             parametros.append(tipo.value)
+        sql.append("  UNION ALL")
+        sql.append("  SELECT o.tipo, o.numero, o.ano, o.processo, o.id AS oficial")
+        sql.append("  FROM documentos_oficiais o WHERE o.numero <> ''")
+        if tipo:
+            sql.append("    AND o.tipo = ?")
+            parametros.append(tipo.value)
+        # Já tentados e recusados pela origem não voltam à fila sozinhos: o
+        # 404 é ausência estrutural, não falha a repetir a cada execução.
+        sql.append("    AND o.status_coleta NOT IN ('http_404', 'sem_numero_acordao')")
+        sql.append(")")
         sql.append(
             "GROUP BY oficial HAVING oficial NOT IN (SELECT documento_id FROM paginas)"
         )
-        sql.append("ORDER BY d.ano DESC, CAST(d.numero AS INTEGER) DESC")
+        sql.append("ORDER BY ano DESC, CAST(numero AS INTEGER) DESC")
         return [dict(l) for l in self.conexao.execute(" ".join(sql), parametros)]
+
+    def registrar_descobertos(self, referencias) -> tuple[int, int]:
+        """Guarda referências achadas pela Pesquisa Textual. (novas, já conhecidas)
+
+        Não sobrescreve o que já existe: um acórdão já coletado, ou já marcado
+        como indisponível, não volta ao estado inicial por ter sido encontrado
+        de novo numa busca.
+        """
+        novas = conhecidas = 0
+        agora = datetime.now(timezone.utc).isoformat()
+        for referencia in referencias:
+            existe = self.conexao.execute(
+                "SELECT 1 FROM documentos_oficiais WHERE id = ?", (referencia.oficial,)
+            ).fetchone()
+            if existe:
+                conhecidas += 1
+                continue
+            self.conexao.execute(
+                "INSERT INTO documentos_oficiais "
+                "(id, tipo, numero, ano, processo, url, paginas_total, impressao, "
+                " status_coleta, detalhe_status, ultima_tentativa, ultima_coleta_ok, "
+                " coletado_em) "
+                "VALUES (?, 'acordao', ?, ?, ?, NULL, 0, NULL, 'descoberto', ?, "
+                "        NULL, NULL, ?)",
+                (referencia.oficial, referencia.numero, referencia.ano,
+                 referencia.processo,
+                 " · ".join(p for p in (referencia.orgao, referencia.natureza) if p)
+                 or None,
+                 agora),
+            )
+            novas += 1
+        self.conexao.commit()
+        return novas, conhecidas
 
     def estatisticas_inteiro_teor(self) -> dict[str, int]:
         (docs,) = self.conexao.execute(
