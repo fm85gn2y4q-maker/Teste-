@@ -95,6 +95,32 @@ A tese pode sobreviver ao novo regime, mas quem afirma que sobrevive é o
 advogado, depois de conferir. No regime "transicao", o parecer cita os dois:
 verifique a qual deles a conclusão se refere.
 
+O PASSO OBRIGATÓRIO — E O QUE O `alerta_vigencia` NÃO SABE
+
+**Antes de apresentar QUALQUER norma como fundamento, chame `quem_citou` sobre
+ela e leia o parecer MAIS RECENTE que a cita.** Sempre. Inclusive lei estadual,
+inclusive lei recente, inclusive quando o parecer que você encontrou parecer
+convincente.
+
+O campo `alerta_vigencia` cobre **uma única coisa**: a revogação da lei geral
+de licitação. Ele NÃO sabe de declaração de inconstitucionalidade, de suspensão
+de eficácia, de alteração legislativa posterior, nem de nada que envolva lei
+estadual ou municipal. Silêncio dele não é atestado de vigência.
+
+O caso que obriga esta regra: a Lei Estadual nº 6.450/2013, que disciplinava o
+reembolso de honorários de defesa de agente público, **foi declarada
+inconstitucional pelo Órgão Especial do TJRJ**, com efeitos erga omnes e ex
+tunc, sem modulação. O acervo diz isso com todas as letras no Parecer MGV nº
+19/2023 — que aparece em PRIMEIRO lugar quando se chama `quem_citou("Lei
+6.450")`. Uma resposta que parou num parecer de 2020 apresentou como direito
+vigente uma lei que não existe mais, e pelo motivo errado: não é conflito de
+interesses que impede o reembolso, é falta de fundamento legal.
+
+Some-se a isso: o acervo vai até 2026. Parar no documento mais antigo que
+responde à pergunta é erro de pesquisa. Quando a resposta depender do estado
+da norma ou do entendimento, **confira se há manifestação posterior** antes de
+concluir.
+
 AUTORIDADE — O QUE ESTE ACERVO É E O QUE NÃO É
 
 Parecer da PGE-RJ vincula a Administração ESTADUAL fluminense nos termos da
@@ -280,9 +306,16 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
 
     @mcp.tool()
     def quem_citou(referencia: str, limite: int = 25) -> dict[str, Any]:
-        """Quais pareceres citam uma norma, súmula, acórdão ou parecer interno.
-        Ex.: "Lei 14.133", "Sumula 247", "Parecer 25/2009". Serve para mapear o
-        precedente interno da própria Procuradoria."""
+        """CONFERE O QUE ACONTECEU COM UMA NORMA, e mapeia o precedente interno.
+
+        Etapa obrigatória antes de apresentar qualquer norma como fundamento:
+        devolve quem a cita, do mais recente para o mais antigo, e é assim que
+        se descobre revogação, declaração de inconstitucionalidade, suspensão ou
+        mudança de entendimento — nada disso está no campo `alerta_vigencia`.
+
+        Serve também para súmula, acórdão e parecer interno da própria PGE.
+        Ex.: "Lei 6.450", "Lei 14.133", "Sumula 247", "Parecer 25/2009".
+        """
         return acervo.quem_citou(referencia, limite=limite)
 
     @mcp.tool()

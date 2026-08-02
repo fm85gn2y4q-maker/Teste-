@@ -117,3 +117,23 @@ def test_parecer_de_terceiro_setor_nao_vem_como_8666(servidor):
     d = chamar(servidor, "obter_documento", {"id": 8510})  # PARECER GUB 03/2013
     assert "9.637" in d["regime"]
     assert "lateral" in d["alerta_vigencia"]
+
+
+def test_instrucoes_obrigam_conferir_a_norma(servidor):
+    """O alerta_vigencia so sabe de revogacao da lei de licitacao. Sem passo
+    obrigatorio, uma lei estadual declarada inconstitucional passa batida --
+    foi o que aconteceu com a Lei 6.450/2013."""
+    texto = servidor.instructions or ""
+    assert "quem_citou" in texto
+    assert "inconstitucionalidade" in texto.lower()
+    assert "6.450" in texto
+
+
+def test_quem_citou_traz_o_mais_recente_primeiro(servidor):
+    """O que aconteceu por ultimo com a norma e o que decide. Ordenar por
+    frequencia escondia o parecer de 2023 que declarou a inconstitucionalidade
+    da Lei 6.450/2013."""
+    d = chamar(servidor, "quem_citou", {"referencia": "Lei 6.450", "limite": 5})
+    anos = [x["ano"] for x in d["documentos"] if x.get("ano")]
+    assert anos == sorted(anos, reverse=True)
+    assert anos[0] >= 2023

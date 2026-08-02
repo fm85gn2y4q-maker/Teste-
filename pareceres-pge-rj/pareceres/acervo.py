@@ -352,7 +352,12 @@ class Acervo:
                      (principal["referencia"],))]
         linhas = self.con.execute(
             """SELECT d.* FROM citacoes c JOIN documentos d ON d.codigo = c.codigo
-               WHERE c.referencia = ? ORDER BY c.ocorrencias DESC, d.ano DESC LIMIT ?""",
+               WHERE c.referencia = ?
+               -- do mais RECENTE para o mais antigo: esta é a ferramenta de
+               -- conferir o que aconteceu com a norma, e o que aconteceu por
+               -- último é o que decide. Ordenar por frequência escondia o
+               -- parecer de 2023 que declarou a inconstitucionalidade.
+               ORDER BY d.ano DESC, c.ocorrencias DESC LIMIT ?""",
             (principal["referencia"], limite))
         return {
             "referencia": principal["referencia"],
