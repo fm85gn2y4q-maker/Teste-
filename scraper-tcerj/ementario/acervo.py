@@ -52,6 +52,26 @@ PORTAIS = {
 }
 PORTAL_PADRAO = "https://www.tcerj.tc.br/cadastro-publicacoes/public/portal-jurisprudencia"
 
+# Rastros literais de dissenso dentro de um mesmo julgamento.
+#
+# Medido nos 1.471 acórdãos com inteiro teor: "voto vencido" aparece em 0,8%,
+# "voto divergente" em 0,1%, "redator" em 0,5%. São raros porque no TCE-RJ a
+# divergência quase nunca se manifesta como dissenso interno — ela aparece como
+# o Tribunal decidindo diferente em anos diferentes, sem declarar que mudou.
+# Por isso estes sinais servem para APONTAR divergência, nunca para negá-la.
+#
+# Ficou de fora "divergindo": casa em 8,1% dos acórdãos, mas quase sempre em
+# "divergindo do parecer do Ministério Público" — divergência com o órgão
+# instrutor, não entre precedentes.
+SINAIS_DE_DISSENSO = [
+    ("voto vencido", "houve voto vencido"),
+    ("voto divergente", "houve voto divergente"),
+    ("vencido o Conselheiro", "conselheiro vencido"),
+    ("redator para o acórdão", "relator vencido; acórdão redigido por outro"),
+    ("pedido de vista", "houve pedido de vista"),
+    ("embargos", "a decisão foi embargada"),
+]
+
 # Palavras que o FTS5 interpreta como operador e que, vindas de uma frase em
 # português, quase sempre são apenas parte da busca.
 _OPERADORES = {"and", "or", "not", "near"}
@@ -201,6 +221,10 @@ class Resultado:
     url_documento: str | None
     url_processo: str | None
     url_portal: str
+    # Se o Serviço de Jurisprudência escolheu divulgar este julgado. É a
+    # diferença entre orientação que o Tribunal assume e decisão de caso
+    # concreto que apenas existe.
+    na_curadoria: bool = True
 
     @property
     def url(self) -> str:
@@ -214,6 +238,16 @@ class Resultado:
             "especie": ROTULOS.get(self.tipo, self.tipo),
             "citacao": self.citacao,
             "trecho": self.trecho,
+            "na_jurisprudencia_selecionada": self.na_curadoria,
+            "peso_da_fonte": (
+                "Ementa da Jurisprudência Selecionada: o Serviço de Jurisprudência "
+                "do TCE-RJ escolheu divulgar este julgado como orientação."
+                if self.na_curadoria else
+                "Acórdão NÃO integra a Jurisprudência Selecionada: foi localizado na "
+                "Pesquisa Textual do Tribunal. É decisão de caso concreto, sem ementa "
+                "oficial e sem o aval de curadoria — vale como precedente, mas pesa "
+                "menos que julgado selecionado, e a tese tem de ser extraída do voto."
+            ),
             # Do que tratou o julgado (indexação oficial do Tribunal).
             "descritores": descritores,
             # O que ficou decidido — é isto que fundamenta.
@@ -472,6 +506,151 @@ class Acervo:
             for l in linhas
         ]
 
+    # -- súmulas ----------------------------------------------------------
+
+    def sumulas_sobre(self, consulta: str) -> tuple[list[Resultado], bool]:
+        """Súmulas pertinentes à consulta. Devolve (achadas, veio_tudo).
+
+        As súmulas do TCE-RJ são poucas — vinte e oito. Quando nenhuma casa por
+        palavra, esta função devolve **todas**, e o segundo elemento vem `True`.
+
+        Isso é deliberado. "Não há súmula sobre a matéria" é uma afirmação de
+        ausência, e ausência não se prova com busca literal: a súmula pode usar
+        vocabulário diverso. Com o conjunto inteiro à vista, quem responde
+        confere uma a uma em vez de deduzir do silêncio do índice.
+        """
+        achadas, _, _ = self.pesquisar(consulta, especie="sumula", limite=28)
+        if achadas:
+            return achadas, False
+        return self.listar(especie="sumula", limite=50), True
+
+    # -- panorama do tema -------------------------------------------------
+
+    def universo(self, expressao: str, *, em_ementas: bool = False) -> int:
+        """Quantos documentos casam a expressão, sem limite de resultados.
+
+        A busca devolve uma página; este número é o conjunto de onde ela saiu.
+        Sem os dois, contar precedentes engana: dizer "doze julgados nesse
+        sentido" tendo examinado doze de quatrocentos descreve a janela da
+        busca, e não o Tribunal.
+
+        O denominador tem de vir do mesmo índice que produziu os resultados —
+        ementas e páginas de inteiro teor cobrem universos de tamanhos bem
+        diferentes, e trocá-los inverteria o sinal de "é amostra".
+        """
+        if not expressao:
+            return 0
+        if em_ementas:
+            return self.conexao.execute(
+                "SELECT COUNT(*) FROM documentos_fts WHERE documentos_fts MATCH ?",
+                (expressao,),
+            ).fetchone()[0]
+        return self.conexao.execute(
+            "SELECT COUNT(DISTINCT documento_id) FROM paginas_fts "
+            "WHERE paginas_fts MATCH ?", (expressao,)
+        ).fetchone()[0]
+
+    def panorama(self, consulta: str, *, ano_min: int | None = None,
+                 ano_max: int | None = None) -> dict[str, Any]:
+        """Como o tema se distribui no acervo, sem devolver nenhum julgado.
+
+        Responde ao que a leitura de uma página de resultados não responde:
+        quantos acórdãos existem sobre isso, em que anos foram julgados,
+        quantos o Tribunal escolheu divulgar, e quais trazem rastro de dissenso.
+
+        Nada aqui identifica divergência de teses — para isso é preciso ler os
+        votos. O que estes números fazem é dizer QUANTO ficou por ler.
+        """
+        for operador in ("AND", "OR"):
+            expressao = montar_consulta_fts(consulta, operador)
+            total = self.universo(expressao)
+            if total:
+                break
+        else:
+            return {"consulta": consulta, "acordaos_no_acervo": 0}
+        parcial = operador == "OR"
+
+        # Curadoria se mede pela existência de ementa, e não por `status_coleta`
+        # — este último só diz se o PDF já foi baixado. Um acórdão descoberto na
+        # Pesquisa Textual passa de 'descoberto' a 'ok' assim que é coletado,
+        # sem nunca ter entrado na Jurisprudência Selecionada.
+        onde = ["SELECT o.ano ano, COUNT(DISTINCT o.id) n,",
+                "  EXISTS (SELECT 1 FROM documentos d WHERE d.tipo = o.tipo",
+                "          AND d.numero = o.numero AND d.ano = o.ano) sel",
+                "FROM paginas_fts f",
+                "JOIN paginas p ON p.rowid = f.rowid",
+                "JOIN documentos_oficiais o ON o.id = p.documento_id",
+                "WHERE paginas_fts MATCH ?"]
+        parametros: list[Any] = [expressao]
+        if ano_min is not None:
+            onde.append("AND o.ano >= ?")
+            parametros.append(ano_min)
+        if ano_max is not None:
+            onde.append("AND o.ano <= ?")
+            parametros.append(ano_max)
+        onde.append("GROUP BY o.ano, sel")
+
+        por_ano: dict[int, dict[str, int]] = {}
+        curados = fora = 0
+        for l in self.conexao.execute(" ".join(onde), parametros):
+            faixa = por_ano.setdefault(l["ano"], {"ano": l["ano"], "julgados": 0,
+                                                  "selecionados": 0})
+            faixa["julgados"] += l["n"]
+            if l["sel"]:
+                curados += l["n"]
+                faixa["selecionados"] += l["n"]
+            else:
+                fora += l["n"]
+
+        # Sinais de dissenso: acórdãos que casam o tema E carregam a marca.
+        # Duas subconsultas, cada uma com seu MATCH, cruzadas pelo documento.
+        sinais = []
+        for marca, rotulo in SINAIS_DE_DISSENSO:
+            n = self.conexao.execute(
+                "SELECT COUNT(*) FROM ("
+                "  SELECT DISTINCT documento_id FROM paginas_fts"
+                "  WHERE paginas_fts MATCH ?) a"
+                " JOIN (SELECT DISTINCT documento_id FROM paginas_fts"
+                "       WHERE paginas_fts MATCH ?) b"
+                "   ON a.documento_id = b.documento_id",
+                (expressao, f'"{marca}"'),
+            ).fetchone()[0]
+            if n:
+                sinais.append({"sinal": rotulo, "acordaos": n})
+
+        anos = sorted(por_ano.values(), key=lambda f: f["ano"], reverse=True)
+        return {
+            "consulta": consulta,
+            "expressao_executada": expressao,
+            "correspondencia_parcial": parcial,
+            "acordaos_no_acervo": total,
+            "na_jurisprudencia_selecionada": curados,
+            "fora_da_curadoria": fora,
+            "por_ano": anos,
+            "periodo": f"{anos[-1]['ano']}–{anos[0]['ano']}" if anos else None,
+            "sinais_de_dissenso": sinais,
+            # Sem isto o número engana: nenhum documento reunia todos os termos,
+            # então o universo mede a palavra mais comum da consulta, e não o
+            # tema. Medido: "zzqqxx inexistente" devolve 103 acórdãos — todos
+            # por conta de "inexistente".
+            "aviso": (
+                "ATENÇÃO: nenhum acórdão reunia todos os termos, e a contagem "
+                "caiu para 'qualquer um deles'. Este universo NÃO dimensiona o "
+                "tema — mede a palavra mais frequente da consulta. Refaça com "
+                "expressão exata entre aspas antes de citar qualquer número."
+                if parcial else None
+            ),
+            "como_ler": (
+                "`acordaos_no_acervo` é o universo que casa a expressão; a busca "
+                "devolve uma fração dele. Use `por_ano` para ver se o Tribunal "
+                "continua decidindo assim ou se o tema esfriou — queda a zero em "
+                "anos recentes pede verificação, não conclusão. "
+                "`sinais_de_dissenso` aponta acórdãos com rastro de divergência "
+                "interna; são raros (menos de 1% do acervo), de modo que a lista "
+                "vazia NÃO significa entendimento pacífico."
+            ),
+        }
+
     # -- cobertura --------------------------------------------------------
 
     def cobertura(self) -> dict[str, Any]:
@@ -520,6 +699,19 @@ class Acervo:
             )
         ]
 
+        # As duas origens do acervo, que não têm o mesmo peso jurídico. O
+        # critério é ter ementa: `status_coleta` diz apenas se o PDF já foi
+        # baixado, e usá-lo aqui promoveria a acórdão selecionado todo
+        # descoberto que a coleta alcançasse.
+        origens = dict(self.conexao.execute(
+            "SELECT CASE WHEN EXISTS (SELECT 1 FROM documentos d WHERE d.tipo = o.tipo "
+            "  AND d.numero = o.numero AND d.ano = o.ano) THEN 'curadoria' ELSE 'fora' "
+            "END, COUNT(*) FROM documentos_oficiais o GROUP BY 1"
+        ).fetchall())
+        sumulas = self.conexao.execute(
+            "SELECT COUNT(*) FROM documentos WHERE tipo = 'sumula'"
+        ).fetchone()[0]
+
         return {
             "ementas": {
                 "total": total,
@@ -535,15 +727,34 @@ class Acervo:
                 "observacao": "Só acórdãos têm inteiro teor. Súmulas, respostas a "
                               "consulta e questões de ordem existem apenas como ementa.",
             },
+            "origem_dos_acordaos": {
+                "jurisprudencia_selecionada": origens.get("curadoria", 0),
+                "fora_da_curadoria": origens.get("fora", 0),
+                "observacao": "A Jurisprudência Selecionada é a curadoria que o Serviço "
+                              "de Jurisprudência divulga como orientação. Os demais vêm "
+                              "da Pesquisa Textual do Tribunal: são acórdãos reais, sem "
+                              "ementa oficial e sem esse aval. Todo resultado declara a "
+                              "que origem pertence, em `na_jurisprudencia_selecionada`.",
+            },
+            "sumulas": {
+                "total": sumulas,
+                "observacao": "Poucas o bastante para serem lidas por inteiro. Antes de "
+                              "dizer que não há súmula sobre a matéria, use `sumulas_sobre` "
+                              "— sem casamento por palavra ele devolve todas.",
+            },
             "relatores": relatores,
             "macro_temas": macro_temas,
             # Mantido para quem lia o campo antigo; é o total de ementas.
             "total_de_documentos": total,
             "limites_do_acervo": [
-                "A base de acórdãos é a Jurisprudência Selecionada do TCE-RJ: ementas "
-                "escolhidas pelo Serviço de Jurisprudência, NÃO o conjunto de todos os "
-                "acórdãos do Tribunal. Não afirme que uma tese inexiste só por não "
+                "O acervo NÃO é o conjunto dos acórdãos do TCE-RJ. Reúne a curadoria da "
+                "Jurisprudência Selecionada e o que a Pesquisa Textual alcançou em temas "
+                "de licitações e contratos. Não afirme que uma tese inexiste só por não "
                 "constar aqui.",
+                "Nunca declare pacífico um entendimento por não ter encontrado o "
+                "contrário. O que se pode afirmar é o que se leu: 'entre os N acórdãos "
+                "que examinei, todos apontam nesse sentido'. Consulte `panorama_do_tema` "
+                "para saber quantos ficaram por ler.",
                 "O inteiro teor dos acórdãos está disponível e é pesquisável por "
                 "`pesquisar_inteiro_teor`, página a página. Não encontrando na ementa, "
                 "procure no voto antes de concluir que o Tribunal não se pronunciou.",
@@ -585,6 +796,7 @@ class Acervo:
             url_documento=montar_url_pdf("acordao", numero, ano),
             url_processo=montar_url_processo(processo),
             url_portal=PORTAIS.get("acordao", PORTAL_PADRAO),
+            na_curadoria=False,
         )
 
     def _resultado(self, linha: sqlite3.Row, trecho: str) -> Resultado:

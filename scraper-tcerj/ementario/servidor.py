@@ -68,6 +68,11 @@ DUAS BUSCAS, PROPOSITALMENTE SEPARADAS:
 - `pesquisar_inteiro_teor` procura dentro dos **votos e acórdãos**, e devolve
   a página. É onde está a fundamentação.
 
+E duas ferramentas que não devolvem julgado, e sim o que se precisa saber para
+não errar o peso do que se achou: `sumulas_sobre` (há enunciado vinculante?) e
+`panorama_do_tema` (quantos acórdãos existem, de que anos, quanto ficou por
+ler).
+
 Diga sempre de onde veio a proposição. "Consta da ementa" e "consta do voto,
 à p. 27" têm pesos diferentes numa peça, e o advogado precisa saber qual dos
 dois você leu. Não encontrando na ementa, procure no inteiro teor antes de
@@ -165,6 +170,67 @@ Um único acórdão é um precedente, não a jurisprudência consolidada do
 Tribunal. Diga "nesse precedente", salvo quando houver súmula ou resposta a
 consulta, que têm força própria.
 
+DIVERGÊNCIA, PACIFICAÇÃO E O QUE NÃO SE PODE AFIRMAR
+
+Antes de dizer qualquer coisa sobre **orientação do Tribunal** — e não sobre um
+precedente isolado —, faça as duas verificações. Elas são baratas e a resposta
+sem elas é insegura.
+
+1. **`sumulas_sobre`.** Havendo súmula sobre o ponto, ela precede tudo: vincula
+   a Administração fluminense no controle externo, enquanto ementa de acórdão
+   apenas persuade. Acórdão anterior em sentido diverso está **superado**, não
+   em divergência — a diferença muda a peça inteira. Não casando súmula por
+   palavra, a ferramenta devolve todas: leia e conclua você, porque "nenhuma
+   casou" não é "não existe".
+
+2. **`panorama_do_tema`.** Diz quantos acórdãos tratam da matéria, como se
+   distribuem no tempo e quantos estão na curadoria. É o denominador da sua
+   afirmação.
+
+Sobre divergência, três regras, e a terceira é a que não pode ser quebrada:
+
+- **Nunca apresente um precedente sozinho como sendo o entendimento do
+  Tribunal.** Resultado único é a principal fábrica de falsa pacificação.
+  Reformule a busca e dimensione o tema antes.
+
+- **Sempre declare a base do que afirma.** O campo `exame` traz quantos você
+  examinou e quantos casam a expressão. Ao contar precedentes, diga "dos N que
+  examinei" — nunca "o Tribunal majoritariamente entende". Um tema com
+  trezentos acórdãos devolve doze na busca; descrever os doze como se fossem o
+  Tribunal é falso, e soa verdadeiro por vir com número.
+
+- **É VEDADO afirmar que não há divergência, ou que a matéria é pacífica, por
+  não ter encontrado julgado em contrário.** No TCE-RJ a divergência quase
+  nunca se declara: medido no acervo, menos de 1% dos acórdãos registram voto
+  vencido ou voto divergente. O Tribunal decide diferente em anos diferentes,
+  em processos diferentes, sem dizer que mudou. Logo, ausência de dissenso
+  visível não é prova de nada, e `sinais_de_dissenso` vazio significa apenas
+  que ninguém registrou dissenso interno — não que o entendimento seja um só.
+
+  O que se pode dizer: "entre os N acórdãos que examinei, todos apontam nesse
+  sentido, o mais recente de <ano>". O que não se pode: "o entendimento do
+  TCE-RJ é pacífico".
+
+Quando o `panorama_do_tema` mostrar julgados distribuídos ao longo dos anos,
+prefira examinar os mais recentes e ao menos um antigo: entendimento que muda
+sem aviso só aparece na comparação. Havendo desfechos diferentes sobre a mesma
+matéria, **aponte a divergência explicitamente**, diga qual julgado é mais
+recente e quantos você viu de cada lado — sempre como amostra.
+
+DUAS ORIGENS, DOIS PESOS
+
+Todo resultado traz `na_jurisprudencia_selecionada`.
+
+- **Verdadeiro**: o Serviço de Jurisprudência escolheu divulgar o julgado como
+  orientação. Há ementa oficial, com a tese destilada pelo Tribunal.
+- **Falso**: o acórdão veio da Pesquisa Textual. É decisão real e citável, mas
+  de caso concreto, sem ementa e sem o aval da curadoria. A tese tem de ser
+  extraída do voto, com o cuidado de proveniência acima.
+
+Diga ao advogado a que origem pertence cada julgado que apresentar. Entre dois
+precedentes em sentido oposto, o que o Tribunal selecionou para divulgação pesa
+mais — é o que ele assume como orientação.
+
 COMO APRESENTAR CADA JULGADO — os quatro itens são obrigatórios, nesta ordem:
 
 1. **Citação.** Exatamente o campo `citacao`: espécie, número/ano, processo,
@@ -187,22 +253,96 @@ COMO APRESENTAR CADA JULGADO — os quatro itens são obrigatórios, nesta ordem
    endereço. Quando não houver `url_inteiro_teor` (súmulas, por exemplo),
    ofereça o que houver e diga qual é.
 
-Nunca cite um julgado sem os quatro. Uma citação sem explicação obriga o
+5. **Origem.** Se o julgado integra a Jurisprudência Selecionada ou veio da
+   Pesquisa Textual — o campo `na_jurisprudencia_selecionada`. Uma linha basta:
+   "julgado selecionado pelo Tribunal" ou "acórdão de caso concreto, fora da
+   curadoria". Muda o peso do precedente e o advogado tem de saber antes de
+   apoiar a peça nele.
+
+Nunca cite um julgado sem os cinco. Uma citação sem explicação obriga o
 advogado a abrir tudo para saber se serve; uma explicação sem link o obriga a
-confiar sem conferir.
+confiar sem conferir; e um precedente sem origem declarada aparenta um peso que
+pode não ter.
 
 A ementa é o resumo oficial, não o acórdão. Quando a tese for decisiva para a
 peça, diga para conferir o inteiro teor pelo link antes de citar.
 
 Limites que não podem ser omitidos quando importarem:
-- A base de acórdãos é a *Jurisprudência Selecionada* — curadoria do Serviço de
-  Jurisprudência, não todos os acórdãos do Tribunal. A ausência de uma tese
-  aqui NÃO prova que o Tribunal não a firmou.
-- Não há inteiro teor: só a ementa.
+- O acervo não é o conjunto dos acórdãos do TCE-RJ. Reúne a curadoria da
+  *Jurisprudência Selecionada* e o que a Pesquisa Textual do Tribunal alcançou
+  em temas de licitações e contratos. A ausência de uma tese aqui NÃO prova que
+  o Tribunal não a firmou.
 - Deliberações e Resoluções não estão no acervo.
 - Súmula do TCE-RJ vincula a Administração estadual e municipal fluminense no
   âmbito do controle externo; ementa de acórdão é precedente persuasivo.
+- Chame `cobertura_do_acervo` para os números do momento — o acervo cresce, e
+  volumes citados de memória envelhecem.
 """.strip()
+
+
+def _exame(achados: list[Any], universo: int) -> dict[str, Any]:
+    """Declara o que foi de fato examinado, e o que sobrou.
+
+    Uma página de resultados parece um levantamento e não é. Sem o denominador,
+    "todos os precedentes vão neste sentido" descreve a janela da busca e soa
+    como descrição do Tribunal — é o modo mais comum de fabricar pacificação
+    onde há divergência não lida.
+    """
+    anos = sorted({a for a in (_ano(r) for r in achados) if a})
+    return {
+        "examinados": len(achados),
+        "acordaos_que_casam_a_expressao": universo,
+        "e_amostra": universo > len(achados),
+        "periodo_examinado": f"{anos[0]}–{anos[-1]}" if anos else None,
+        "mais_recente_examinado": max(anos) if anos else None,
+        "regra": (
+            "Este é o recorte que a busca devolveu, não o conjunto do que o "
+            "Tribunal decidiu. Ao contar precedentes, diga sempre 'dos N que "
+            "examinei'. É vedado afirmar que não há divergência, ou que a "
+            "matéria é pacífica, com base em não ter encontrado o contrário."
+        ),
+    }
+
+
+def _bloco_sumulas(acervo: Acervo, consulta: str) -> dict[str, Any]:
+    """Súmula pertinente vai junto do resultado, sem precisar ser pedida.
+
+    Súmula do TCE-RJ vincula a Administração fluminense no controle externo;
+    ementa de acórdão apenas persuade. Deixar a verificação a cargo de uma
+    segunda chamada é deixá-la acontecer só quando alguém lembrar — e é
+    exatamente quando não lembra que a peça sai citando precedente persuasivo
+    contra enunciado vinculante.
+
+    Aqui vai só o que casou. Não casando nada, o bloco aponta para
+    `sumulas_sobre`, que devolve as vinte e oito para leitura direta: ausência
+    de casamento léxico não é ausência de súmula.
+    """
+    achadas, _, _ = acervo.pesquisar(consulta, especie="sumula", limite=5)
+    if not achadas:
+        return {
+            "encontradas": 0,
+            "atencao": (
+                "Nenhuma súmula casou estes termos. Isso NÃO autoriza dizer que "
+                "não há súmula sobre a matéria — a busca é literal e o enunciado "
+                "pode usar outro vocabulário. Chame `sumulas_sobre` para receber "
+                "as súmulas do Tribunal e conferir uma a uma."
+            ),
+        }
+    return {
+        "encontradas": len(achadas),
+        "sumulas": [s.para_dict() for s in achadas],
+        "peso": (
+            "Súmula do TCE-RJ vincula a Administração estadual e municipal "
+            "fluminense no âmbito do controle externo. Havendo súmula sobre o "
+            "ponto, ela precede os acórdãos na resposta — e um acórdão anterior "
+            "em sentido diverso está superado, não em divergência."
+        ),
+    }
+
+
+def _ano(resultado: Any) -> int | None:
+    alvo = getattr(resultado, "documento", resultado)
+    return getattr(alvo, "ano", None)
 
 
 def _caminho_padrao() -> Path:
@@ -278,6 +418,12 @@ def construir(
                 "deles, ordenados por relevância. Confira a aderência ao caso "
                 "antes de citar."
             )
+        elif len(achados) == 1:
+            observacao = (
+                "Um único precedente. Não o apresente como o entendimento do "
+                "Tribunal: reformule a busca e consulte `panorama_do_tema` antes "
+                "de dizer qualquer coisa sobre orientação consolidada."
+            )
         else:
             observacao = None
 
@@ -287,6 +433,8 @@ def construir(
             "quantidade": len(achados),
             "correspondencia_parcial": parcial,
             "resultados": [r.para_dict() for r in achados],
+            "exame": _exame(achados, acervo.universo(expressao, em_ementas=True)),
+            "sumulas_sobre_a_materia": _bloco_sumulas(acervo, consulta),
             "observacao": observacao,
         }
 
@@ -331,6 +479,12 @@ def construir(
                 "deles, ordenadas por relevância. Verifique `termos_encontrados` "
                 "para saber o que de fato casou."
             )
+        elif len({t.documento.id for t in achados}) == 1:
+            observacao = (
+                "Todos os trechos vieram de um único acórdão. Um acórdão é um "
+                "precedente, não a orientação do Tribunal: consulte "
+                "`panorama_do_tema` antes de generalizar."
+            )
         else:
             observacao = None
 
@@ -343,7 +497,65 @@ def construir(
             "quantidade": len(achados),
             "correspondencia_parcial": parcial,
             "resultados": [t.para_dict() for t in achados],
+            "exame": _exame(achados, acervo.universo(expressao)),
+            "sumulas_sobre_a_materia": _bloco_sumulas(acervo, consulta),
             "observacao": observacao,
+        }
+
+    @mcp.tool()
+    def panorama_do_tema(
+        consulta: str, ano_min: int | None = None, ano_max: int | None = None
+    ) -> dict[str, Any]:
+        """Dimensiona um tema no acervo: quantos acórdãos, de que anos, com que sinais.
+
+        Não devolve julgado nenhum — devolve o tamanho do que existe. Use
+        sempre que for afirmar alguma coisa sobre *orientação do Tribunal*, e
+        não sobre um precedente isolado: quantos acórdãos tratam do tema, como
+        se distribuem no tempo, quantos o Serviço de Jurisprudência selecionou
+        e quais carregam rastro de dissenso no julgamento.
+
+        Serve para saber **quanto ficou por ler** antes de dizer que a matéria
+        é pacífica. Números de distribuição não identificam divergência de
+        teses; isso só a leitura dos votos faz.
+
+        Args:
+            consulta: o tema, nas mesmas palavras que se usaria na busca.
+            ano_min: recorta a partir deste ano de julgamento.
+            ano_max: recorta até este ano de julgamento.
+        """
+        return acervo.panorama(consulta, ano_min=ano_min, ano_max=ano_max)
+
+    @mcp.tool()
+    def sumulas_sobre(consulta: str) -> dict[str, Any]:
+        """Verifica se há súmula do TCE-RJ sobre a matéria.
+
+        Etapa obrigatória antes de responder sobre orientação do Tribunal.
+        Súmula vincula a Administração fluminense no controle externo; ementa
+        de acórdão é apenas persuasiva. Havendo súmula sobre o ponto, ela vem
+        antes de qualquer acórdão na resposta.
+
+        Não casando nenhuma pelas palavras da consulta, devolve **todas** as
+        súmulas do Tribunal — são poucas e cabem numa leitura. É assim que se
+        afirma ausência com base em ter conferido, e não em silêncio do índice.
+
+        Args:
+            consulta: a matéria sobre a qual se quer saber se há enunciado.
+        """
+        achadas, todas = acervo.sumulas_sobre(consulta)
+        return {
+            "consulta": consulta,
+            "quantidade": len(achadas),
+            "veio_o_conjunto_completo": todas,
+            "sumulas": [s.para_dict() for s in achadas],
+            "como_ler": (
+                "Nenhuma súmula casou os termos da consulta; estas são TODAS as "
+                "do Tribunal. Leia-as e conclua você: se nenhuma tratar da "
+                "matéria, aí sim pode dizer que não há súmula sobre o ponto."
+                if todas else
+                "Estas casaram os termos da consulta. Confira a pertinência — "
+                "casamento de palavra não é identidade de matéria. Se nenhuma "
+                "servir, chame de novo com outro vocabulário antes de concluir."
+            ),
         }
 
     @mcp.tool()

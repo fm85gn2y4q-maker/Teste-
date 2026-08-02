@@ -230,8 +230,134 @@ def test_cobertura_nao_nega_a_existencia_do_inteiro_teor(acervo):
     assert "pesquisar_inteiro_teor" in limites
     # E precisa avisar que o documento mistura proveniências.
     assert "alegações de defesa" in limites
-    # A base continua sendo curadoria: isso não podia se perder na reescrita.
-    assert "NÃO o conjunto de todos os acórdãos" in limites
+    # O acervo não é o Tribunal inteiro, e ausência aqui não prova nada: as
+    # duas advertências têm de sobreviver a qualquer reescrita do texto.
+    assert "é o conjunto dos acórdãos do TCE-RJ" in limites
+    assert "Não afirme que uma tese inexiste" in limites
+    # E, desde a expansão pela Pesquisa Textual, a proibição de declarar
+    # pacífico o que apenas não se leu.
+    assert "Nunca declare pacífico" in limites
+
+
+# -- as duas origens, o dissenso e a súmula ---------------------------------
+#
+# Quatro exigências, e uma delas é negativa: o acervo tem de saber apontar
+# divergência, atualidade, curadoria e súmula — e tem de se recusar a certificar
+# que não há divergência, porque isso ele não pode saber.
+
+
+class _Pagina:
+    def __init__(self, numero, texto, folha=None):
+        self.numero, self.texto, self.folha = numero, texto, folha
+
+
+@pytest.fixture
+def acervo_misto(tmp_path):
+    """Um acórdão selecionado e outro só descoberto, ambos com inteiro teor."""
+    banco = tmp_path / "misto.sqlite"
+    with Armazenamento(banco) as arm:
+        arm.gravar(Documento(
+            tipo=TipoDocumento.ACORDAO, numero="100", ano=2025, id_fonte="a",
+            processo="111.111-1/2025", relator="Fulano", data_sessao=date(2025, 3, 1),
+            ementa="CONTRATO. SOBREPREÇO.\nO sobrepreço apurado enseja glosa.",
+        ))
+        arm.gravar(Documento(
+            tipo=TipoDocumento.SUMULA, numero="9", ano=2022, id_fonte="s9",
+            data_sessao=date(2022, 2, 2),
+            ementa="É vedada a exigência de capital social mínimo cumulada com "
+                   "garantia de proposta.",
+        ))
+        for ident, numero, ano, texto in [
+            ("acordao-100-2025", "100", 2025,
+             "o sobrepreço restou demonstrado na planilha, com voto vencido do "
+             "Conselheiro relator"),
+            ("acordao-777-2024", "777", 2024,
+             "sobrepreço não caracterizado no orçamento examinado"),
+        ]:
+            arm.registrar_oficial(
+                ident, tipo="acordao", numero=numero, ano=ano,
+                processo=f"{numero}/{ano}", url=None, paginas_total=1,
+            )
+            arm.gravar_paginas(ident, [_Pagina(1, texto)])
+    a = Acervo(banco)
+    yield a
+    a.fechar()
+
+
+def test_resultado_declara_se_passou_pela_curadoria(acervo_misto):
+    """Ementa oficial e acórdão de caso concreto não pesam igual."""
+    trechos, _, _ = acervo_misto.pesquisar_paginas("sobrepreço", limite=10)
+    origem = {t.documento.ano: t.documento.na_curadoria for t in trechos}
+    assert origem[2025] is True   # tem ementa selecionada
+    assert origem[2024] is False  # só existe na Pesquisa Textual
+    fora = next(t for t in trechos if not t.documento.na_curadoria)
+    assert "NÃO integra a Jurisprudência Selecionada" in fora.para_dict()["peso_da_fonte"]
+
+
+def test_curadoria_nao_se_confunde_com_ter_sido_coletado(acervo_misto):
+    """`status_coleta='ok'` só diz que o PDF baixou, não que o TCE selecionou.
+
+    Confundir os dois promoveria a jurisprudência selecionada cada acórdão que
+    a coleta alcançasse — exatamente ao contrário do que o campo serve.
+    """
+    origens = acervo_misto.cobertura()["origem_dos_acordaos"]
+    assert origens["jurisprudencia_selecionada"] == 1
+    assert origens["fora_da_curadoria"] == 1
+
+
+def test_panorama_dimensiona_o_tema_sem_devolver_julgado(acervo_misto):
+    p = acervo_misto.panorama("sobrepreço")
+    assert p["acordaos_no_acervo"] == 2
+    assert p["na_jurisprudencia_selecionada"] == 1
+    assert p["fora_da_curadoria"] == 1
+    assert [f["ano"] for f in p["por_ano"]] == [2025, 2024]  # mais atual primeiro
+    assert p["periodo"] == "2024–2025"
+    assert "resultados" not in p and "trecho" not in p
+
+
+def test_panorama_aponta_dissenso_quando_ha_rastro(acervo_misto):
+    sinais = {s["sinal"] for s in acervo_misto.panorama("sobrepreço")["sinais_de_dissenso"]}
+    assert "houve voto vencido" in sinais
+
+
+def test_panorama_nega_valor_ao_universo_quando_a_busca_abrandou(acervo_misto):
+    """Caindo para OU, o número mede a palavra mais comum, e não o tema.
+
+    Medido no acervo real: "zzqqxx inexistente" devolvia 103 acórdãos, todos
+    por conta de "inexistente". Sem este aviso o número seria citado como
+    tamanho do tema.
+    """
+    p = acervo_misto.panorama("sobrepreço inexistente")
+    assert p["correspondencia_parcial"] is True
+    assert "NÃO dimensiona o tema" in p["aviso"]
+    assert acervo_misto.panorama("sobrepreço")["aviso"] is None
+
+
+def test_panorama_avisa_que_ausencia_de_dissenso_nao_prova_pacificacao(acervo_misto):
+    """A regra que não pode ser quebrada tem de viajar junto com o número."""
+    assert "NÃO significa entendimento pacífico" in acervo_misto.panorama(
+        "sobrepreço")["como_ler"]
+
+
+def test_sumula_sem_casamento_devolve_todas(acervo_misto):
+    """Ausência de súmula se afirma por leitura, nunca por silêncio do índice."""
+    achadas, todas = acervo_misto.sumulas_sobre("desapropriação de imóvel rural")
+    assert todas is True
+    # O conjunto inteiro do acervo, e só súmulas — nada de acórdão no meio.
+    assert [s.tipo for s in achadas] == ["sumula"]
+    assert "Súmula 9/2022" in achadas[0].citacao
+
+
+def test_sumula_pertinente_vem_sozinha(acervo_misto):
+    achadas, todas = acervo_misto.sumulas_sobre("capital social mínimo garantia")
+    assert todas is False
+    assert [s.tipo for s in achadas] == ["sumula"]
+
+
+def test_universo_usa_o_indice_de_onde_saiu_o_resultado(acervo_misto):
+    """Trocar o denominador inverteria o sinal de "é amostra"."""
+    assert acervo_misto.universo('"sobrepreço"') == 2               # acórdãos
+    assert acervo_misto.universo('"sobrepreço"', em_ementas=True) == 1  # ementas
 
 
 def test_acervo_e_somente_leitura(acervo):
