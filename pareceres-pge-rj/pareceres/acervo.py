@@ -235,7 +235,7 @@ class Acervo:
         linhas = self.con.execute(
             f"""SELECT d.* FROM busca b JOIN documentos d ON d.codigo = b.codigo
                 WHERE busca MATCH ?{onde}
-                ORDER BY bm25(busca, 0.0, 6.0, 8.0, 4.0, 1.0), d.ano DESC
+                ORDER BY bm25(busca, 0.0, 6.0, 8.0, 4.0), d.ano DESC
                 LIMIT ?""", params + [limite])
         return [self._parecer(l) for l in linhas], expressao, total
 
