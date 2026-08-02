@@ -143,6 +143,14 @@ foi interrompida antes de localizá-los.
 peças) foi mapeada mas não coletada — vive num iframe, exige termo de busca e
 devolve `quantidadeTotal: 10000` fixo. Ver `README.md`.
 
+> Atualização 01/08/2026: o formato do POST foi descoberto e verificado contra
+> o servidor. O `10000` é **teto**, não valor fixo — consultas estreitas
+> devolvem a contagem real, e o teto se contorna fatiando por município,
+> natureza ou período. Há filtro por município (`enteFederativoId`), e do
+> resultado se chega ao PDF pelo endpoint de documento que o coletor já usa.
+> Ver **`PESQUISA_TEXTUAL_API.md`**, que traz também a medição do teto da
+> curadoria e a lista do que não foi verificado.
+
 **Segunda rodada de testes de aceitação** deixou duas pendências: a leitura
 além da página ainda não é reflexo, e os casos-armadilha (Acórdãos 54691/2025 e
 6930/2025) não apareceram no ranqueamento.
