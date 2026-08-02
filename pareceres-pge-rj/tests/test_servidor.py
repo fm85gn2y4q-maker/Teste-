@@ -17,7 +17,7 @@ def chamar(servidor, ferramenta, argumentos=None):
 FERRAMENTAS = {
     "pesquisar_pareceres", "pesquisar_inteiro_teor", "ler_paginas",
     "expandir_consulta", "obter_documento", "conclusoes_sobre",
-    "quem_citou", "listar_documentos", "cobertura_do_acervo",
+    "quem_citou", "situacao_da_norma", "listar_documentos", "cobertura_do_acervo",
 }
 
 
@@ -137,3 +137,34 @@ def test_quem_citou_traz_o_mais_recente_primeiro(servidor):
     anos = [x["ano"] for x in d["documentos"] if x.get("ano")]
     assert anos == sorted(anos, reverse=True)
     assert anos[0] >= 2023
+
+
+def test_situacao_da_norma_acha_a_inconstitucionalidade(servidor):
+    """O caso que motivou a tabela: a Lei 6.450/2013 foi derrubada pelo Orgao
+    Especial do TJRJ, e o alerta_vigencia nao sabia disso."""
+    d = chamar(servidor, "situacao_da_norma", {"norma": "Lei 6.450"})
+    assert d["apontamentos"]
+    p = d["apontamentos"][0]
+    assert p["situacao"] == "inconstitucionalidade"
+    assert p["ano"] >= 2023
+    assert "19/2023" in p["parecer"]
+
+
+def test_situacao_da_norma_nao_afirma_vigencia(servidor):
+    """A ferramenta responde o que os pareceres declararam, nunca 'esta em
+    vigor' -- e ausencia de apontamento nao e atestado."""
+    d = chamar(servidor, "situacao_da_norma", {"norma": "Lei 6.450"})
+    assert "NÃO é declaração de vigência" in d["advertencia"]
+    assert "PISTA" in d["advertencia"]
+    assert "não que a norma esteja íntegra" in d["advertencia"]
+
+
+def test_situacao_da_norma_sem_apontamento(servidor):
+    d = chamar(servidor, "situacao_da_norma", {"norma": "Lei 99.999/1899"})
+    assert d["apontamentos"] == []
+    assert "advertencia" in d
+
+
+def test_instrucoes_mandam_conferir_a_situacao_da_norma(servidor):
+    texto = servidor.instructions or ""
+    assert "situacao_da_norma" in texto

@@ -97,10 +97,20 @@ verifique a qual deles a conclusão se refere.
 
 O PASSO OBRIGATÓRIO — E O QUE O `alerta_vigencia` NÃO SABE
 
-**Antes de apresentar QUALQUER norma como fundamento, chame `quem_citou` sobre
-ela e leia o parecer MAIS RECENTE que a cita.** Sempre. Inclusive lei estadual,
-inclusive lei recente, inclusive quando o parecer que você encontrou parecer
-convincente.
+**Antes de apresentar QUALQUER norma como fundamento, chame `situacao_da_norma`
+sobre ela.** Sempre. Inclusive lei estadual, inclusive lei recente, inclusive
+quando o parecer que você encontrou parecer convincente. Ela devolve o que as
+ementas do acervo registram de revogação, declaração de inconstitucionalidade,
+suspensão de eficácia e alteração — e devolve nessa ordem: do mais recente para
+o mais antigo.
+
+Ela **não** diz "está em vigor", e ausência de apontamento não é atestado de
+norma íntegra: significa apenas que nenhum parecer deste recorte temático tocou
+no assunto. Havendo apontamento, leia o parecer indicado antes de usar a norma.
+
+Para ver todos os pareceres que aplicaram a norma — e não só os que apontaram
+mudança de estado —, use `quem_citou`, que também vem do mais recente ao mais
+antigo.
 
 O campo `alerta_vigencia` cobre **uma única coisa**: a revogação da lei geral
 de licitação. Ele NÃO sabe de declaração de inconstitucionalidade, de suspensão
@@ -317,6 +327,22 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
         Ex.: "Lei 6.450", "Lei 14.133", "Sumula 247", "Parecer 25/2009".
         """
         return acervo.quem_citou(referencia, limite=limite)
+
+    @mcp.tool()
+    def situacao_da_norma(norma: str) -> dict[str, Any]:
+        """O QUE ACONTECEU COM UMA NORMA, segundo os próprios pareceres.
+
+        Etapa obrigatória antes de apresentar qualquer norma como fundamento.
+        Devolve os apontamentos de revogação, declaração de
+        inconstitucionalidade, suspensão de eficácia e alteração que as ementas
+        do acervo registram, do mais recente para o mais antigo.
+
+        NÃO devolve "está em vigor" — esta base não autoriza essa afirmação.
+        Ausência de apontamento não é atestado de norma íntegra.
+
+        Ex.: "Lei 6.450", "Lei 8.666", "Decreto 40.500".
+        """
+        return acervo.situacao_da_norma(norma)
 
     @mcp.tool()
     def listar_documentos(ano: int | None = None, procurador: str | None = None,

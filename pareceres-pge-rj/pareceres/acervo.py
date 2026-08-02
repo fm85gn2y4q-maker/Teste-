@@ -371,6 +371,45 @@ class Acervo:
             "documentos": [self._parecer(l).para_dict(com_conclusao=False) for l in linhas],
         }
 
+    # --------------------------------------------------- situação da norma
+    def situacao_da_norma(self, norma: str) -> dict[str, Any]:
+        """O que os pareceres DECLARAM ter acontecido com uma norma.
+
+        Não responde "está em vigor" — nenhuma consulta a esta base autoriza
+        essa afirmação. Responde o que documentos do acervo disseram.
+        """
+        chave = _sem_acento(norma).lower().strip()
+        alvos = [r[0] for r in self.con.execute(
+            "SELECT DISTINCT norma FROM situacao_normas")
+            if chave in _sem_acento(r[0]).lower()]
+        apontamentos = []
+        for alvo in alvos:
+            for r in self.con.execute(
+                    """SELECT norma, situacao, codigo, ano, citacao, trecho
+                       FROM situacao_normas WHERE norma = ?
+                       ORDER BY ano DESC""", (alvo,)):
+                apontamentos.append({
+                    "norma": r["norma"], "situacao": r["situacao"],
+                    "ano": r["ano"], "parecer": r["citacao"], "id": r["codigo"],
+                    "trecho_da_ementa": r["trecho"],
+                    "url_ficha": FICHA % r["codigo"],
+                })
+        apontamentos.sort(key=lambda x: -(x["ano"] or 0))
+        return {
+            "consulta": norma,
+            "apontamentos": apontamentos,
+            "advertencia": (
+                "Isto NÃO é declaração de vigência, e não é conclusão: é PISTA. "
+                "Cada apontamento significa que a ementa do parecer indicado menciona "
+                "aquela situação — revogação, inconstitucionalidade, suspensão ou "
+                "alteração — perto desta norma. A proximidade acerta na maioria dos "
+                "casos e erra em alguns: a ementa pode estar falando da norma que "
+                "revogou, e não da revogada. LEIA o parecer apontado antes de "
+                "afirmar qualquer coisa. "
+                "Ausência de apontamento significa que nenhum parecer do recorte "
+                "temático tocou no assunto, e não que a norma esteja íntegra."),
+        }
+
     # ------------------------------------------------------------ listagem
     def listar(self, ano: int | None = None, procurador: str | None = None,
                orgao: str | None = None, eixo: str | None = None,
