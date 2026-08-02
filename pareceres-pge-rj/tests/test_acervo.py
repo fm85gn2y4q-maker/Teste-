@@ -34,10 +34,10 @@ def test_operadores_escritos_pelo_usuario_passam_adiante():
 # ------------------------------------------------------------- ficha e busca
 def test_cobertura_declara_os_limites(acervo):
     c = acervo.cobertura()
-    assert c["documentos"] == "14420"
-    assert c["paginas"] == "177156"
+    assert c["documentos"] == "49139"
+    assert c["paginas"] == "348060"
     assert "PERSUASIVO" in c["autoridade"]
-    assert "49.139" in c["recorte"]
+    assert "no_recorte" in c["recorte"]
 
 
 def test_pesquisa_por_ementa(acervo):

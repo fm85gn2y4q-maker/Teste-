@@ -34,7 +34,7 @@ def test_as_instrucoes_carregam_as_tres_regras(servidor):
 
 def test_cobertura(servidor):
     d = chamar(servidor, "cobertura_do_acervo")
-    assert d["documentos"] == "14420" and d["paginas"] == "177156"
+    assert d["documentos"] == "49139" and d["paginas"] == "348060"
 
 
 def test_busca_estreita_demais_cai_para_qualquer_termo(servidor):
@@ -147,7 +147,9 @@ def test_situacao_da_norma_acha_a_inconstitucionalidade(servidor):
     p = d["apontamentos"][0]
     assert p["situacao"] == "inconstitucionalidade"
     assert p["ano"] >= 2023
-    assert "19/2023" in p["parecer"]
+    # o acervo completo trouxe os quatro pareceres de 2023 sobre o tema; o
+    # teste nao pode travar em qual deles aparece primeiro
+    assert any("MGV n.º 19/2023" in x["parecer"] for x in d["apontamentos"])
 
 
 def test_situacao_da_norma_nao_afirma_vigencia(servidor):

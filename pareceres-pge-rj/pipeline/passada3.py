@@ -22,6 +22,8 @@ import sys
 import time
 import unicodedata
 
+from regime import regime_e_alerta  # unica fonte da verdade
+
 BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
 DB = os.path.join(BASE, "pge_rj_pareceres.db")
 
@@ -147,33 +149,6 @@ def mede_transcricao(txt):
 
 
 # ---------------------------------------------------------------- 3. VIGENCIA
-def regime_e_alerta(ano, refs):
-    tem133 = any(r.startswith("Lei 14.133") for r in refs)
-    tem666 = any(r.startswith("Lei 8.666") for r in refs)
-    tem520 = any(r.startswith("Lei 10.520") for r in refs)
-    tem019 = any(r.startswith("Lei 13.019") for r in refs)
-    if tem133 and (tem666 or tem520):
-        reg = "transicao 8.666/14.133"
-    elif tem133:
-        reg = "Lei 14.133/2021"
-    elif tem666 or tem520:
-        reg = "Lei 8.666/1993"
-    elif tem019:
-        reg = "Lei 13.019/2014 (MROSC)"
-    else:
-        reg = "outro/nao identificado"
-
-    al = []
-    if reg == "Lei 8.666/1993":
-        al.append("Responde sob a Lei 8.666/93, revogada pela Lei 14.133/2021 desde 30/12/2023. "
-                  "Confira se a tese sobrevive ao novo regime antes de usar.")
-    if ano and ano < 2021 and not tem133:
-        al.append("Parecer anterior a Lei 14.133/2021.")
-    if reg == "transicao 8.666/14.133":
-        al.append("Cita os dois regimes; verifique a qual deles a conclusao se refere.")
-    return reg, " ".join(al)
-
-
 def main():
     con = sqlite3.connect(DB)
     con.execute("PRAGMA journal_mode=WAL")
@@ -252,8 +227,8 @@ def main():
     for cod, r in con.execute("SELECT codigo, referencia FROM citacoes WHERE especie='norma'"):
         refs[cod].add(r)
     ups, regs = [], collections.Counter()
-    for cod, ano in con.execute("SELECT codigo, ano FROM documentos"):
-        reg, al = regime_e_alerta(ano, refs.get(cod, set()))
+    for cod, ano, eixos in con.execute("SELECT codigo, ano, eixos FROM documentos"):
+        reg, al = regime_e_alerta(ano, refs.get(cod, set()), eixos or "")
         regs[reg] += 1
         ups.append((reg, al, cod))
     con.executemany("UPDATE documentos SET regime=?, alerta_vigencia=? WHERE codigo=?", ups)
@@ -278,8 +253,10 @@ def main():
         ("anteriores_a_14133", str(g("SELECT COUNT(*) FROM documentos WHERE ano<2021"))),
         ("autoridade", "Parecer da PGE-RJ vincula a Administracao estadual fluminense nos termos "
                        "da legislacao propria. Para municipio e precedente PERSUASIVO, nao norma."),
-        ("recorte", "Selecao tematica: contratacoes, acordos e parcerias (1o, 2o e 3o setores). "
-                    "Nao e o acervo integral da PGE-RJ, que tem 49.139 documentos."),
+        ("recorte", "Acervo INTEGRAL da PGE-RJ. O recorte tematico de contratacoes, acordos "
+                    "e parcerias permanece marcado no campo no_recorte (14.420 documentos) e "
+                    "pode ser usado como filtro em listar_documentos. Fora dele ha materia de "
+                    "pessoal, tributaria, previdenciaria e constitucional."),
         ("limite_busca", "A busca e literal. Consulte a tabela sinonimos antes de concluir que "
                          "o acervo nao trata de um tema."),
     ]

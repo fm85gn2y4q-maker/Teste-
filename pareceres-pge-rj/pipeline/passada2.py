@@ -73,18 +73,27 @@ def main():
             d.close()
         txt = "\n".join(paginas)
 
-        con.executemany("INSERT OR REPLACE INTO paginas VALUES (?,?,?)",
+        # Colunas nomeadas: a tabela ganha `secao` e `transcricao` na passada
+        # seguinte, e a insercao por posicao quebrava na reexecucao.
+        con.executemany("INSERT OR REPLACE INTO paginas (codigo, pagina, caracteres) VALUES (?,?,?)",
                         [(cod, n, len(t.strip())) for n, t in enumerate(paginas, 1)])
-        con.executemany("INSERT INTO paginas_fts VALUES (?,?,?)",
+        con.executemany("INSERT INTO paginas_fts (codigo, pagina, texto) VALUES (?,?,?)",
                         [(cod, n, t) for n, t in enumerate(paginas, 1)])
         npag += len(paginas)
 
-        conc, tipo = conclusao_de(txt)
+        # conclusao_de devolve TRES valores desde que passou a rejeitar
+        # peca de terceiro reproduzida no fim do parecer.
+        conc, tipo, alheia = conclusao_de(txt)
         tipos[tipo or "(nenhuma)"] += 1
-        con.execute("""UPDATE documentos SET conclusao=?, conclusao_tipo=?, fecho=?,
-                       paginas=?, caracteres=? WHERE codigo=?""",
-                    (conc, tipo, re.sub(r"\s+", " ", txt[-1500:]).strip(),
-                     len(paginas), len(txt.strip()), cod))
+        con.execute("""UPDATE documentos SET conclusao=?, conclusao_tipo=?,
+                       conclusao_alheia=?, fecho=?, paginas=?, caracteres=?, tem_texto=?
+                       WHERE codigo=?""",
+                    (conc, tipo, 1 if alheia else 0,
+                     re.sub(r"\s+", " ", txt[-1500:]).strip(),
+                     len(paginas), len(txt.strip()),
+                     # 200 caracteres e o piso: abaixo disso e
+                     # digitalizacao sem camada de texto
+                     1 if len(txt.strip()) > 200 else 0, cod))
 
         if len(txt) > 100:
             cits = [(cod, e, r, q, o) for e, r, q, o in extrai(txt)]
