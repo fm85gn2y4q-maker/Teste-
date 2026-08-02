@@ -1,0 +1,3 @@
+# O servidor usa mcp.server.fastmcp, que o SDK 2.0 removeu.
+# Mesma versao do projeto do Ementario, que esta em producao.
+mcp>=1.28,<2

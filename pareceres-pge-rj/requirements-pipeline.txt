@@ -1,0 +1,3 @@
+# Só a construção do acervo precisa disto. O servidor MCP não:
+# ele apenas serve o banco já pronto (ver requirements.txt).
+PyMuPDF>=1.24

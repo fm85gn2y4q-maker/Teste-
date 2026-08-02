@@ -1,0 +1,21 @@
+# Artefatos de dados: o banco tem 1,3 GB e se reconstrói pelo pipeline.
+*.db
+*.db-wal
+*.db-shm
+*.db.gz
+dados/
+
+# Intermediários do pipeline, gravados ao lado dos scripts
+*.jsonl
+*.jsonl.state
+*.csv
+*.log
+
+# PDFs do acervo (12,4 GB)
+PDFs/
+
+# Ambiente
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
