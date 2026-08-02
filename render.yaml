@@ -42,4 +42,7 @@ services:
     region: virginia
     envVars:
       - key: PARECERES_DOMINIOS
-        value: pareceres-pge-rj.onrender.com
+        # O Render acrescentou sufixo ao criar: o nome limpo ja estava
+        # ocupado. O dominio tem de ser o REAL, senao a protecao de Host
+        # recusa tudo com 421 -- ela compara exatamente, sem curinga.
+        value: pareceres-pge-rj-kip3.onrender.com
