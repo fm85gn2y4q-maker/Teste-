@@ -25,3 +25,21 @@ services:
       # dois. Para ativá-lo um dia, basta declarar EMENTARIO_URL_PUBLICA com o
       # endereço público — o código está pronto e testado em ementario/
       # autenticacao.py.
+
+  # Pareceres da PGE-RJ. Servico separado de proposito: parecer da PGE, da AGU
+  # e de outra PGE tem graus de autoridade diferentes, e num acervo so essa
+  # diferenca vira metadado ignoravel.
+  #
+  # ATENCAO ao plano: o acervo tem 766 MB dentro da imagem, contra ~10 MB do
+  # Ementario. O plano gratuito do Render pode nao comportar. Ver HOSPEDAGEM.md
+  # em pareceres-pge-rj/ antes do primeiro deploy.
+  - type: web
+    name: pareceres-pge-rj
+    runtime: docker
+    rootDir: pareceres-pge-rj
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: virginia
+    envVars:
+      - key: PARECERES_DOMINIOS
+        value: pareceres-pge-rj.onrender.com
