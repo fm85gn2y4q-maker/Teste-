@@ -313,11 +313,16 @@ class Acervo:
 
     # ------------------------------------------------------------- tesauro
     def sinonimos(self, termo: str) -> list[dict[str, Any]]:
+        # A comparação tem de ignorar acento dos DOIS lados: as variantes estão
+        # gravadas acentuadas ("organização social") e o termo chega sem acento.
+        # Comparar só o lado da consulta fazia o tesauro não achar nada.
         chave = _sem_acento(termo).lower()
-        conceitos = [r[0] for r in self.con.execute(
-            """SELECT DISTINCT conceito FROM sinonimos
-               WHERE lower(conceito) LIKE ? OR lower(variante) LIKE ?""",
-            (f"%{chave}%", f"%{chave}%"))]
+        conceitos = []
+        for conceito, variante in self.con.execute(
+                "SELECT conceito, variante FROM sinonimos"):
+            if chave in _sem_acento(conceito).lower() or chave in _sem_acento(variante).lower():
+                if conceito not in conceitos:
+                    conceitos.append(conceito)
         saida = []
         for c in conceitos:
             variantes = [dict(variante=r["variante"], documentos=r["documentos"],
