@@ -250,8 +250,6 @@ CONCEITOS = {
 
 def main() -> None:
     ACERVO.mkdir(parents=True, exist_ok=True)
-    if BANCO.exists():
-        BANCO.unlink()
     con = sqlite3.connect(BANCO)
     con.executescript(ESQUEMA)
 
@@ -266,6 +264,19 @@ def main() -> None:
     reconhecidos = 0
 
     conuni = _jsonl("conuni.jsonl")
+    # Os .jsonl ficam fora do Git e ao lado destes scripts. Sumindo eles, o
+    # indexador rodava até o fim e anunciava sucesso com zero documentos --
+    # e como ele apaga o banco antes de reconstruir, o acervo bom ia junto.
+    # Aconteceu. Falhar cedo custa uma linha; o silêncio custou uma recoleta.
+    if not conuni:
+        raise SystemExit(
+            f"conuni.jsonl vazio ou ausente em {AQUI}.\n"
+            f"Rode `python coletar.py` antes de indexar — sem ele o banco sairia "
+            f"vazio, e o anterior já teria sido apagado.")
+
+    # Só agora, com a matéria-prima conferida, o banco antigo pode ir.
+    if BANCO.exists():
+        BANCO.unlink()
 
     # Primeiro passe: lê o texto nativo dos PDFs e monta o vocabulário do
     # acervo. Ele é a régua do OCR, e por isso precisa existir ANTES de
