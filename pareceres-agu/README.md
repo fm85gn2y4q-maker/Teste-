@@ -44,10 +44,10 @@ O SDK precisa ser da série 1.x: o `mcp` 2.0 removeu `mcp.server.fastmcp`.
 {
   "mcpServers": {
     "consultivo-agu": {
-      "command": "C:\\Users\\Matheus Menegatti\\projetos\\pareceres-agu\\.venv\\Scripts\\python.exe",
+      "command": "C:\\Users\\Matheus Menegatti\\projetos\\Teste-\\pareceres-agu\\.venv\\Scripts\\python.exe",
       "args": ["-m", "agu"],
       "env": {
-        "PYTHONPATH": "C:\\Users\\Matheus Menegatti\\projetos\\pareceres-agu",
+        "PYTHONPATH": "C:\\Users\\Matheus Menegatti\\projetos\\Teste-\\pareceres-agu",
         "AGU_BANCO": "C:\\Users\\Matheus Menegatti\\Documents\\AGU_Acervo_Consultivo\\agu_consultivo.db",
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUTF8": "1"
