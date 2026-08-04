@@ -17,11 +17,12 @@ diferença vira metadado ignorável.
 | CONUNI e Câmaras Nacionais | 1.724 |
 | Orientações Normativas (103 da AGU + 7 da extinta CNU) | 110 |
 | Súmulas da AGU | 86 |
-| Com texto pesquisável | 429 |
+| Com texto pesquisável | 798 |
+| — destes, recuperados por OCR | 369 |
 | Sem arquivo público | 1.115 |
 | Páginas indexadas | 6.337 |
 | Período | 1997 a 2026 |
-| Citações mapeadas | 5.736 |
+| Citações mapeadas | 9.706 |
 
 Banco: `~/Documents/AGU_Acervo_Consultivo/agu_consultivo.db`, fora do
 repositório — é artefato de dados. O caminho pode ser passado com `--banco` ou
