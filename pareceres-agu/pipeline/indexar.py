@@ -250,6 +250,24 @@ CONCEITOS = {
 
 def main() -> None:
     ACERVO.mkdir(parents=True, exist_ok=True)
+
+    # A ORDEM AQUI NÃO É ESTILO. Conferir a matéria-prima e apagar o banco
+    # antigo têm de vir ANTES de abrir a conexão: com ela aberta, o unlink
+    # falha no Windows com "arquivo já está sendo usado por outro processo" —
+    # e o processo é este mesmo.
+    conuni = _jsonl("conuni.jsonl")
+    # Os .jsonl ficam fora do Git e ao lado destes scripts. Sumindo eles, o
+    # indexador rodava até o fim e anunciava sucesso com zero documentos --
+    # e como ele apaga o banco antes de reconstruir, o acervo bom ia junto.
+    # Aconteceu. Falhar cedo custa uma linha; o silêncio custou uma recoleta.
+    if not conuni:
+        raise SystemExit(
+            f"conuni.jsonl vazio ou ausente em {AQUI}.\n"
+            f"Rode `python coletar.py` antes de indexar — sem ele o banco sairia "
+            f"vazio, e o anterior já teria sido apagado.")
+    if BANCO.exists():
+        BANCO.unlink()
+
     con = sqlite3.connect(BANCO)
     con.executescript(ESQUEMA)
 
@@ -262,21 +280,6 @@ def main() -> None:
     sem_arquivo = 0
     sem_camada = 0
     reconhecidos = 0
-
-    conuni = _jsonl("conuni.jsonl")
-    # Os .jsonl ficam fora do Git e ao lado destes scripts. Sumindo eles, o
-    # indexador rodava até o fim e anunciava sucesso com zero documentos --
-    # e como ele apaga o banco antes de reconstruir, o acervo bom ia junto.
-    # Aconteceu. Falhar cedo custa uma linha; o silêncio custou uma recoleta.
-    if not conuni:
-        raise SystemExit(
-            f"conuni.jsonl vazio ou ausente em {AQUI}.\n"
-            f"Rode `python coletar.py` antes de indexar — sem ele o banco sairia "
-            f"vazio, e o anterior já teria sido apagado.")
-
-    # Só agora, com a matéria-prima conferida, o banco antigo pode ir.
-    if BANCO.exists():
-        BANCO.unlink()
 
     # Primeiro passe: lê o texto nativo dos PDFs e monta o vocabulário do
     # acervo. Ele é a régua do OCR, e por isso precisa existir ANTES de
@@ -462,6 +465,20 @@ def main() -> None:
             "páginas de Orientações Normativas e Súmulas. Os pareceres das "
             "Consultorias Jurídicas junto aos Ministérios não são públicos e não "
             "estão aqui.",
+            "O filtro por câmara usa o campo que a fonte preenche, e ele não é "
+            "perfeito: 5 documentos nomeiam a própria câmara (CNLCA, CNCIC, "
+            "CNASP, CNDE e CNIR, um cada) mas estão no agrupamento residual, e "
+            "portanto escapam do filtro. Na direção contrária o campo acerta "
+            "mais do que o nome — em CNPAD, CNASP e CNPAT ele marca documentos "
+            "cujo título não traz a sigla. A contagem por câmara é boa, não "
+            "exata: para varredura exaustiva de um tema, busque também por "
+            "assunto.",
+            "O agrupamento residual de 1.471 documentos não tem autor único. "
+            "1.416 são do DECOR; 37 nomeiam a CONUNI, todos de 2025 e 2026; e "
+            "os 18 restantes vêm de outras unidades (CGOR, CONJUR-CGU, ADVNEA, "
+            "DEINF, gabinete da CGU, câmaras temáticas e até um parecer da "
+            "PGFN). Nenhuma contagem deste acervo autoriza dizer que a CONUNI "
+            "produziu os 1.471.",
             "O grau de vinculação é o declarado pela fonte, não uma qualificação "
             "jurídica própria. O efeito do art. 40, § 1º, da LC 73/93 depende de "
             "aprovação presidencial e publicação, que se confere no ato, não aqui.",

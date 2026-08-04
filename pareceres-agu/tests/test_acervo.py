@@ -155,5 +155,30 @@ def test_cobertura_declara_o_que_falta(acervo):
     assert "Consultorias Jurídicas" in limites
 
 
+def test_cobertura_declara_o_limite_do_filtro_por_camara(acervo):
+    """O filtro usa o campo da fonte, e 5 documentos nomeiam a propria camara
+    sem estarem marcados nela. Pouco, mas quem varre um tema precisa saber."""
+    limites = " ".join(acervo.cobertura()["limites"])
+    assert "filtro por câmara" in limites
+    assert "agrupamento residual" in limites
+    assert "1.416 são do DECOR" in limites
+
+
+def test_o_balde_residual_nao_tem_autor_unico(acervo):
+    """A afirmacao que a conferencia do advogado derrubou: nenhuma contagem
+    deste acervo autoriza atribuir os 1.471 a um orgao so."""
+    total = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE fonte='conuni' AND orgao='CONUNI'").fetchone()[0]
+    conuni = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE fonte='conuni' "
+        "AND upper(citacao) LIKE '%/CONUNI/%'").fetchone()[0]
+    assert total > 1000
+    assert conuni < 100, "o balde residual deixou de ser residual — reveja o rótulo"
+    anos = [a for (a,) in acervo.con.execute(
+        "SELECT DISTINCT ano FROM documentos WHERE fonte='conuni' "
+        "AND upper(citacao) LIKE '%/CONUNI/%'")]
+    assert min(anos) >= 2025, "a CONUNI e recente; documento antigo com a sigla e suspeito"
+
+
 def test_aviso_de_ente_esta_na_cobertura(acervo):
     assert "Município" in acervo.cobertura()["aviso_ente_federado"]
