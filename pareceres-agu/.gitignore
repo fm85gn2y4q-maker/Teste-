@@ -7,5 +7,6 @@ dist/
 
 # artefatos de dados: ficam fora do repositório
 *.db
+*.db.gz
 *.jsonl
 *.html

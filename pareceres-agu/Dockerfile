@@ -24,7 +24,7 @@ COPY agu/ ./agu/
 # depender disso deixa a imagem sem acervo por um motivo invisível.
 # Publicar acervo novo é trocar estas duas linhas.
 ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/consultivo-agu-v1.0.0/consultivo-agu-v1.0.0.db.gz
-ARG ACERVO_SHA256=
+ARG ACERVO_SHA256=d33530f1faa6d8ecdfc63fb8f4970545cdf856e65a1c2f85869bb91247b3870d
 COPY baixar_acervo.py ./
 RUN python baixar_acervo.py "$ACERVO_URL" dados/agu_consultivo.db "$ACERVO_SHA256"
 
