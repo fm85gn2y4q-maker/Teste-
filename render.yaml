@@ -46,3 +46,26 @@ services:
         # ocupado. O dominio tem de ser o REAL, senao a protecao de Host
         # recusa tudo com 421 -- ela compara exatamente, sem curinga.
         value: pareceres-pge-rj-kip3.onrender.com
+
+  # Acervo consultivo da AGU: CONUNI, Orientacoes Normativas e Sumulas.
+  # Servico separado pelo mesmo motivo dos outros dois: parecer da AGU, da
+  # PGE-RJ e do TCE-RJ tem graus de autoridade diferentes, e num acervo so
+  # essa diferenca vira metadado ignoravel.
+  #
+  # Este cabe folgado no plano gratuito -- sao dezenas de MB, contra os 766 MB
+  # do acervo da PGE-RJ. Pelo motivo menos animador possivel: 1.115 das 1.724
+  # manifestacoes do CONUNI nao tem inteiro teor publico.
+  - type: web
+    name: consultivo-agu
+    runtime: docker
+    rootDir: pareceres-agu
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: virginia
+    envVars:
+      - key: AGU_DOMINIOS
+        # ATENCAO: trocar pelo dominio REAL depois de criar o servico. O
+        # Render acrescenta sufixo quando o nome limpo ja esta ocupado, e foi
+        # exatamente o que aconteceu com os pareceres da PGE-RJ. Enquanto o
+        # valor nao for o real, o servico recusa tudo com 421.
+        value: consultivo-agu.onrender.com

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+
+# artefatos de dados: ficam fora do repositório
+*.db
+*.jsonl
+*.html

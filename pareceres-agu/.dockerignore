@@ -1,0 +1,16 @@
+# A imagem leva só o servidor e o acervo, que vem de release.
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+pipeline/
+dados/
+*.mcpb
+*.db
+*.db.gz
+requirements-pipeline.txt
+pytest.ini
+empacotar_mcpb.py
