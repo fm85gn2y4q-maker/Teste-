@@ -83,6 +83,27 @@ def test_manifestacao_do_conuni_mantem_despachos(servidor):
     assert any("despachos" in r for r in d["resultados"])
 
 
+def test_conuni_nao_e_anunciado_como_autor(servidor):
+    """Na fonte, CONUNI e o rotulo do que nao foi atribuido a nenhuma Camara:
+    1.471 documentos de 2007 a 2026, dos quais 1.416 sao do DECOR. Traduzir a
+    sigla pelo nome do orgao fez o servidor anunciar 1.471 manifestacoes de quem
+    nao as produziu."""
+    from agu.acervo import CAMARAS
+    rotulo = CAMARAS["CONUNI"]
+    assert "DECOR" in rotulo
+    assert "não especificado" in rotulo
+    cob = _chamar(servidor, "cobertura_do_acervo")
+    chaves = list(cob["por_camara"])
+    assert not any(k.startswith("Consultoria Nacional da União de Uniformização")
+                   for k in chaves), chaves
+
+
+def test_instrucoes_avisam_das_duas_armadilhas_de_contagem():
+    assert "1.416 são do DECOR" in INSTRUCOES
+    assert "não são internas" in INSTRUCOES
+    assert "regime` ausente não é regime neutro" in INSTRUCOES
+
+
 def test_cobertura_nao_esconde_o_que_falta(servidor):
     cob = _chamar(servidor, "cobertura_do_acervo")
     assert int(cob["sem_arquivo_publico"]) > 1000

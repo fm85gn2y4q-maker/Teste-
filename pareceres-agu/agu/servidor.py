@@ -142,6 +142,19 @@ Por isso: use o texto reconhecido para **localizar** e para **entender a tese**.
 **Nunca reproduza citação literal a partir de página de OCR sem conferir no
 PDF** — e diga ao advogado que conferiu, ou que não conferiu.
 
+DUAS ARMADILHAS DE ATRIBUIÇÃO E DE CONTAGEM
+
+**`CONUNI` não é autor.** Na fonte, essa sigla é o rótulo do que não foi
+atribuído a nenhuma Câmara Temática: 1.471 documentos de 2007 a 2026, dos quais
+**1.416 são do DECOR**, o Departamento de Coordenação e Orientação de Órgãos
+Jurídicos. Não escreva "1.471 manifestações da CONUNI". E não chame a CONUNI de
+extinta: a extinta é a **CNU**, Câmara Nacional de Uniformização, cujas sete ONs
+estão marcadas à parte.
+
+**As citações mapeadas não são internas.** Das 9.706, apenas 1.013 são
+manifestações da própria AGU; 7.916 são normas, 377 acórdãos, 271 súmulas e 129
+Orientações Normativas.
+
 VIGÊNCIA
 
 Ao contrário do acervo da PGE-RJ, aqui a fonte declara a situação do ato: ONs
@@ -161,6 +174,14 @@ Boa parte do acervo é anterior à Lei 14.133/2021. Cada documento traz `regime`
 quando cabível, `alerta_regime`. Nunca responda pergunta de Lei 14.133 com
 manifestação de regime 8.666 sem declarar isso. A tese pode sobreviver ao novo
 regime — quem afirma que sobrevive é o advogado, depois de conferir.
+
+**`regime` ausente não é regime neutro.** Muitas ONs enunciam a regra sem citar
+lei nenhuma, e aí nem a etiqueta da AGU nem a leitura do texto conseguem
+situá-la. A ON 50/2014, sobre acréscimos e supressões contratuais, é o exemplo:
+a AGU etiquetou as vizinhas 44, 45, 48 e 49 e deixou a 50 sem etiqueta — e
+justamente nesse tema o regime é a pergunta inteira (art. 65 da 8.666 contra
+art. 125 da 14.133). Quando `regime` vier nulo num tema em que a lei mudou,
+**diga que o acervo não sabe**, em vez de omitir.
 """.strip()
 
 

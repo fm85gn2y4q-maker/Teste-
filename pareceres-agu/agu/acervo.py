@@ -60,7 +60,13 @@ CAMARAS = {
     "CNPAD": "Câmara Nacional de Procedimentos Administrativos Disciplinares",
     "CNIR": "Câmara Nacional de Infraestrutura e Regulação",
     "CNU": "Câmara Nacional de Uniformização (extinta)",
-    "CONUNI": "Consultoria Nacional da União de Uniformização",
+    # ATENÇÃO: na fonte, `CONUNI` NÃO é o órgão que produziu o documento — é o
+    # rótulo geral do que não foi atribuído a nenhuma Câmara Temática. São 1.471
+    # documentos de 2007 a 2026, dos quais 1.416 são do DECOR. Traduzir a sigla
+    # por "Consultoria Nacional da União de Uniformização" fazia o servidor
+    # anunciar 1.471 documentos de um órgão que não os produziu.
+    "CONUNI": ("órgão não especificado pela fonte — inclui o DECOR e a extinta "
+               "CNU, além da própria CONUNI"),
 }
 
 
