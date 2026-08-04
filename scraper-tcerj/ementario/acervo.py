@@ -708,6 +708,31 @@ class Acervo:
             "  AND d.numero = o.numero AND d.ano = o.ano) THEN 'curadoria' ELSE 'fora' "
             "END, COUNT(*) FROM documentos_oficiais o GROUP BY 1"
         ).fetchall())
+
+        # Período do corpus de inteiro teor, por origem.
+        #
+        # Declarar só o período das ementas era omissão séria: elas são 6% do
+        # acervo, e quem lesse "2021–2026" poderia supor que valia para o
+        # resto ou, pior, não supor nada e ficar sem saber. Um acervo que não
+        # diz onde começa convida a tratar ausência como inexistência.
+        periodos = {
+            ("Jurisprudência Selecionada" if l["sel"] else "Pesquisa Textual"): {
+                "acordaos": l["n"], "periodo": f"{l['de']}–{l['ate']}",
+            }
+            for l in self.conexao.execute(
+                "SELECT COUNT(*) n, MIN(o.ano) de, MAX(o.ano) ate,"
+                "  EXISTS (SELECT 1 FROM documentos d WHERE d.tipo = o.tipo"
+                "          AND d.numero = o.numero AND d.ano = o.ano) sel "
+                "FROM documentos_oficiais o WHERE o.paginas_total > 0 GROUP BY sel"
+            )
+        }
+        por_ano = [
+            {"ano": l["ano"], "acordaos": l["n"]}
+            for l in self.conexao.execute(
+                "SELECT ano, COUNT(*) n FROM documentos_oficiais "
+                "WHERE paginas_total > 0 GROUP BY ano ORDER BY ano"
+            )
+        ]
         sumulas = self.conexao.execute(
             "SELECT COUNT(*) FROM documentos WHERE tipo = 'sumula'"
         ).fetchone()[0]
@@ -723,9 +748,15 @@ class Acervo:
                 "documentos_com_inteiro_teor": com_texto,
                 "paginas": paginas,
                 "caracteres": caracteres,
+                "periodo_por_origem": periodos,
+                "acordaos_por_ano": por_ano,
                 "pendencias": pendencias,
                 "observacao": "Só acórdãos têm inteiro teor. Súmulas, respostas a "
-                              "consulta e questões de ordem existem apenas como ementa.",
+                              "consulta e questões de ordem existem apenas como ementa. "
+                              "O período acima é o do corpus textual, e NÃO coincide "
+                              "necessariamente com o das ementas: nada anterior ao "
+                              "primeiro ano listado foi coletado, e a ausência de um "
+                              "julgado antigo é limite da coleta, não do Tribunal.",
             },
             "origem_dos_acordaos": {
                 "jurisprudencia_selecionada": origens.get("curadoria", 0),
@@ -744,6 +775,13 @@ class Acervo:
             },
             "relatores": relatores,
             "macro_temas": macro_temas,
+            "alcance_dos_macro_temas": (
+                f"Os macro-temas e a lista de relatores descrevem APENAS as {total} "
+                f"ementas da curadoria. Os {origens.get('fora', 0)} acórdãos vindos da "
+                f"Pesquisa Textual não têm assunto classificado nem relator no registro "
+                f"— são recuperáveis por busca textual, não por filtro temático. Não "
+                f"conclua, de um macro-tema, que ele cobre o corpus inteiro."
+            ),
             # Mantido para quem lia o campo antigo; é o total de ementas.
             "total_de_documentos": total,
             "limites_do_acervo": [
