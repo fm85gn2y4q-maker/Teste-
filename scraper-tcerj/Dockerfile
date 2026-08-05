@@ -31,10 +31,19 @@ ARG ACERVO_SHA256=1e1c287b378285b45e79d1ea1d8f9e0eeafd788b8fcfe47b12d58657295814
 COPY baixar_acervo.py ./
 RUN python baixar_acervo.py "$ACERVO_URL" dados/tcerj.sqlite "$ACERVO_SHA256"
 
+# O acervo NORMATIVO viaja no mesmo servidor, em banco separado. Separado
+# porque as duas bases erram por motivos distintos — a jurisprudencia pela
+# proveniencia do trecho, a norma pela vigencia — e um schema so convidaria a
+# tratar as duas com a mesma regua. Juntas no processo, apartadas no banco.
+ARG NORMAS_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/normas-v1.0.0/normas-tcerj-v1.0.0.db.gz
+ARG NORMAS_SHA256=d88998db7d8d7fe2f9304900c16f9847a5897705639b4429448bfdf61a3538c4
+RUN python baixar_acervo.py "$NORMAS_URL" dados/normas-tcerj.sqlite "$NORMAS_SHA256"
+
 # O serviço define a porta; 8080 é o padrão do Cloud Run quando ele não define.
 ENV PORT=8080 \
     EMENTARIO_HOST=0.0.0.0 \
     EMENTARIO_BANCO=/app/dados/tcerj.sqlite \
+    NORMAS_BANCO=/app/dados/normas-tcerj.sqlite \
     PYTHONUTF8=1 \
     PYTHONUNBUFFERED=1
 

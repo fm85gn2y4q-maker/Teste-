@@ -15,6 +15,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
 from .acervo import ROTULOS, Acervo
+from .normas import AcervoNormas
 
 # Hosts sempre aceitos: é por onde o servidor é usado na própria máquina.
 _LOCAIS = ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
@@ -52,9 +53,28 @@ def seguranca_de_transporte(dominios: list[str] | None) -> TransportSecuritySett
     )
 
 INSTRUCOES = """
-Acervo de jurisprudência do Tribunal de Contas do Estado do Rio de Janeiro
-(TCE-RJ): ementas de acórdãos, súmulas, respostas a consulta e questões de
-ordem, coletadas do portal público do Tribunal.
+Dois acervos do Tribunal de Contas do Estado do Rio de Janeiro, no mesmo
+servidor e com ferramentas separadas:
+
+    JURISPRUDÊNCIA   ementas de acórdãos, súmulas, respostas a consulta e
+                     questões de ordem, mais o inteiro teor dos acórdãos.
+    NORMAS           deliberações, resoluções, atos normativos, portarias e
+                     notas técnicas do próprio Tribunal, de 1975 em diante,
+                     inclusive o Regimento Interno.
+
+**As duas erram por motivos diferentes, e a confusão entre elas é o erro que
+este servidor mais teme.** Na jurisprudência, a pergunta perigosa é *de quem é
+este trecho* — o PDF do acórdão mistura decisão, defesa e parecer do MPC. Nas
+normas, é *isto ainda vale* — um quarto dos atos está revogado, e o documento
+revogado é idêntico, em aparência, ao vigente.
+
+Não use ferramenta de uma para responder pergunta da outra. Acórdão não
+regulamenta; deliberação não julga.
+
+Quando a pergunta for de conduta administrativa — "posso exigir tal
+documento?", "qual o prazo para isso?" —, **as duas importam**: a norma diz o
+que regula, o precedente diz como o Tribunal a aplicou. Responder só com uma
+delas deixa metade do problema de fora.
 
 Como responder ao advogado:
 - Entregue análise e precedentes, não o funcionamento da ferramenta. Não cite
@@ -267,7 +287,45 @@ pode não ter.
 A ementa é o resumo oficial, não o acórdão. Quando a tese for decisiva para a
 peça, diga para conferir o inteiro teor pelo link antes de citar.
 
+ACERVO NORMATIVO: A VIGÊNCIA É A REGRA QUE NÃO SE QUEBRA
+
+Todo resultado de norma traz `situacao`, com três estados:
+
+    vigente                Sem revogação registrada na fonte.
+    revogado               A fonte registra quem revogou e quando.
+    revogado_tacitamente   A ementa do próprio Tribunal declara a revogação
+                           em prosa, embora o campo estruturado diga vigente.
+                           São 16 atos. Não os trate como em vigor.
+
+**Nunca escreva "o ato está em vigor".** Escreva o que a fonte declara e em que
+data foi coletada: "sem revogação registrada até a coleta de <data>". A
+diferença é entre uma pesquisa e uma garantia — e garantia esta base não dá.
+
+NENHUM ATO TEM TEXTO CONSOLIDADO
+
+Todo PDF é a **redação original** da data de publicação. Alteração posterior é
+ato autônomo, e nada no documento alterado avisa que ele mudou.
+
+Vale inclusive para o **Regimento Interno**: o que o portal serve é a
+Deliberação nº 338/2023, texto de fevereiro de 2023. As alterações posteriores
+são deliberações separadas, e `situacao.alteracoes_declaradas` as lista.
+
+Antes de reproduzir qualquer dispositivo, **verifique
+`situacao.alteracoes_declaradas`**. Havendo alteração, diga-o na resposta e
+leia o ato alterador. Citar "o art. 5º dispõe que…" quando há alteração
+declarada é reproduzir redação possivelmente superada.
+
+Força de cada espécie, que não se equivalem: **Súmula** vincula a Administração
+fluminense no controle externo; **Deliberação** é ato normativo do Plenário —
+espécie do Regimento e das normas de maior alcance; **Resolução** trata de
+organização interna e procedimento; **Ato Normativo** é da Presidência, de
+alcance interno; **Portaria** é ato pontual; **Nota Técnica** é orientação, sem
+força normativa própria. Não trate Portaria ou Nota Técnica como se obrigassem
+o jurisdicionado.
+
 Limites que não podem ser omitidos quando importarem:
+- A **Lei Orgânica do TCE-RJ** (Lei Complementar estadual nº 63/1990) NÃO está
+  em nenhum dos dois acervos: é lei da ALERJ, não ato do Tribunal.
 - O acervo não é o conjunto dos acórdãos do TCE-RJ. Reúne a curadoria da
   *Jurisprudência Selecionada* e o que a Pesquisa Textual do Tribunal alcançou
   em temas de licitações e contratos. A ausência de uma tese aqui NÃO prova que
@@ -351,14 +409,27 @@ def _caminho_padrao() -> Path:
     return Path(__file__).resolve().parent.parent / "dados" / "tcerj.sqlite"
 
 
+def _caminho_normas() -> Path | None:
+    if os.environ.get("NORMAS_BANCO"):
+        return Path(os.environ["NORMAS_BANCO"])
+    padrao = Path(__file__).resolve().parent.parent / "dados" / "normas-tcerj.sqlite"
+    return padrao if padrao.exists() else None
+
+
 def construir(
     banco: str | Path | None = None,
     dominios: list[str] | None = None,
     url_publica: str | None = None,
     segredo_oauth: str | None = None,
+    banco_normas: str | Path | None = None,
     **ajustes: Any,
 ) -> FastMCP:
     acervo = Acervo(banco or _caminho_padrao())
+    # O acervo normativo é opcional: sem ele o servidor continua servindo a
+    # jurisprudência, e as ferramentas de norma simplesmente não existem — o
+    # que é melhor do que existirem e responderem vazio.
+    caminho_normas = banco_normas or _caminho_normas()
+    normas = AcervoNormas(caminho_normas) if caminho_normas else None
 
     # O ChatGPT recusa servidor MCP sem OAuth; o Claude conecta sem. O fluxo
     # só é montado quando há URL pública, porque os metadados precisam apontar
@@ -635,7 +706,183 @@ def construir(
         Consulte antes de afirmar que algo não consta, ou para saber quais
         filtros fazem sentido.
         """
-        return acervo.cobertura()
+        c = acervo.cobertura()
+        if normas is not None:
+            c["acervo_normativo"] = normas.cobertura()
+        return c
+
+    # -- Acervo normativo -------------------------------------------------
+    # Ferramentas próprias, e não filtros das anteriores: a pergunta que se faz
+    # a uma norma ("isto ainda vale?") não é a que se faz a um acórdão ("de
+    # quem é este trecho?"). Nomes distintos mantêm as duas réguas separadas
+    # dentro do mesmo servidor.
+
+    if normas is not None:
+
+        def _nota_normas(achados: list[dict[str, Any]]) -> str | None:
+            rev = [a for a in achados
+                   if a["situacao"] and a["situacao"]["estado"] != "vigente"]
+            alt = [a for a in achados
+                   if a["situacao"] and a["situacao"]["alteracoes_declaradas"]]
+            partes = []
+            if rev:
+                partes.append(f"{len(rev)} de {len(achados)} estão REVOGADOS — "
+                              f"leia `situacao` antes de citar.")
+            if alt:
+                partes.append(f"{len(alt)} têm alteração declarada: o texto é a "
+                              f"redação original.")
+            return " ".join(partes) or None
+
+        @mcp.tool()
+        def pesquisar_normas(
+            consulta: str, especie: str | None = None,
+            apenas_vigentes: bool | None = None, limite: int = 15
+        ) -> dict[str, Any]:
+            """Procura atos normativos do TCE-RJ pela ementa.
+
+            Deliberações, Resoluções, Atos Normativos, Portarias e Notas
+            Técnicas — inclusive o Regimento Interno. Use para descobrir QUAIS
+            atos regulam um assunto; para o texto do artigo, use
+            `pesquisar_dispositivos`.
+
+            Args:
+                consulta: palavras ou expressão entre aspas.
+                especie: deliberacao, resolucao, ato-normativo, portaria,
+                    nota-tecnica, sumula.
+                apenas_vigentes: True só os sem revogação registrada; False só
+                    os revogados; omitido, todos. Prefira omitir: ato revogado
+                    é o que vale quando os fatos são da época dele.
+                limite: quantos devolver (máximo 50).
+            """
+            achados, parcial, expressao = normas.pesquisar(
+                consulta, especie=especie, vigentes=apenas_vigentes, limite=limite)
+            return {
+                "consulta": consulta, "expressao_executada": expressao,
+                "quantidade": len(achados), "correspondencia_parcial": parcial,
+                "resultados": achados, "coletado_em": normas.coletado_em,
+                "observacao": _nota_normas(achados) or (
+                    "Nenhum resultado. Não prova que o Tribunal não normatizou "
+                    "a matéria: tente outra formulação antes de concluir."
+                    if not achados else None),
+            }
+
+        @mcp.tool()
+        def pesquisar_dispositivos(
+            consulta: str, especie: str | None = None,
+            apenas_vigentes: bool | None = None, limite: int = 12
+        ) -> dict[str, Any]:
+            """Procura dentro do TEXTO dos atos normativos, e devolve a página.
+
+            É onde estão os artigos. Cada resultado traz a página e a situação
+            do ato — sem a qual o dispositivo não pode ser citado.
+
+            Args:
+                consulta: palavras ou expressão entre aspas.
+                especie: filtra a espécie.
+                apenas_vigentes: ver `pesquisar_normas`.
+                limite: quantos trechos devolver (máximo 30).
+            """
+            achados, parcial, expressao = normas.pesquisar_texto(
+                consulta, especie=especie, vigentes=apenas_vigentes, limite=limite)
+            return {
+                "consulta": consulta, "expressao_executada": expressao,
+                "quantidade": len(achados), "correspondencia_parcial": parcial,
+                "resultados": achados, "coletado_em": normas.coletado_em,
+                "lembrete": ("O trecho é a redação ORIGINAL. Havendo alteração "
+                             "em `situacao.alteracoes_declaradas`, ela NÃO está "
+                             "aplicada aqui."),
+                "observacao": _nota_normas(achados),
+            }
+
+        @mcp.tool()
+        def situacao_do_ato(id: str) -> dict[str, Any]:
+            """Vigência de um ato normativo: revogado, alterado ou sem registro.
+
+            Etapa obrigatória antes de citar qualquer dispositivo.
+
+            Args:
+                id: identificador vindo de uma pesquisa de normas
+                    (ex.: deliberacao-338-2023).
+            """
+            ato = normas.obter(id)
+            if not ato:
+                return {"erro": f"Ato normativo não encontrado: {id}"}
+            return {
+                "citacao": ato["citacao"], "ementa": ato["ementa"],
+                "situacao": ato["situacao"], "revogou": normas.revogados_por(id),
+                "url_documento": ato["url_documento"],
+                "coletado_em": normas.coletado_em,
+                "como_afirmar": (
+                    "Diga a situação declarada na fonte E a data da coleta. Não "
+                    "escreva 'está em vigor': escreva 'sem revogação registrada "
+                    f"até a coleta de {normas.coletado_em}'."),
+            }
+
+        @mcp.tool()
+        def historico_do_ato(id: str) -> dict[str, Any]:
+            """A cadeia de um ato: o que ele revogou e o que o alterou.
+
+            Serve para reconstituir o regime aplicável na data dos fatos — que
+            raramente é o de hoje.
+
+            Args:
+                id: identificador do ato normativo.
+            """
+            ato = normas.obter(id)
+            if not ato:
+                return {"erro": f"Ato normativo não encontrado: {id}"}
+            s = ato["situacao"] or {}
+            return {
+                "citacao": ato["citacao"], "publicado_em": ato["data"],
+                "revogou": normas.revogados_por(id),
+                "alterado_por": s.get("alteracoes_declaradas", []),
+                "revogado_por": s.get("revogado_por"),
+                "revogado_em": s.get("revogado_em"), "estado": s.get("estado"),
+                "aviso": ("A cadeia é a que a fonte declara. Alteração que o "
+                          "Tribunal não registrou não aparece aqui, e esta base "
+                          "não a detecta."),
+            }
+
+        @mcp.tool()
+        def ler_norma(id: str, pagina: int, vizinhas: int = 1) -> dict[str, Any]:
+            """Lê páginas contíguas de um ato normativo, no contexto.
+
+            Args:
+                id: identificador do ato.
+                pagina: página central.
+                vizinhas: quantas antes e depois (até 8).
+            """
+            v = max(0, min(vizinhas, 8))
+            paginas = normas.paginas(id, pagina - v, pagina + v)
+            if not paginas:
+                return {"erro": f"Sem texto para {id} na página {pagina}."}
+            ato = normas.obter(id)
+            return {
+                "citacao": ato["citacao"] if ato else id,
+                "situacao": ato["situacao"] if ato else None,
+                "url_documento": ato["url_documento"] if ato else None,
+                "paginas": paginas,
+                "lembrete": "Redação original. Confira as alterações declaradas.",
+            }
+
+        @mcp.tool()
+        def listar_normas(
+            especie: str | None = None, ano: int | None = None,
+            apenas_vigentes: bool | None = None, limite: int = 30
+        ) -> dict[str, Any]:
+            """Lista atos normativos por espécie, ano ou vigência.
+
+            Args:
+                especie: deliberacao, resolucao, ato-normativo, portaria,
+                    nota-tecnica, sumula.
+                ano: ano exato de publicação.
+                apenas_vigentes: True, False ou omitido.
+                limite: quantos devolver (máximo 100).
+            """
+            achados = normas.listar(especie=especie, ano=ano,
+                                    vigentes=apenas_vigentes, limite=limite)
+            return {"quantidade": len(achados), "resultados": achados,
+                    "observacao": _nota_normas(achados)}
 
     # -- Compatibilidade com os conectores do ChatGPT ---------------------
     # A pesquisa profunda do ChatGPT espera exatamente `search` e `fetch`, com

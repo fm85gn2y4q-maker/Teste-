@@ -90,7 +90,7 @@ class Situacao:
         }
 
 
-class Acervo:
+class AcervoNormas:
     def __init__(self, caminho: str | Path) -> None:
         self.caminho = Path(caminho)
         if not self.caminho.exists():
