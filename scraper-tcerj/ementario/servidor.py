@@ -7,6 +7,7 @@ com um processo local, enquanto o ChatGPT só aceita servidor remoto por HTTP.
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -410,10 +411,19 @@ def _caminho_padrao() -> Path:
 
 
 def _caminho_normas() -> Path | None:
-    if os.environ.get("NORMAS_BANCO"):
-        return Path(os.environ["NORMAS_BANCO"])
-    padrao = Path(__file__).resolve().parent.parent / "dados" / "normas-tcerj.sqlite"
-    return padrao if padrao.exists() else None
+    """Onde está o acervo normativo, se estiver.
+
+    A existência é conferida também para o caminho vindo do ambiente, e não só
+    para o padrão. Sem isso, uma variável apontando para arquivo ausente
+    derrubava o servidor INTEIRO na subida — e a jurisprudência, que nada tem
+    com o acervo de normas, saía do ar junto. Numa hospedagem que mantém a
+    versão anterior quando a nova não sobe, o sintoma é o pior possível: nada
+    quebra visivelmente, e o deploy simplesmente não tem efeito.
+    """
+    declarado = os.environ.get("NORMAS_BANCO")
+    caminho = (Path(declarado) if declarado else
+               Path(__file__).resolve().parent.parent / "dados" / "normas-tcerj.sqlite")
+    return caminho if caminho.exists() else None
 
 
 def construir(
@@ -429,7 +439,16 @@ def construir(
     # jurisprudência, e as ferramentas de norma simplesmente não existem — o
     # que é melhor do que existirem e responderem vazio.
     caminho_normas = banco_normas or _caminho_normas()
-    normas = AcervoNormas(caminho_normas) if caminho_normas else None
+    normas = None
+    if caminho_normas:
+        try:
+            normas = AcervoNormas(caminho_normas)
+        except Exception as erro:  # noqa: BLE001 — banco de terceiro, na subida
+            # Degradar, não morrer: um acervo acessório defeituoso não pode
+            # levar consigo o principal.
+            logging.getLogger(__name__).warning(
+                "Acervo normativo indisponível (%s); o servidor sobe apenas com "
+                "a jurisprudência.", erro)
 
     # O ChatGPT recusa servidor MCP sem OAuth; o Claude conecta sem. O fluxo
     # só é montado quando há URL pública, porque os metadados precisam apontar
