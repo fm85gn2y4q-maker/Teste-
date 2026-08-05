@@ -40,6 +40,32 @@ def test_todo_vinculante_declara_presidente_e_publicacao(acervo):
     assert not sem, f"{len(sem)} vinculantes sem Presidente ou data de publicação"
 
 
+def test_a_prova_da_vinculacao_chega_ao_advogado(acervo):
+    """O teste anterior lia a coluna do banco e passava enquanto a ferramenta
+    entregava o dado sob o rótulo errado — `links_do_ato`, como se Presidente e
+    publicação no DOU fossem links. É o dado que separa o parecer vinculante de
+    todos os outros; sob rótulo errado, ele some."""
+    codigo = acervo.con.execute(
+        "SELECT codigo FROM documentos WHERE fonte = 'vinculante' LIMIT 1").fetchone()[0]
+    ficha = acervo.obter(codigo).para_dict()
+    assert "aprovacao" in ficha, list(ficha)
+    assert "links_do_ato" not in ficha
+    assert ficha["aprovacao"]["presidente"]
+    assert ficha["aprovacao"]["data_publicacao_dou"]
+
+
+def test_cada_fonte_rotula_a_coluna_conforme_o_que_ela_guarda(acervo):
+    esperado = {"conuni": "despachos", "vinculante": "aprovacao",
+                "on": "links_do_ato", "sumula": "links_do_ato"}
+    for fonte, rotulo in esperado.items():
+        linha = acervo.con.execute(
+            "SELECT codigo FROM documentos WHERE fonte = ? "
+            "AND COALESCE(despachos,'') <> '' LIMIT 1", (fonte,)).fetchone()
+        if not linha:
+            continue
+        assert rotulo in acervo.obter(linha[0]).para_dict(), fonte
+
+
 def test_vinculante_e_citado_pelo_codigo(acervo):
     """JM-10, GQ-..., AC-... é como o parecer é conhecido e conferido."""
     citacoes = [c for (c,) in acervo.con.execute(

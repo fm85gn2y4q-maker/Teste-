@@ -215,10 +215,13 @@ class Documento:
         if self.relacionadas:
             d["manifestacoes_relacionadas"] = self.relacionadas
         if self.despachos:
-            # O campo guarda a cadeia de despachos no CONUNI e os links do ato
-            # nas ONs e súmulas. Rotular tudo de "despacho" faria o servidor
-            # anunciar despacho onde não há.
-            rotulo = "despachos" if self.fonte == "conuni" else "links_do_ato"
+            # A mesma coluna guarda três coisas diferentes, e o rótulo tem de
+            # dizer qual. No CONUNI é a cadeia de despachos; nos vinculantes é
+            # o que PROVA a vinculação — Presidente que aprovou e publicação no
+            # DOU; nas ONs e súmulas são links. Rotular tudo igual esconderia
+            # justamente o dado que separa o parecer vinculante dos demais.
+            rotulo = {"conuni": "despachos",
+                      "vinculante": "aprovacao"}.get(self.fonte, "links_do_ato")
             try:
                 d[rotulo] = json.loads(self.despachos)
             except json.JSONDecodeError:
