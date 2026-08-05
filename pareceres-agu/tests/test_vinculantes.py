@@ -74,6 +74,47 @@ def test_vinculante_e_citado_pelo_codigo(acervo):
     assert any("-" in c for c in citacoes), citacoes[:3]
 
 
+def test_comprimento_do_texto_nao_vira_relevancia(acervo):
+    """O falso positivo que a consulta real do advogado expôs: perguntando por
+    aditivo de prazo em contrato de obra, o servidor devolvia como ÚNICO
+    precedente vinculante o GQ-134/1997, sobre programa BEFIEX de exportação de
+    câmeras fotográficas. Casava porque a fonte entrega ementa e inteiro teor no
+    mesmo campo, e num texto de 40 mil caracteres qualquer termo aparece."""
+    achados, _, _ = acervo.pesquisar("prorrogação prazo vigência contrato aditivo",
+                                     limite=10, fonte="vinculante")
+    assert not any("GQ-134" in d.citacao for d in achados), \
+        [d.citacao for d in achados]
+
+
+def test_o_documento_longo_continua_achavel_pelo_tema_dele(acervo):
+    """O conserto não pode ter sido esconder o documento: ele some da busca por
+    termo genérico e continua aparecendo no assunto que é o dele."""
+    for consulta in ("BEFIEX", "programa especial de exportação"):
+        achados, _, total = acervo.pesquisar(consulta, limite=5)
+        assert any("GQ-134" in d.citacao for d in achados), (consulta, total)
+
+
+def test_ementa_do_vinculante_e_curta_e_o_teor_esta_paginado(acervo):
+    linha = acervo.con.execute(
+        """SELECT codigo, LENGTH(ementa) AS n, paginas FROM documentos
+           WHERE fonte = 'vinculante' AND paginas > 3 LIMIT 1""").fetchone()
+    assert linha["n"] <= 1900, linha["n"]
+    assert linha["paginas"] > 3
+    paginas = acervo.paginas_do_documento(linha["codigo"], 1, 2)
+    assert len(paginas) == 2 and paginas[0]["texto"]
+
+
+def test_documento_cortado_pela_fonte_avisa(acervo):
+    """59 vinculantes param no teto de ~32.700 caracteres, e 58 terminam no meio
+    de uma frase. Sem o aviso, o silêncio parece ausência de argumento."""
+    linha = acervo.con.execute(
+        """SELECT codigo FROM documentos WHERE fonte = 'vinculante'
+           AND COALESCE(aviso_fonte,'') LIKE '%32.700%' LIMIT 1""").fetchone()
+    assert linha, "nenhum vinculante marcado como cortado — o aviso regrediu"
+    ficha = acervo.obter(linha[0]).para_dict()
+    assert "meio do texto" in ficha["aviso_da_fonte"]
+
+
 def test_a_camada_federal_cresceu_com_os_vinculantes(acervo):
     por_chave = dict(acervo.con.execute(
         "SELECT vinculacao_chave, COUNT(*) FROM documentos GROUP BY 1"))

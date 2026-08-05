@@ -140,6 +140,28 @@ def _ler_pdf(caminho: Path) -> list[str]:
         return []
 
 
+# Nos vinculantes a fonte entrega ementa e inteiro teor NO MESMO CAMPO, e o
+# corta em ~32.700 caracteres. Tentar achar a fronteira por marcador falha: os
+# documentos vão de transcrição do DOU a despacho presidencial, e 121 dos 215
+# não trazem marcador algum. Em vez de adivinhar, o acervo indexa o COMEÇO como
+# ementa — que é onde ela está em todos — e o texto inteiro como inteiro teor.
+#
+# Isso conserta o defeito que fazia um parecer de 1997 sobre programa de
+# exportação aparecer como precedente vinculante em aditivo de prazo de obra:
+# num campo de 40 mil caracteres qualquer termo aparece, e o comprimento virava
+# relevância na busca por ementa.
+EMENTA_MAX = 1800
+PAGINA_MAX = 3000
+
+
+def _paginar(texto: str, tamanho: int = PAGINA_MAX) -> list[str]:
+    """Fatia o inteiro teor em páginas, para citar folha e limitar o trecho."""
+    limpo = (texto or "").strip()
+    if not limpo:
+        return []
+    return [limpo[i:i + tamanho] for i in range(0, len(limpo), tamanho)]
+
+
 _TOKEN = re.compile(r"[A-Za-zÀ-ÿ]{4,}")
 
 
@@ -394,24 +416,35 @@ def main() -> None:
         despachos = {k: r[k] for k in
                      ("presidente", "advogado_geral", "data_publicacao_dou",
                       "parecer_adotado") if r.get(k)}
+        ementa = re.sub(r"\s+", " ", texto[:EMENTA_MAX]).strip()
+        paginas_txt = _paginar(texto)
+        cortado = len(texto) >= 32000
         docs.append((
             codigo, "vinculante", especie, r["citacao"],
             r.get("numero"), r.get("ano"), r.get("orgao"),
-            "Advogado-Geral da União", r.get("assunto"), texto[:2000], texto,
+            "Advogado-Geral da União", r.get("assunto"), ementa, None,
             None, chave, autoridade.ordem(chave), explicacao,
             None,
             "revogado, conforme a fonte" if r.get("revogado") else None,
             None, None, None, None,
             json.dumps(despachos, ensure_ascii=False) if despachos else None,
             regime, alerta,
-            0, 1 if texto.strip() else 0,
+            len(paginas_txt), 1 if texto.strip() else 0,
             "pagina_oficial" if texto.strip() else "sem_arquivo",
-            None, r.get("observacao"),
+            None,
+            ("A fonte corta este documento em cerca de 32.700 caracteres, e ele "
+             "termina no meio do texto. O que falta não está publicado nesta "
+             "consulta — leia o inteiro teor pelo DOU antes de concluir que a AGU "
+             "não enfrentou um argumento." if cortado else r.get("observacao")),
             None, None, r.get("processo"),
             r.get("url_inteiro_teor"), None,
         ))
-        busca.append((codigo, r["citacao"], r.get("assunto") or "",
-                      texto[:2000], texto))
+        # A busca por ementa recebe só o começo; o texto inteiro vai para a
+        # busca por página. Sem isso, o documento longo ganha de todos.
+        busca.append((codigo, r["citacao"], r.get("assunto") or "", ementa, ""))
+        for n, pagina in enumerate(paginas_txt, 1):
+            pag_meta.append((codigo, n, len(pagina), "indefinida", _transcricao(pagina)))
+            pag_texto.append((codigo, n, pagina))
         for (esp, ref), qtd in referencias.extrair(base).items():
             cits.append((codigo, esp, ref, qtd))
 
@@ -607,6 +640,12 @@ def main() -> None:
             "DEINF, gabinete da CGU, câmaras temáticas e até um parecer da "
             "PGFN). Nenhuma contagem deste acervo autoriza dizer que a CONUNI "
             "produziu os 1.471.",
+            "Nos 215 pareceres vinculantes a fonte entrega ementa e inteiro teor "
+            "no MESMO campo, e o corta em cerca de 32.700 caracteres: 59 deles "
+            "terminam no meio de uma frase. O acervo indexa o começo do campo "
+            "como ementa e o texto inteiro como inteiro teor, paginado — a "
+            "fronteira entre um e outro é aproximada, e o que ficou fora do corte "
+            "só está no DOU.",
             "O grau de vinculação é o declarado pela fonte, não uma qualificação "
             "jurídica própria. O efeito do art. 40, § 1º, da LC 73/93 depende de "
             "aprovação presidencial e publicação, que se confere no ato, não aqui.",
