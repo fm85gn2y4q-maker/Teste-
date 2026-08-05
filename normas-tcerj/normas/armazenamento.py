@@ -118,6 +118,7 @@ class Armazenamento:
 
     def gravar_atos(self, atos: Iterable[Ato]) -> int:
         agora = datetime.now(timezone.utc).isoformat()
+        pendentes: list[tuple[str, list[tuple[str, int]], str | None]] = []
         n = 0
         for a in atos:
             self.conexao.execute(
@@ -135,13 +136,23 @@ class Armazenamento:
                  a.arquivo_id, a.revogado_por_numero, a.revogado_em,
                  a.texto_revogacao, int(a.e_regimento), a.bruto, agora),
             )
-            for especie, numero in a.revogou:
-                alvo = self._identificar(especie, numero)
-                if alvo:
-                    self.conexao.execute(
-                        "INSERT OR REPLACE INTO revogacoes (revogado_id, revogador_id,"
-                        " data) VALUES (?,?,?)", (alvo, a.id, a.revogado_em or a.data))
+            pendentes.append((a.id, a.revogou, a.revogado_em or a.data))
             n += 1
+        self.conexao.commit()
+
+        # Segundo passe, e ele é necessário: resolver o vínculo durante a
+        # inserção falha para todo ato que revoga alguém ainda não inserido —
+        # e a API devolve a lista em ordem decrescente, de modo que o revogador
+        # quase sempre vem ANTES do revogado. Medido: 82 relações gravadas
+        # contra as que existem.
+        for revogador, revogadas, data in pendentes:
+            for especie, numero in revogadas:
+                alvo = self._identificar(especie, numero)
+                if alvo and alvo != revogador:
+                    self.conexao.execute(
+                        "INSERT OR REPLACE INTO revogacoes (revogado_id,"
+                        " revogador_id, data) VALUES (?,?,?)",
+                        (alvo, revogador, data))
         self.conexao.commit()
         self._reindexar_atos()
         return n

@@ -66,6 +66,20 @@ def cmd_textos(args) -> int:
     return 0
 
 
+def cmd_relacoes(args) -> int:
+    from .relacoes import minerar
+
+    with Armazenamento(args.banco) as arm:
+        c = minerar(arm.conexao)
+        ambiguas = c.pop("ambiguas", 0)
+        for relacao, n in sorted(c.items(), key=lambda x: -x[1]):
+            print(f"  {relacao:<20} {n:>5}")
+        print(f"\n  sem vínculo resolvido (número ambíguo entre anos): {ambiguas}")
+        total = arm.conexao.execute("SELECT COUNT(*) FROM relacoes").fetchone()[0]
+        print(f"  total de relações: {total}")
+    return 0
+
+
 def cmd_situacao(args) -> int:
     with Armazenamento(args.banco) as arm:
         e = arm.estatisticas()
@@ -89,6 +103,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("coletar").set_defaults(func=cmd_coletar)
     sub.add_parser("textos").set_defaults(func=cmd_textos)
+    sub.add_parser("relacoes").set_defaults(func=cmd_relacoes)
     sub.add_parser("situacao").set_defaults(func=cmd_situacao)
     args = p.parse_args(argv)
     try:
