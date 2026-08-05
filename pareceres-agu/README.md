@@ -13,17 +13,18 @@ diferença vira metadado ignorável.
 
 | | |
 |---|---|
-| Documentos | 2.804 |
+| Documentos | 3.019 |
+| Pareceres vinculantes do Advogado-Geral (art. 40, § 1º) | 215 |
 | CONUNI e Câmaras Nacionais | 1.724 |
 | Manifestações Jurídicas Referenciais (55 Consultorias) | 884 |
 | Orientações Normativas (103 da AGU + 7 da extinta CNU) | 110 |
 | Súmulas da AGU | 86 |
-| Com texto pesquisável | 1.637 |
+| Com texto pesquisável | 1.852 |
 | — destes, recuperados por OCR | 369 |
 | Sem arquivo público | 1.115 |
 | Páginas indexadas | 7.893 |
-| Período | 1997 a 2026 |
-| Citações mapeadas | 14.710 |
+| Período | 1993 a 2026 |
+| Citações mapeadas | 16.722 |
 
 Banco: `~/Documents/AGU_Acervo_Consultivo/agu_consultivo.db`, fora do
 repositório — é artefato de dados. O caminho pode ser passado com `--banco` ou
@@ -91,10 +92,22 @@ central. No acervo de jurisprudência é a **proveniência** — de que parte do
 acórdão veio o trecho. No de legislação, a **vigência**. Aqui é a **força
 vinculante**.
 
-Ela não está no texto. Um parecer que alcança toda a Administração Federal e um
+Ela não está no texto. Um parecer que obriga toda a Administração Federal e um
 que alcança apenas os órgãos envolvidos naquele processo têm o mesmo
-vocabulário, a mesma estrutura e o mesmo aspecto. A diferença está no metadado —
-e a distribuição mostra por que isso importa:
+vocabulário, a mesma estrutura e o mesmo aspecto. A diferença está no metadado.
+
+O acervo tem cinco camadas, e elas não se equivalem:
+
+```
+  215  Pareceres do Advogado-Geral aprovados pelo Presidente e publicados
+       — art. 40, § 1º, da LC 73/93. Grau máximo do sistema.
+  110  Orientações Normativas da AGU
+   86  Súmulas da AGU (obrigam AGU, PGF e PGBC)
+1.724  Manifestações do CONUNI — só 12 de alcance federal
+  884  Manifestações Referenciais das CONJURs, com prazo de validade
+```
+
+Dentro do CONUNI, que é o volume do acervo, a proporção é o que mais engana:
 
 ```
 Apenas os órgãos envolvidos no processo    510
@@ -106,9 +119,10 @@ Toda a Administração Pública Federal        12
 **Doze de 1.724.** Apresentar qualquer um dos outros 1.712 como vinculante da
 Administração Federal inverte o documento.
 
-O servidor traduz o que a fonte declarou; não qualifica juridicamente. O efeito
-do art. 40, § 1º, da LC 73/93 depende de aprovação pelo Presidente da República
-e publicação, e isso se confere no ato.
+O servidor traduz o que a fonte declarou; não qualifica juridicamente. **Só nos
+215 pareceres vinculantes os dois requisitos do art. 40, § 1º vêm documentados
+na fonte** — o Presidente que aprovou e a data de publicação no DOU. Para o
+resto, confere-se no ato.
 
 **E nada disto vincula Município.** O acervo é federal: para o ente subnacional,
 até a Orientação Normativa é precedente persuasivo. O aviso acompanha toda

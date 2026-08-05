@@ -63,6 +63,14 @@ _NATUREZA = {
 # Espécies que têm regime próprio de vinculação, definido em lei ou em ato
 # normativo, e não pela `natureza` de um processo.
 ESPECIE_PROPRIA = {
+    "Parecer Vinculante do Advogado-Geral da União": (
+        "administracao_federal",
+        "Parecer do Advogado-Geral da União aprovado pelo Presidente da "
+        "República e publicado: vincula toda a Administração Pública Federal, "
+        "cujos órgãos e entidades ficam obrigados a lhe dar fiel cumprimento "
+        "(art. 40, § 1º, da LC 73/93). É o grau máximo de vinculação do sistema "
+        "consultivo da AGU. A fonte declara o Presidente que aprovou e a data "
+        "de publicação no DOU — os dois requisitos do dispositivo."),
     "Orientação Normativa": (
         "administracao_federal",
         "Orientação Normativa da AGU: uniformiza o entendimento e vincula os "

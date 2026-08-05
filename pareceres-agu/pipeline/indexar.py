@@ -273,6 +273,7 @@ def main() -> None:
     # antigo têm de vir ANTES de abrir a conexão: com ela aberta, o unlink
     # falha no Windows com "arquivo já está sendo usado por outro processo" —
     # e o processo é este mesmo.
+    vinculantes = _jsonl("vinculantes.jsonl")
     conuni = _jsonl("conuni.jsonl")
     # Os .jsonl ficam fora do Git e ao lado destes scripts. Sumindo eles, o
     # indexador rodava até o fim e anunciava sucesso com zero documentos --
@@ -375,6 +376,42 @@ def main() -> None:
         for n, texto in enumerate(paginas_txt, 1):
             pag_meta.append((codigo, n, len(texto), secoes[n - 1], _transcricao(texto)))
             pag_texto.append((codigo, n, texto))
+        for (esp, ref), qtd in referencias.extrair(base).items():
+            cits.append((codigo, esp, ref, qtd))
+
+    # ------------------------------ Pareceres vinculantes do Advogado-Geral
+    #
+    # O grau máximo do sistema: aprovados pelo Presidente da República e
+    # publicados, vinculam toda a Administração Federal (art. 40, § 1º, da LC
+    # 73/93). São poucos e valem muito — 215 contra 1.724 do CONUNI.
+    for r in vinculantes:
+        codigo += 1
+        especie = r["especie"]
+        chave, rotulo, explicacao = autoridade.classificar(especie, None)
+        texto = r.get("texto") or ""
+        base = " ".join(x for x in (r.get("assunto"), texto) if x)
+        regime, alerta = _regime(base)
+        despachos = {k: r[k] for k in
+                     ("presidente", "advogado_geral", "data_publicacao_dou",
+                      "parecer_adotado") if r.get(k)}
+        docs.append((
+            codigo, "vinculante", especie, r["citacao"],
+            r.get("numero"), r.get("ano"), r.get("orgao"),
+            "Advogado-Geral da União", r.get("assunto"), texto[:2000], texto,
+            None, chave, autoridade.ordem(chave), explicacao,
+            None,
+            "revogado, conforme a fonte" if r.get("revogado") else None,
+            None, None, None, None,
+            json.dumps(despachos, ensure_ascii=False) if despachos else None,
+            regime, alerta,
+            0, 1 if texto.strip() else 0,
+            "pagina_oficial" if texto.strip() else "sem_arquivo",
+            None, r.get("observacao"),
+            None, None, r.get("processo"),
+            r.get("url_inteiro_teor"), None,
+        ))
+        busca.append((codigo, r["citacao"], r.get("assunto") or "",
+                      texto[:2000], texto))
         for (esp, ref), qtd in referencias.extrair(base).items():
             cits.append((codigo, esp, ref, qtd))
 

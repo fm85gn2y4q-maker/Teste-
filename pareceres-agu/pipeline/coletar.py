@@ -21,7 +21,8 @@ def gravar(nome: str, registros: list[dict]) -> Path:
 
 
 def main() -> None:
-    for nome, coletor in (("conuni.jsonl", fontes.conuni),
+    for nome, coletor in (("vinculantes.jsonl", fontes.vinculantes),
+                          ("conuni.jsonl", fontes.conuni),
                           ("ons.jsonl", fontes.ons),
                           ("sumulas.jsonl", fontes.sumulas),
                           ("referenciais.jsonl", fontes.referenciais)):

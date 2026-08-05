@@ -39,10 +39,12 @@ def seguranca_de_transporte(dominios: list[str] | None) -> TransportSecuritySett
 
 
 INSTRUCOES = """
-Acervo consultivo da Advocacia-Geral da União: as manifestações de uniformização
-do CONUNI e de suas Câmaras Nacionais Temáticas, as Orientações Normativas da
-AGU e as Súmulas da AGU. 1.920 documentos, de 1997 a 2026, colhidos da consulta
-pública do CONUNI e das páginas oficiais de ONs e Súmulas.
+Acervo consultivo da Advocacia-Geral da União: os pareceres vinculantes do
+Advogado-Geral aprovados pelo Presidente da República, as manifestações de
+uniformização do CONUNI e de suas Câmaras Nacionais Temáticas, as Orientações
+Normativas, as Súmulas e as Manifestações Jurídicas Referenciais das
+Consultorias Jurídicas dos Ministérios. 3.019 documentos, de 1993 a 2026,
+colhidos das cinco consultas públicas que a AGU mantém.
 
 Como responder ao advogado: entregue a tese e o ato, não o funcionamento da
 ferramenta. Não cite nomes de tools, identificadores internos nem estrutura de
@@ -54,25 +56,40 @@ A REGRA QUE NÃO PODE SER QUEBRADA: O GRAU DE VINCULAÇÃO
 
 Num acervo de jurisprudência o risco é a proveniência; num de legislação, a
 vigência. Aqui é a **força vinculante** — e ela não está no texto. Um parecer
-que alcança toda a Administração Federal e um que alcança apenas os órgãos
+que obriga toda a Administração Federal e um que alcança apenas os órgãos
 envolvidos naquele processo têm o mesmo vocabulário, a mesma estrutura e o
 mesmo aspecto. A diferença está no metadado.
 
-Medido neste acervo, entre as 1.724 manifestações do CONUNI:
+O acervo tem cinco camadas, e elas NÃO se equivalem:
+
+    215     Pareceres do Advogado-Geral aprovados pelo Presidente da
+            República e publicados — art. 40, § 1º, da LC 73/93. Obrigam
+            toda a Administração Federal. É o grau máximo do sistema.
+    110     Orientações Normativas da AGU
+     86     Súmulas da AGU (obrigam os órgãos da AGU, PGF e PGBC)
+  1.724     Manifestações do CONUNI, das quais só 12 declaram alcance
+            sobre toda a Administração Federal
+    884     Manifestações Referenciais das CONJURs, com PRAZO DE VALIDADE
+
+Dentro do CONUNI a proporção é a que segue, e é o que mais engana:
 
     Apenas os órgãos envolvidos no processo    510
     Órgãos da Consultoria-Geral da União       851
     Órgãos da AGU                              350
     Toda a Administração Pública Federal        12
 
-**Doze.** Apresentar qualquer um dos outros 1.712 como vinculante da
+**Doze de 1.724.** Apresentar qualquer um dos outros 1.712 como vinculante da
 Administração Federal inverte o documento.
 
 Todo resultado traz `vinculacao_declarada` e `alcance`. Leia antes de citar, e
-diga na resposta o que a fonte declarou. E nunca escreva que uma manifestação
-"vincula a Administração Federal" sem conferir o ato de aprovação: o efeito do
-art. 40, § 1º, da LC 73/93 depende de aprovação pelo Presidente da República e
-publicação, e isso se confere no ato, não aqui.
+diga na resposta o que a fonte declarou.
+
+**Só os 215 pareceres vinculantes têm os dois requisitos do art. 40, § 1º
+documentados na fonte**: o Presidente que aprovou e a data de publicação no
+DOU, ambos em `despachos`. Para qualquer outro documento, nunca escreva que
+"vincula a Administração Federal" sem conferir o ato de aprovação — e mesmo nos
+215, cite o parecer pelo código (JM-10, GQ-..., AC-...), que é como ele é
+conhecido e conferido.
 
 O ente federado, que decide quase toda consulta deste escritório:
 
@@ -268,9 +285,10 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
 
     @mcp.tool()
     def o_que_vincula(consulta: str, limite: int = 10) -> dict[str, Any]:
-        """Procura só no que tem força normativa: Orientações Normativas e
-        Súmulas da AGU, mais as manifestações de alcance declarado sobre toda a
-        Administração Federal.
+        """Procura só no que tem força normativa, em ordem de autoridade: os
+        pareceres vinculantes do Advogado-Geral aprovados pelo Presidente da
+        República, as Orientações Normativas, as Súmulas e as manifestações de
+        alcance declarado sobre toda a Administração Federal.
 
         É a primeira pergunta a fazer sobre qualquer tema: existe enunciado
         vinculante? Havendo, o parecer isolado vira reforço, não fundamento.
@@ -279,7 +297,8 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
             achados, expressao, total = acervo.pesquisar(consulta, limite=limite, **filtro)
             return achados, expressao, total
 
-        ons, expressao, total_on = buscar(fonte="on")
+        vinc, expressao, total_vinc = buscar(fonte="vinculante")
+        ons, _, total_on = buscar(fonte="on")
         sums, _, total_sum = buscar(fonte="sumula")
         federal, _, total_fed = buscar(vinculacao="administracao_federal")
         criterio = "todos os termos"
@@ -288,9 +307,10 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
         # contrato de serviço contínuo" não casava a ON 1/2009, que diz
         # exatamente isso com outras palavras. Sem este segundo passe a
         # ferramenta falha justamente no caso que ela existe para responder.
-        if not (ons or sums or federal):
+        if not (vinc or ons or sums or federal):
             criterio = "qualquer termo (a busca com todos não devolveu nada)"
-            ons, expressao, total_on = buscar(fonte="on", operador="OR")
+            vinc, expressao, total_vinc = buscar(fonte="vinculante", operador="OR")
+            ons, _, total_on = buscar(fonte="on", operador="OR")
             sums, _, total_sum = buscar(fonte="sumula", operador="OR")
             federal, _, total_fed = buscar(
                 vinculacao="administracao_federal", operador="OR")
@@ -298,6 +318,9 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
         return {
             "expressao_executada": expressao,
             "criterio": criterio,
+            # Em primeiro lugar o que obriga toda a Administração Federal:
+            # havendo parecer vinculante sobre o tema, o resto é reforço.
+            "pareceres_vinculantes": [d.para_dict() for d in vinc],
             "orientacoes_normativas": [d.para_dict() for d in ons],
             "sumulas": [d.para_dict() for d in sums],
             "manifestacoes_de_alcance_federal": [d.para_dict() for d in federal],
@@ -306,6 +329,7 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
             # "86 súmulas sobre o tema" seria falso: são as 86 que existem.
             ("totais" if criterio == "todos os termos" else
              "alcancados_pela_busca_ampliada"): {
+                "pareceres_vinculantes": total_vinc,
                 "orientacoes_normativas": total_on, "sumulas": total_sum,
                 "manifestacoes_de_alcance_federal": total_fed},
             "leitura_dos_totais": None if criterio == "todos os termos" else (
@@ -318,9 +342,10 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
                      "significa que a AGU não tenha se pronunciado — significa que "
                      "não há enunciado uniformizador publicado. Procure em "
                      "pesquisar_manifestacoes.")
-            if not (ons or sums or federal) else
-            ("Verifique as ressalvas de vigência antes de citar: a fonte marca ON "
-             "cancelada, revogada e com nova redação."),
+            if not (vinc or ons or sums or federal) else
+            ("Havendo parecer vinculante sobre o tema, ele é o fundamento e o "
+             "resto é reforço. Verifique as ressalvas de vigência antes de "
+             "citar: a fonte marca ON cancelada, revogada e com nova redação."),
         }
 
     @mcp.tool()

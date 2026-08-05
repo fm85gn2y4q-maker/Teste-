@@ -4,6 +4,8 @@ Cada fonte tem uma forma própria e um risco próprio, e por isso um cliente
 próprio. O que elas têm em comum é o que o resto do pipeline consome: uma lista
 de dicionários com texto e metadado de autoridade.
 
+    VINCULANTES   pareceres do Advogado-Geral da União aprovados pelo
+                  Presidente da República (art. 40, § 1º, da LC 73/93)
     CONUNI        manifestações de uniformização (Câmaras Nacionais Temáticas)
     ONS           Orientações Normativas da AGU
     SUMULAS       Súmulas da AGU
@@ -28,6 +30,7 @@ CONUNI_API = "https://cgu.agu.gov.br/cgi-bin/sapiens_com/relsapiens/coleta.py"
 ONS_URL = "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu"
 SUMULAS_URL = "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/sumula"
 REFERENCIAIS_URL = "https://cgu.agu.gov.br/referenciais/"
+VINCULANTES_URL = "https://siscon.agu.gov.br/consultivo/vinculantes/"
 
 # Como o CONUNI resolve o link do inteiro teor, conforme `origem_manifestacao`.
 ORIGENS = {
@@ -363,5 +366,55 @@ def referenciais() -> list[dict]:
             # o texto de um vencido é idêntico ao de um válido.
             "validade": (r.get("validade") or "").strip() or None,
             "url_inteiro_teor": url,
+        })
+    return saida
+
+
+# ------------------------------------------------------------- Vinculantes
+
+# O JSON vem indentado dentro da página, e os valores trazem aspas escapadas.
+# Regex para casar o objeto inteiro erra; o decodificador do próprio json acha
+# o fim sozinho a partir do começo de cada registro.
+_VINC_INICIO = re.compile(r'\{\s*"id"\s*:\s*"\d+"')
+
+
+def vinculantes() -> list[dict]:
+    bruto = _abrir(VINCULANTES_URL, timeout=300).decode("utf-8", "ignore")
+    dec = json.JSONDecoder()
+    saida: list[dict] = []
+    for m in _VINC_INICIO.finditer(bruto):
+        try:
+            obj, _fim = dec.raw_decode(bruto, m.start())
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(obj, dict) or "revogado" not in obj:
+            continue
+        codigo = re.sub(r"\s+", "", str(obj.get("title") or "")).strip()
+        ano = str(obj.get("ano_parecer") or "").strip()
+        link = str(obj.get("link_parecer") or "").strip() or None
+        # `revogado` vem como "0"/"1"; qualquer coisa fora de "0" é ressalva.
+        revogado = str(obj.get("revogado") or "0").strip()
+        saida.append({
+            "especie": "Parecer Vinculante do Advogado-Geral da União",
+            "id_fonte": obj.get("id"),
+            "codigo": codigo or None,
+            "numero": int(obj["numero"]) if str(obj.get("numero") or "").isdigit() else None,
+            "ano": int(ano) if ano.isdigit() else None,
+            "citacao": (f"Parecer {codigo}" + (f", de {ano}" if ano else "")
+                        if codigo else "Parecer vinculante da AGU"),
+            "assunto": (obj.get("assunto") or "").strip() or None,
+            "texto": (obj.get("ementa") or "").strip(),
+            "orgao": (obj.get("orgao_autor") or "").strip() or None,
+            "advogado_geral": (obj.get("nome_agu") or "").strip() or None,
+            # O que faz destes documentos o que eles são: o despacho do
+            # Presidente da República e a publicação no DOU são os dois
+            # requisitos do art. 40, § 1º, e ambos vêm declarados na fonte.
+            "presidente": (obj.get("presidente") or "").strip() or None,
+            "data_publicacao_dou": (obj.get("data_publicacao_dou") or "").strip() or None,
+            "parecer_adotado": (obj.get("parecer_adotado") or "").strip() or None,
+            "processo": (obj.get("nup") or "").strip() or None,
+            "observacao": (obj.get("observacao") or "").strip() or None,
+            "revogado": revogado != "0",
+            "url_inteiro_teor": link,
         })
     return saida
