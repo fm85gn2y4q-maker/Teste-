@@ -9,6 +9,52 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from pathlib import Path
+
+
+def _relatar_falha(erro: BaseException) -> None:
+    """Diz por que o servidor não subiu, com o que a hospedagem mostra no log.
+
+    Um processo que morre com `status 1` e uma linha de erro obriga a adivinhar
+    — e adivinhar custou um deploy inteiro. O que falta, quando a subida falha
+    numa máquina que não é a nossa, é sempre a mesma coisa: qual arquivo o
+    processo procurou, onde, e o que de fato existe ali.
+
+    Isto imprime as três coisas. Não muda comportamento nenhum: o processo
+    morre igual, mas o log seguinte responde em vez de sugerir.
+    """
+    import traceback
+
+    print("=" * 64, file=sys.stderr)
+    print("O SERVIDOR NAO SUBIU", file=sys.stderr)
+    print("=" * 64, file=sys.stderr)
+    print(f"  {type(erro).__name__}: {erro}", file=sys.stderr)
+
+    print("\n  caminhos esperados:", file=sys.stderr)
+    for rotulo, valor in (("EMENTARIO_BANCO", os.environ.get("EMENTARIO_BANCO")),
+                          ("NORMAS_BANCO", os.environ.get("NORMAS_BANCO"))):
+        caminho = Path(valor) if valor else None
+        if caminho is None:
+            print(f"    {rotulo:<16} (nao definido)", file=sys.stderr)
+        else:
+            existe = caminho.exists()
+            tam = f"{caminho.stat().st_size / 1e6:,.1f} MB" if existe else "AUSENTE"
+            print(f"    {rotulo:<16} {valor}  ->  {tam}", file=sys.stderr)
+
+    print("\n  o que ha no diretorio de dados:", file=sys.stderr)
+    for base in {Path(v).parent for v in
+                 (os.environ.get("EMENTARIO_BANCO"), os.environ.get("NORMAS_BANCO"))
+                 if v} or {Path("dados")}:
+        if not base.exists():
+            print(f"    {base}/  NAO EXISTE", file=sys.stderr)
+            continue
+        for item in sorted(base.iterdir()):
+            tam = f"{item.stat().st_size / 1e6:,.1f} MB" if item.is_file() else "<dir>"
+            print(f"    {base}/{item.name}  {tam}", file=sys.stderr)
+
+    print("\n  traceback completo:", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+    print("=" * 64, file=sys.stderr)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -67,8 +113,8 @@ def main(argv: list[str] | None = None) -> int:
             segredo_oauth=os.environ.get("EMENTARIO_SEGREDO_OAUTH"),
             **ajustes,
         )
-    except FileNotFoundError as erro:
-        print(f"Erro: {erro}", file=sys.stderr)
+    except Exception as erro:  # noqa: BLE001 — é o diagnóstico da subida
+        _relatar_falha(erro)
         return 1
 
     if args.http:
