@@ -26,6 +26,25 @@ services:
       # endereço público — o código está pronto e testado em ementario/
       # autenticacao.py.
 
+  # Normas do TCE-RJ: Deliberacoes, Resolucoes, Atos Normativos, Portarias,
+  # Notas Tecnicas e Sumulas, inclusive o Regimento Interno.
+  #
+  # Servico separado do Ementario, e a razao nao e organizacional: num acervo
+  # de jurisprudencia a pergunta perigosa e de quem e o trecho; num de normas e
+  # se ainda vale. Sao reguas diferentes, e um servidor so embaçaria as duas.
+  #
+  # O acervo tem 22 MB — o menor dos tres.
+  - type: web
+    name: normas-tcerj
+    runtime: docker
+    rootDir: normas-tcerj
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: virginia
+    envVars:
+      - key: NORMAS_DOMINIOS
+        value: normas-tcerj.onrender.com
+
   # Pareceres da PGE-RJ. Servico separado de proposito: parecer da PGE, da AGU
   # e de outra PGE tem graus de autoridade diferentes, e num acervo so essa
   # diferenca vira metadado ignoravel.
