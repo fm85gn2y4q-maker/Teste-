@@ -102,14 +102,31 @@ ALERTA_8666 = (
     "14.133/2021. A tese pode continuar correta e o fundamento legal, não.")
 
 
-def _regime(texto: str) -> tuple[str | None, str | None]:
-    achados = [rotulo for rotulo, padrao in _REGIMES if padrao.search(texto)]
-    if not achados:
+def _rotular_regime(achados: list[str]) -> tuple[str | None, str | None]:
+    """Monta o rótulo e decide o alerta a partir das leis encontradas.
+
+    Deduplica preservando a ordem. Sem isso, juntar a etiqueta que a AGU põe na
+    ON com a lei que o texto cita produzia "Lei 8.666/1993; Lei 8.666/1993" —
+    a mesma lei duas vezes, com aparência de dois regimes.
+
+    O alerta é decidido sobre o conjunto FINAL, não sobre uma das origens: uma
+    ON etiquetada como 8.666 cujo texto já cita a 14.133 está em transição, e
+    alertar revogação ali seria enganoso.
+    """
+    unicos: list[str] = []
+    for a in achados:
+        if a and a not in unicos:
+            unicos.append(a)
+    if not unicos:
         return None, None
-    rotulo = "; ".join(achados)
-    alerta = ALERTA_8666 if any("8.666" in a for a in achados) and not any(
-        "14.133" in a for a in achados) else None
-    return rotulo, alerta
+    alerta = ALERTA_8666 if any("8.666" in a for a in unicos) and not any(
+        "14.133" in a for a in unicos) else None
+    return "; ".join(unicos), alerta
+
+
+def _regime(texto: str) -> tuple[str | None, str | None]:
+    return _rotular_regime(
+        [rotulo for rotulo, padrao in _REGIMES if padrao.search(texto)])
 
 
 # ------------------------------------------------------------------- leitura
@@ -367,11 +384,13 @@ def main() -> None:
             chave, rotulo, explicacao = autoridade.classificar(especie, None)
             texto = r.get("texto") or ""
             enunciado = r.get("enunciado") or texto
-            regime, alerta = _regime(texto)
-            if r.get("regime_declarado"):
-                regime = r["regime_declarado"] + (f"; {regime}" if regime else "")
-                if "8.666" in r["regime_declarado"] and "14.133" not in r["regime_declarado"]:
-                    alerta = ALERTA_8666
+            # A etiqueta que a AGU põe na ON vem primeiro: é declaração da
+            # fonte, e vale mais que a lei que eu acho lendo o enunciado.
+            declarado = [p.strip() for p in
+                         (r.get("regime_declarado") or "").split(";") if p.strip()]
+            detectado, _ = _regime(texto)
+            regime, alerta = _rotular_regime(
+                declarado + (detectado.split("; ") if detectado else []))
             docs.append((
                 codigo, fonte, especie, r["citacao"],
                 r.get("numero"), r.get("ano"), None, r.get("grupo"),

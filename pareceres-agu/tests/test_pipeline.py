@@ -61,6 +61,29 @@ def test_regime_de_8666_sem_14133_gera_alerta():
     assert alerta and "revogada" in alerta
 
 
+def test_regime_nao_repete_a_mesma_lei():
+    """A etiqueta que a AGU poe na ON mais a lei que o texto cita produziam
+    "Lei 8.666/1993; Lei 8.666/1993" -- a mesma lei duas vezes, com aparencia
+    de dois regimes."""
+    rotulo, _ = indexar._rotular_regime(
+        ["Lei 8.666/1993", "Lei 8.666/1993", "Lei 14.133/2021"])
+    assert rotulo == "Lei 8.666/1993; Lei 14.133/2021"
+
+
+def test_etiqueta_da_fonte_vem_antes_do_que_eu_deduzo():
+    rotulo, _ = indexar._rotular_regime(["Lei 14.133/2021", "Lei 8.666/1993"])
+    assert rotulo.startswith("Lei 14.133/2021")
+
+
+def test_alerta_decide_sobre_o_conjunto_final_nao_sobre_uma_origem():
+    """ON etiquetada como 8.666 cujo texto ja cita a 14.133 esta em transicao;
+    alertar revogacao ali seria enganoso."""
+    _, alerta = indexar._rotular_regime(["Lei 8.666/1993", "Lei 14.133/2021"])
+    assert alerta is None
+    _, alerta = indexar._rotular_regime(["Lei 8.666/1993", "Lei 8.666/1993"])
+    assert alerta and "revogada" in alerta
+
+
 def test_regime_de_transicao_nao_alerta_como_se_fosse_so_8666():
     """Citando as duas, o documento pode estar tratando da transição — o alerta
     de norma revogada seria enganoso."""
