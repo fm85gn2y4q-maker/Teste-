@@ -123,8 +123,9 @@ Consequência prática, que precisa aparecer na resposta: **ausência de um
 argumento nesta base não prova que a AGU não o enfrentou.** Diga "não localizei
 no que está publicado", nunca "a AGU não se pronunciou".
 
-Os pareceres das Consultorias Jurídicas junto aos Ministérios não são públicos e
-não estão aqui.
+Os pareceres **individuais** das Consultorias Jurídicas junto aos Ministérios não
+são públicos e não estão aqui. As **manifestações referenciais** dessas mesmas
+Consultorias estão: são 884, e é outro corpus, com outro risco.
 
 O QUE VEIO DE OCR — E POR QUE ISSO MUDA A CITAÇÃO
 
@@ -141,6 +142,25 @@ estraga é justamente a palavra de terceiro.
 Por isso: use o texto reconhecido para **localizar** e para **entender a tese**.
 **Nunca reproduza citação literal a partir de página de OCR sem conferir no
 PDF** — e diga ao advogado que conferiu, ou que não conferiu.
+
+O SEGUNDO RISCO, QUE VALE SÓ PARA UM CORPUS: O PRAZO
+
+As 884 Manifestações Jurídicas Referenciais das Consultorias Jurídicas dos
+Ministérios têm **prazo de validade**, e isso não existe no resto do acervo. Um
+referencial dispensa a análise jurídica individualizada dos processos da classe
+que descreve; **vencido, não dispensa nada**, e invocá-lo para dispensar parecer
+é vício no processo administrativo.
+
+Medido na coleta: das 823 com prazo declarado, **463 já estavam vencidas** — mais
+da metade. E o texto de uma vencida é idêntico ao de uma válida.
+
+Use `manifestacoes_referenciais`, que separa em vigor, vencidas e sem prazo
+declarado, e calcula o vencimento contra a data de HOJE. Nunca apresente
+referencial vencido como fundamento de dispensa: ele serve como argumento e como
+histórico do entendimento, não como dispensa.
+
+Sem prazo declarado não é prazo indeterminado. Nesses casos, mande conferir no
+próprio parecer.
 
 DUAS ARMADILHAS DE ATRIBUIÇÃO E DE CONTAGEM
 
@@ -302,6 +322,23 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
             ("Verifique as ressalvas de vigência antes de citar: a fonte marca ON "
              "cancelada, revogada e com nova redação."),
         }
+
+    @mcp.tool()
+    def manifestacoes_referenciais(consulta: str, limite: int = 10,
+                                   orgao: str | None = None,
+                                   so_em_vigor: bool = False) -> dict[str, Any]:
+        """Manifestações Jurídicas Referenciais das Consultorias Jurídicas dos
+        Ministérios, SEPARADAS pelo prazo de validade.
+
+        Um parecer referencial dispensa a análise jurídica individualizada dos
+        processos da classe que descreve — mas só dentro do prazo. Vencido, não
+        dispensa nada, e invocá-lo para dispensar parecer é vício no processo.
+
+        O vencimento é calculado contra a data de hoje, não contra a data em que
+        o acervo foi construído.
+        """
+        return acervo.referenciais(consulta, limite=limite, orgao=orgao,
+                                   so_validos=so_em_vigor)
 
     @mcp.tool()
     def pesquisar_inteiro_teor(consulta: str, limite: int = 8,

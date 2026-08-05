@@ -23,8 +23,8 @@ COPY agu/ ./agu/
 # construção do serviço: nem todo serviço repassa argumentos de build, e
 # depender disso deixa a imagem sem acervo por um motivo invisível.
 # Publicar acervo novo é trocar estas duas linhas.
-ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/consultivo-agu-v1.1.2/consultivo-agu-v1.1.2.db.gz
-ARG ACERVO_SHA256=b8d7dcb5f190069a9cda3788f40de83b115063169e3487dfbfa2862d639cea5f
+ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/consultivo-agu-v1.2.0/consultivo-agu-v1.2.0.db.gz
+ARG ACERVO_SHA256=4380acee9bba8d6ac602c42d0bee53edbb4a009c6d6ad313195f147dd16b5e49
 COPY baixar_acervo.py ./
 RUN python baixar_acervo.py "$ACERVO_URL" dados/agu_consultivo.db "$ACERVO_SHA256"
 

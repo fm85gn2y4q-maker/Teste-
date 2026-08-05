@@ -13,16 +13,17 @@ diferença vira metadado ignorável.
 
 | | |
 |---|---|
-| Documentos | 1.920 |
+| Documentos | 2.804 |
 | CONUNI e Câmaras Nacionais | 1.724 |
+| Manifestações Jurídicas Referenciais (55 Consultorias) | 884 |
 | Orientações Normativas (103 da AGU + 7 da extinta CNU) | 110 |
 | Súmulas da AGU | 86 |
-| Com texto pesquisável | 798 |
+| Com texto pesquisável | 1.637 |
 | — destes, recuperados por OCR | 369 |
 | Sem arquivo público | 1.115 |
-| Páginas indexadas | 6.337 |
+| Páginas indexadas | 7.893 |
 | Período | 1997 a 2026 |
-| Citações mapeadas | 9.706 |
+| Citações mapeadas | 14.710 |
 
 Banco: `~/Documents/AGU_Acervo_Consultivo/agu_consultivo.db`, fora do
 repositório — é artefato de dados. O caminho pode ser passado com `--banco` ou
@@ -72,6 +73,7 @@ religar não basta, o cliente mantém a versão antiga em cache. Confira com
 | | |
 |---|---|
 | `o_que_vincula` | só o que tem força normativa: ONs, súmulas e o de alcance federal |
+| `manifestacoes_referenciais` | referenciais das CONJURs, **separadas pelo prazo de validade** |
 | `pesquisar_manifestacoes` | busca em ementa, assunto e enunciado |
 | `pesquisar_inteiro_teor` | busca no texto e **devolve a página**, com seção e grau de transcrição |
 | `ler_paginas` | páginas contíguas, para ver o contexto ao redor |
@@ -112,6 +114,29 @@ e publicação, e isso se confere no ato.
 até a Orientação Normativa é precedente persuasivo. O aviso acompanha toda
 resposta de busca — é o que mais importa para a carteira deste escritório.
 
+## O segundo risco, que vale só para um corpus: o prazo
+
+As 884 Manifestações Jurídicas Referenciais têm **prazo de validade**, e o resto
+do acervo não. Um referencial dispensa a análise jurídica individualizada dos
+processos da classe que descreve; vencido, **não dispensa nada**, e invocá-lo
+para dispensar parecer é vício no processo administrativo.
+
+Medido na coleta, das 823 com prazo declarado:
+
+```
+vencidas          463   (56%)
+em vigor          360
+sem prazo          61
+```
+
+Mais da metade. E o texto de uma vencida é idêntico ao de uma válida — a
+diferença está só na data.
+
+Por isso `manifestacoes_referenciais` separa em vigor, vencidas e sem prazo, e
+calcula o vencimento **contra a data da consulta**, não contra a data em que o
+acervo foi construído. Gravar "vencido" no índice congelaria a resposta e ela
+envelheceria em silêncio.
+
 ## O que o acervo não tem
 
 - **1.115 das 1.724 manifestações do CONUNI não têm inteiro teor.** A AGU as
@@ -121,8 +146,12 @@ resposta de busca — é o que mais importa para a carteira deste escritório.
   invisíveis à busca. Concentram-se entre 2010 e 2014. Precisariam de OCR em
   português, que não está instalado nesta máquina (há Tesseract 5.4, mas só com
   os idiomas `eng` e `osd`).
-- Os pareceres das **Consultorias Jurídicas junto aos Ministérios** não são
-  públicos e não estão aqui.
+- Os pareceres **individuais** das Consultorias Jurídicas junto aos Ministérios
+  não são públicos e não estão aqui. As **manifestações referenciais** dessas
+  mesmas Consultorias estão — 884 delas.
+- Dos 884 referenciais, só **88 têm PDF próprio**; 760 apontam para o Sapiens e
+  760 ficam com ementa apenas. A ementa é substanciosa (traz fundamento
+  jurídico, requisitos formais e prazo), mas não é o parecer.
 - **7 Orientações Normativas não têm enunciado na página oficial** — a AGU
   publica só o título e a situação (cancelada, revogada, nova redação em outra
   ON). Vêm marcadas.

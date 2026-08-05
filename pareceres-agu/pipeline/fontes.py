@@ -1,12 +1,14 @@
-"""Clientes das três fontes públicas do acervo consultivo da AGU.
+"""Clientes das quatro fontes públicas do acervo consultivo da AGU.
 
 Cada fonte tem uma forma própria e um risco próprio, e por isso um cliente
 próprio. O que elas têm em comum é o que o resto do pipeline consome: uma lista
 de dicionários com texto e metadado de autoridade.
 
-    CONUNI    manifestações de uniformização (Câmaras Nacionais Temáticas)
-    ONS       Orientações Normativas da AGU
-    SUMULAS   Súmulas da AGU
+    CONUNI        manifestações de uniformização (Câmaras Nacionais Temáticas)
+    ONS           Orientações Normativas da AGU
+    SUMULAS       Súmulas da AGU
+    REFERENCIAIS  Manifestações Jurídicas Referenciais das Consultorias
+                  Jurídicas junto aos Ministérios
 
 Nenhuma exige autenticação. Todas são páginas ou serviços públicos.
 """
@@ -25,6 +27,7 @@ UA = {"User-Agent": "Mozilla/5.0 (acervo-consultivo-agu; coleta de atos publicos
 CONUNI_API = "https://cgu.agu.gov.br/cgi-bin/sapiens_com/relsapiens/coleta.py"
 ONS_URL = "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/onsagu"
 SUMULAS_URL = "https://www.gov.br/agu/pt-br/composicao/cgu/cgu/sumula"
+REFERENCIAIS_URL = "https://cgu.agu.gov.br/referenciais/"
 
 # Como o CONUNI resolve o link do inteiro teor, conforme `origem_manifestacao`.
 ORIGENS = {
@@ -33,8 +36,23 @@ ORIGENS = {
 }
 
 
+def normalizar_url(url: str) -> str:
+    """Codifica o caminho da URL para o que a rede aceita.
+
+    Os arquivos das manifestações referenciais têm acento e espaço no nome, e
+    urllib não codifica sozinho: sai UnicodeEncodeError ou InvalidURL. Não é
+    detalhe — eram 51 dos 89 PDFs.
+    """
+    partes = urllib.parse.urlsplit(url.strip())
+    caminho = urllib.parse.quote(partes.path, safe="/%")
+    consulta = urllib.parse.quote(partes.query, safe="=&%")
+    return urllib.parse.urlunsplit(
+        (partes.scheme, partes.netloc, caminho, consulta, ""))
+
+
 def _abrir(url: str, dados: bytes | None = None, tentativas: int = 3,
            timeout: int = 180) -> bytes:
+    url = normalizar_url(url)
     ultimo: Exception | None = None
     for n in range(tentativas):
         try:
@@ -298,5 +316,52 @@ def sumulas() -> list[dict]:
             "situacao_declarada": situacao.group(1).strip() if situacao else None,
             "enunciado": enunciado.group(1).strip() if enunciado else None,
             "texto": corpo,
+        })
+    return saida
+
+
+# ------------------------------------------------- Manifestações Referenciais
+
+# O buscador é uma página estática de 1,7 MB com o acervo inteiro embutido em
+# JSON. Não há requisição de dados a interceptar: os registros estão no HTML.
+_REF = re.compile(r'\{\s*"id_referenciais"\s*:.*?"ext"\s*:\s*"\d"\s*\}', re.S)
+
+# Decodificado do próprio filtro do buscador: escolher "Em Brasília" casa
+# abrangência [0, 3]; escolher "Nos Estados" casa [1, 3]. Logo o 3 é o que vale
+# para os dois — é o que a página chama de "Nacional".
+ABRANGENCIA = {
+    "0": "órgãos em Brasília",
+    "1": "órgãos nos Estados",
+    "3": "nacional (Brasília e Estados)",
+}
+
+
+def referenciais() -> list[dict]:
+    bruto = _abrir(REFERENCIAIS_URL, timeout=300).decode("utf-8", "ignore")
+    saida: list[dict] = []
+    for bloco in _REF.findall(bruto):
+        try:
+            r = json.loads(bloco.replace("\\/", "/"))
+        except json.JSONDecodeError:
+            continue
+        url = (r.get("url") or "").strip() or None
+        citacao = re.sub(r"\s+", " ", r.get("parecer") or "").strip()
+        saida.append({
+            "especie": "Manifestação Jurídica Referencial",
+            "id_fonte": r.get("id_referenciais"),
+            "numero": int(r["numero"]) if str(r.get("numero") or "").isdigit() else None,
+            "ano": int(r["ano"]) if str(r.get("ano") or "").isdigit() else None,
+            "citacao": citacao or "Manifestação Jurídica Referencial (sem identificação)",
+            "orgao": (r.get("orgao") or "").strip() or None,
+            "abrangencia": ABRANGENCIA.get(str(r.get("abrangencia")), None),
+            "processo": (r.get("nup") or "").strip() or None,
+            "data": (r.get("data") or "").strip() or None,
+            "assunto": (r.get("assunto") or "").strip() or None,
+            "texto": (r.get("observacao") or "").strip(),
+            # O CAMPO QUE DECIDE. Um referencial vencido não dispensa análise
+            # individualizada: invocá-lo é vício no processo administrativo, e
+            # o texto de um vencido é idêntico ao de um válido.
+            "validade": (r.get("validade") or "").strip() or None,
+            "url_inteiro_teor": url,
         })
     return saida

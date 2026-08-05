@@ -25,20 +25,30 @@ PDFS = ACERVO / "pdfs"
 CONCORRENCIA = 4  # servidor da AGU; não aumente
 
 
-def alvos() -> list[tuple[int, str]]:
-    """(id, url) das manifestações com arquivo público."""
-    saida = []
+def alvos() -> list[tuple[str, str]]:
+    """(nome do arquivo, url) do que tem PDF público.
+
+    Duas origens, dois repositórios: `/decor/arquivos/` guarda as manifestações
+    do CONUNI, `/referenciais/arquivos/` as manifestações referenciais. O resto
+    aponta para o Sapiens, que exige autenticação.
+    """
+    saida: list[tuple[str, str]] = []
     for linha in (AQUI / "conuni.jsonl").read_text(encoding="utf-8").splitlines():
         r = json.loads(linha)
         url = r.get("url_inteiro_teor")
-        # origem 3 é o repositório de arquivos da CGU/AGU: PDF direto.
-        # origem 2 é o Sapiens, que exige autenticação.
         if url and "/decor/arquivos/" in url:
-            saida.append((r["id"], url))
+            saida.append((str(r["id"]), url))
+    caminho = AQUI / "referenciais.jsonl"
+    if caminho.exists():
+        for linha in caminho.read_text(encoding="utf-8").splitlines():
+            r = json.loads(linha)
+            url = r.get("url_inteiro_teor")
+            if url and "/referenciais/arquivos/" in url:
+                saida.append((f"ref{r['id_fonte']}", url))
     return saida
 
 
-def baixar(item: tuple[int, str]) -> tuple[int, str]:
+def baixar(item: tuple[str, str]) -> tuple[str, str]:
     ident, url = item
     destino = PDFS / f"{ident}.pdf"
     if destino.exists() and destino.stat().st_size > 1024:

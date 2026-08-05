@@ -18,12 +18,19 @@ def _chamar(servidor, nome, args=None):
     return r[1] if isinstance(r, tuple) else r
 
 
-def test_as_dez_ferramentas_estao_no_ar(servidor):
+def test_as_ferramentas_estao_no_ar(servidor):
     nomes = {t.name for t in asyncio.run(servidor.list_tools())}
     assert nomes == {
-        "pesquisar_manifestacoes", "o_que_vincula", "pesquisar_inteiro_teor",
-        "ler_paginas", "expandir_consulta", "obter_documento", "quem_citou",
-        "situacao_do_ato", "listar_documentos", "cobertura_do_acervo"}
+        "pesquisar_manifestacoes", "o_que_vincula", "manifestacoes_referenciais",
+        "pesquisar_inteiro_teor", "ler_paginas", "expandir_consulta",
+        "obter_documento", "quem_citou", "situacao_do_ato", "listar_documentos",
+        "cobertura_do_acervo"}
+
+
+def test_instrucoes_avisam_do_prazo_dos_referenciais():
+    assert "PRAZO" in INSTRUCOES
+    assert "463 já estavam vencidas" in INSTRUCOES
+    assert "vício no processo administrativo" in INSTRUCOES
 
 
 def test_instrucoes_fixam_a_regra_da_vinculacao():

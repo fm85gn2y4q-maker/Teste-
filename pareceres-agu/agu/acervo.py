@@ -13,6 +13,7 @@ import re
 import sqlite3
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -29,6 +30,7 @@ ROTULO_SECAO = {
 
 ROTULO_ORIGEM = {
     "pdf": None,
+    "pdf_proprio": None,
     "pagina_oficial": None,
     "sapiens_exige_autenticacao": (
         "Sem inteiro teor: a AGU publica esta manifestação no Sapiens, cujo "
@@ -164,6 +166,9 @@ class Documento:
     origem_texto: str | None
     ocr_confianca: int | None
     aviso_fonte: str | None
+    validade: str | None
+    abrangencia: str | None
+    processo: str | None
     url_inteiro_teor: str | None
     url_publicacao: str | None
     trechos: list[Trecho] = field(default_factory=list)
@@ -220,6 +225,36 @@ class Documento:
                 pass
         if self.paginas:
             d["paginas"] = self.paginas
+        if self.processo:
+            d["processo_de_origem"] = self.processo
+        if self.abrangencia:
+            d["abrangencia"] = self.abrangencia
+        if self.fonte == "referencial":
+            # O vencimento é calculado contra HOJE, não gravado no índice:
+            # gravar congelaria a resposta na data em que o acervo foi
+            # construído, e ela envelheceria em silêncio.
+            hoje = date.today().isoformat()
+            d["validade"] = self.validade or "não declarada pela fonte"
+            if self.validade and self.validade < hoje:
+                d["vencido"] = True
+                d["aviso_validade"] = (
+                    f"VENCIDO em {self.validade}. Manifestação referencial fora do "
+                    f"prazo NÃO dispensa a análise jurídica individualizada — "
+                    f"invocá-la para dispensar parecer é vício no processo "
+                    f"administrativo. Serve como argumento e como histórico do "
+                    f"entendimento, não como fundamento da dispensa.")
+            elif self.validade:
+                d["vencido"] = False
+                d["aviso_validade"] = (
+                    f"Dentro do prazo até {self.validade}. Confira a data na "
+                    f"aprovação do ato: o prazo corre da aprovação definitiva.")
+            else:
+                d["aviso_validade"] = (
+                    "A fonte não declara prazo de validade para esta manifestação. "
+                    "Ausência de prazo publicado não é prazo indeterminado — "
+                    "confira no próprio parecer antes de usá-lo para dispensar "
+                    "análise individualizada.")
+
         if self.aviso_fonte:
             # o que a própria coleta não conseguiu determinar: sobe antes de
             # tudo, porque alcança a citação
@@ -255,8 +290,8 @@ _NOMES = ["codigo", "fonte", "especie", "citacao", "numero", "ano", "orgao",
           "vinculacao_explicacao", "vigencia_declarada", "situacao_declarada",
           "ato_revogador", "ato_reanalise", "relacionadas", "aprovacao",
           "despachos", "regime", "alerta_vigencia", "paginas", "tem_texto",
-          "origem_texto", "ocr_confianca", "aviso_fonte", "url_inteiro_teor",
-          "url_publicacao"]
+          "origem_texto", "ocr_confianca", "aviso_fonte", "validade",
+          "abrangencia", "processo", "url_inteiro_teor", "url_publicacao"]
 
 _CAMPOS = ", ".join(_NOMES)
 # Nas consultas com JOIN, `codigo` existe nas duas tabelas e o SQLite recusa a
@@ -486,6 +521,43 @@ class Acervo:
                 "alteração por norma superveniente nem decisão judicial. "
                 "Ausência de ressalva significa que a fonte nada declarou — não "
                 "que o ato esteja íntegro."),
+            "aviso_ente": AVISO_ENTE,
+        }
+
+    # -------------------------------------------------- referenciais e prazo
+    def referenciais(self, consulta: str, limite: int = 10,
+                     so_validos: bool = False, orgao: str | None = None,
+                     operador: str = "AND") -> dict[str, Any]:
+        """Manifestações referenciais sobre um tema, separadas pelo prazo.
+
+        A separação é a resposta: um referencial vencido e um em vigor têm o
+        mesmo texto, e só o primeiro é inútil para dispensar análise.
+        """
+        hoje = date.today().isoformat()
+        achados, expressao, total = self.pesquisar(
+            consulta, limite=limite * 3, fonte="referencial", orgao=orgao,
+            operador=operador)
+        if not achados:
+            achados, expressao, total = self.pesquisar(
+                consulta, limite=limite * 3, fonte="referencial", orgao=orgao,
+                operador="OR")
+        vigentes, vencidos, sem_prazo = [], [], []
+        for d in achados:
+            if not d.validade:
+                sem_prazo.append(d)
+            elif d.validade < hoje:
+                vencidos.append(d)
+            else:
+                vigentes.append(d)
+        if so_validos:
+            vencidos = []
+        return {
+            "expressao_executada": expressao,
+            "data_da_consulta": hoje,
+            "total_encontrado": total,
+            "em_vigor": [d.para_dict() for d in vigentes[:limite]],
+            "vencidos": [d.para_dict() for d in vencidos[:limite]],
+            "sem_prazo_declarado": [d.para_dict() for d in sem_prazo[:limite]],
             "aviso_ente": AVISO_ENTE,
         }
 

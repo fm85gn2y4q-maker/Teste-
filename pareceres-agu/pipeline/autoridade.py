@@ -77,6 +77,13 @@ ESPECIE_PROPRIA = {
         "Súmula da AGU: de observância obrigatória pelos órgãos de consultoria "
         "e contencioso da AGU, da PGF e da PGBC (LC 73/93). Não é norma para a "
         "Administração consulente."),
+    "Manifestação Jurídica Referencial": (
+        "processo",
+        "Manifestação Jurídica Referencial: dispensa a análise jurídica "
+        "individualizada dos processos da classe que descreve, no órgão a que "
+        "se destina (ON AGU nº 55/2014). Não é tese de alcance geral, e vale "
+        "SOMENTE dentro do prazo de validade — vencido o prazo, não dispensa "
+        "nada, e invocá-lo é vício no processo administrativo."),
 }
 
 # O aviso que acompanha TODA resposta deste acervo. A carteira do escritório é

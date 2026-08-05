@@ -23,7 +23,8 @@ def gravar(nome: str, registros: list[dict]) -> Path:
 def main() -> None:
     for nome, coletor in (("conuni.jsonl", fontes.conuni),
                           ("ons.jsonl", fontes.ons),
-                          ("sumulas.jsonl", fontes.sumulas)):
+                          ("sumulas.jsonl", fontes.sumulas),
+                          ("referenciais.jsonl", fontes.referenciais)):
         registros = coletor()
         destino = gravar(nome, registros)
         print(f"{nome:16} {len(registros):>6} registros  ->  {destino.name}"

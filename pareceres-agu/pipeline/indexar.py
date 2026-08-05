@@ -210,6 +210,7 @@ CREATE TABLE documentos (
   regime TEXT, alerta_vigencia TEXT,
   paginas INTEGER DEFAULT 0, tem_texto INTEGER DEFAULT 0,
   origem_texto TEXT, ocr_confianca INTEGER, aviso_fonte TEXT,
+  validade TEXT, abrangencia TEXT, processo TEXT,
   url_inteiro_teor TEXT, url_publicacao TEXT
 );
 CREATE TABLE paginas (
@@ -365,7 +366,8 @@ def main() -> None:
             (r.get("aprovacao") or "").strip() or None,
             json.dumps(despachos, ensure_ascii=False) if despachos else None,
             regime, alerta,
-            len(paginas_txt), tem_texto, origem, confianca, None, url, None,
+            len(paginas_txt), tem_texto, origem, confianca, None,
+            None, None, None, url, None,
         ))
         busca.append((codigo, especie_bruta, r.get("assunto") or "",
                       r.get("ementa") or "", ""))
@@ -402,13 +404,68 @@ def main() -> None:
                 regime, alerta,
                 0, 1 if texto.strip() else 0,
                 "pagina_oficial" if texto.strip() else "enunciado_nao_publicado",
-                None, r.get("aviso"), None, r.get("url_publicacao"),
+                None, r.get("aviso"), None, None, None,
+                None, r.get("url_publicacao"),
             ))
             busca.append((codigo, r["citacao"], "", enunciado[:2000], texto))
             for (esp, ref), qtd in referencias.extrair(texto).items():
                 cits.append((codigo, esp, ref, qtd))
 
-    con.executemany(f"INSERT INTO documentos VALUES ({','.join('?' * 31)})", docs)
+    # -------------------------------- Manifestações Jurídicas Referenciais
+    #
+    # Corpus das Consultorias Jurídicas dos Ministérios. Tem risco próprio, e
+    # não é o grau de vinculação: é o PRAZO DE VALIDADE. Um referencial vencido
+    # não dispensa análise individualizada, e o texto dele é idêntico ao de um
+    # válido — a diferença está só na data.
+    #
+    # O vencimento NÃO é gravado aqui: é calculado na consulta, contra a data
+    # do dia. Gravar "vencido" no índice congelaria a resposta na data em que o
+    # acervo foi construído, e ela envelheceria em silêncio.
+    for r in _jsonl("referenciais.jsonl"):
+        codigo += 1
+        especie = r["especie"]
+        chave, rotulo, explicacao = autoridade.classificar(especie, None)
+        texto = r.get("texto") or ""
+        base = " ".join(x for x in (r.get("assunto"), texto) if x)
+        regime, alerta = _regime(base)
+        url = r.get("url_inteiro_teor")
+        pdf = PDFS / f"ref{r.get('id_fonte')}.pdf"
+        paginas_txt = _ler_pdf(pdf) if pdf.exists() else []
+        if paginas_txt and len("".join(paginas_txt).strip()) > 200:
+            origem = "pdf_proprio"
+        else:
+            paginas_txt = []
+            origem = ("arquivo_publico_indisponivel"
+                      if url and "/referenciais/arquivos/" in url
+                      else "sapiens_exige_autenticacao" if url and "sapiens" in url
+                      else "sem_arquivo")
+        inteiro = "\n".join(paginas_txt)
+        base = " ".join(x for x in (base, inteiro) if x)
+        regime, alerta = _regime(base)
+        docs.append((
+            codigo, "referencial", especie, r["citacao"],
+            r.get("numero"), r.get("ano"), r.get("orgao"),
+            "Consultorias Jurídicas junto aos Ministérios",
+            r.get("assunto"), texto[:2000], texto,
+            None, chave, autoridade.ordem(chave), explicacao,
+            None, None,
+            None, None, None, None, None,
+            regime, alerta,
+            len(paginas_txt), 1 if (texto.strip() or inteiro.strip()) else 0,
+            origem, None, None,
+            r.get("validade"), r.get("abrangencia"), r.get("processo"),
+            url, None,
+        ))
+        busca.append((codigo, r["citacao"], r.get("assunto") or "",
+                      texto[:2000], texto))
+        secoes = _secoes(paginas_txt)
+        for n, pagina in enumerate(paginas_txt, 1):
+            pag_meta.append((codigo, n, len(pagina), secoes[n - 1], _transcricao(pagina)))
+            pag_texto.append((codigo, n, pagina))
+        for (esp, ref), qtd in referencias.extrair(base).items():
+            cits.append((codigo, esp, ref, qtd))
+
+    con.executemany(f"INSERT INTO documentos VALUES ({','.join('?' * 34)})", docs)
     con.executemany("INSERT INTO paginas VALUES (?,?,?,?,?)", pag_meta)
     con.executemany("INSERT INTO paginas_fts VALUES (?,?,?)", pag_texto)
     con.executemany("INSERT INTO busca VALUES (?,?,?,?,?)", busca)
@@ -444,6 +501,11 @@ def main() -> None:
               OR COALESCE(ato_revogador,'') <> ''
               OR vigencia_declarada NOT IN ('1', 'None')""").fetchone()[0]
 
+    prazos = dict(con.execute(
+        """SELECT CASE WHEN validade IS NULL OR validade = '' THEN 'sem prazo declarado'
+                       WHEN validade < date('now') THEN 'vencidas na data da indexação'
+                       ELSE 'em vigor na data da indexação' END, COUNT(*)
+           FROM documentos WHERE fonte = 'referencial' GROUP BY 1"""))
     faixas = dict(con.execute(
         """SELECT CASE WHEN ocr_confianca >= 80 THEN 'alta (>= 80)'
                        WHEN ocr_confianca >= 60 THEN 'média (60 a 79)'
@@ -455,6 +517,10 @@ def main() -> None:
         "documentos": total,
         "por_fonte": por_fonte,
         "com_texto_pesquisavel": com_texto,
+        "referenciais_por_prazo": prazos,
+        "nota_sobre_o_prazo": (
+            "Contagem na data da indexação, guardada só como panorama. O que "
+            "vale é o cálculo feito na consulta, contra a data de hoje."),
         "recuperados_por_ocr": reconhecidos,
         "confianca_do_ocr": faixas,
         "digitalizacao_sem_texto_mesmo_apos_ocr": sem_camada,
@@ -480,10 +546,16 @@ def main() -> None:
             "Delas só há ementa e assunto — o acervo NÃO permite conferir a "
             "fundamentação, e ausência de um argumento aqui não prova que a AGU "
             "não o enfrentou.",
-            "O acervo é o que a AGU publica na consulta pública do CONUNI e nas "
-            "páginas de Orientações Normativas e Súmulas. Os pareceres das "
-            "Consultorias Jurídicas junto aos Ministérios não são públicos e não "
-            "estão aqui.",
+            "O acervo é o que a AGU publica em consulta aberta: CONUNI, "
+            "Orientações Normativas, Súmulas e o buscador de Manifestações "
+            "Jurídicas Referenciais. Os pareceres INDIVIDUAIS das Consultorias "
+            "Jurídicas junto aos Ministérios não são públicos e não estão aqui — "
+            "só os referenciais delas.",
+            "As Manifestações Jurídicas Referenciais têm PRAZO DE VALIDADE, e o "
+            "resto do acervo não. Vencido o prazo, o referencial não dispensa a "
+            "análise jurídica individualizada, e invocá-lo para dispensar parecer "
+            "é vício no processo. O vencimento é calculado contra a data da "
+            "consulta, não contra a data em que este acervo foi construído.",
             "O filtro por câmara usa o campo que a fonte preenche, e ele não é "
             "perfeito: 5 documentos nomeiam a própria câmara (CNLCA, CNCIC, "
             "CNASP, CNDE e CNIR, um cada) mas estão no agrupamento residual, e "
