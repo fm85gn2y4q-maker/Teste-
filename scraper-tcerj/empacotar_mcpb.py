@@ -126,6 +126,29 @@ MANIFESTO = {
 }
 
 
+def _exigencias() -> list[str]:
+    """Lê o pin de `requirements-servidor.txt` em vez de repeti-lo aqui.
+
+    Repetir custou caro duas vezes. Primeiro nos deploys: o requisito dizia
+    `mcp>=1.28`, sem teto, a 2.0.0 saiu sem `mcp.server.fastmcp` e a imagem
+    passou a falhar — corrigido em e4ab140. Mas a correção alcançou só o
+    requirements; **esta linha aqui continuou pedindo `mcp>=1.28`**, e o
+    próximo .mcpb sairia com a 2.0.0 mesmo com o deploy já consertado. Um
+    pacote assim zipa, instala e só quebra na primeira pergunta do usuário,
+    num log que ele não lê.
+
+    É o defeito se repetindo pela mesma causa: duas declarações da mesma
+    dependência divergem em silêncio. Agora existe uma só.
+    """
+    arquivo = RAIZ / "requirements-servidor.txt"
+    linhas = [l.split("#")[0].strip()
+              for l in arquivo.read_text(encoding="utf-8").splitlines()]
+    exigencias = [l for l in linhas if l]
+    if not exigencias:
+        raise SystemExit(f"{arquivo} não declara nenhuma dependência.")
+    return exigencias
+
+
 def validar(pasta: Path) -> bool:
     """Passa o manifesto pelo validador oficial, se houver Node por perto.
 
@@ -247,13 +270,15 @@ def empacotar(python: str | None = None) -> int:
     )
     (servidor / "main.py").write_text(ENTRADA, encoding="utf-8")
 
+    exigencias = _exigencias()
+    print("  dependências:", ", ".join(exigencias))
     for versao in VERSOES:
         marca = "py" + versao.replace(".", "")
         print(f"Instalando as dependências para Python {versao}…")
         resultado = subprocess.run(
             [sys.executable, "-m", "pip", "install", "--quiet",
              "--target", str(servidor / "lib" / marca),
-             "--python-version", versao, "--only-binary=:all:", "mcp>=1.28"],
+             "--python-version", versao, "--only-binary=:all:", *exigencias],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
         if resultado.returncode != 0:
