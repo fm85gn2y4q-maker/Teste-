@@ -21,13 +21,22 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   Write-Host 'Depois FECHE e reabra o terminal, e rode este comando de novo.'
   return
 }
-$maior = [int]((node -p 'process.versions.node.split(".")[0]'))
-if ($maior -lt 20) {
-  Erro "Node $(node -v) e antigo demais. Precisa da versao 20 ou mais nova."
+# Le a versao em PowerShell puro. Passar JavaScript entre aspas para o node
+# nao sobrevive a forma como o PowerShell repassa argumentos para executavel
+# nativo: as aspas internas somem no caminho.
+$versaoTexto = (node -v)
+$maior = 0
+if ($versaoTexto -match '^v?(\d+)\.') { $maior = [int]$Matches[1] }
+
+if ($maior -eq 0) {
+  Write-Host "Nao consegui identificar a versao do Node (recebi: $versaoTexto). Seguindo assim mesmo."
+} elseif ($maior -lt 20) {
+  Erro "Node $versaoTexto e antigo demais. Precisa da versao 20 ou mais nova."
   Write-Host 'Atualize com:  winget install OpenJS.NodeJS.LTS'
   return
+} else {
+  Write-Host "Node $versaoTexto, ok."
 }
-Write-Host "Node $(node -v), ok."
 
 # --- 2. git ----------------------------------------------------------------
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
