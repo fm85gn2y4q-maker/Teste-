@@ -10,8 +10,17 @@ de 14 meses — quatro instituicoes, dois cartoes, carteira e dois financiamento
 
 ```bash
 npm install && npm run build
-node dist/index.js              # stdio, provedor mock
+node dist/index.js              # stdio, modo demonstracao
 node dist/index.js --http       # HTTP em 127.0.0.1:8787/mcp
+```
+
+Para ligar nos seus bancos de verdade, sao tres comandos — o passo a passo esta
+em [Ligando em banco de verdade](#ligando-em-banco-de-verdade).
+
+```bash
+npm run conectar      # abre a pagina local, voce autoriza cada banco
+npm run diagnostico   # confere se os dados chegam certos
+claude mcp add banco -- node $PWD/dist/index.js
 ```
 
 ## Antes de tudo: o que aqui e codigo e o que e licenca
@@ -28,6 +37,8 @@ Para quem nao e instituicao autorizada, sobram dois caminhos legitimos:
 
 1. **Agregador autorizado** — Pluggy, Belvo, Klavi. Eles ja tem a licenca; voce
    consome a API deles. E o que o adaptador `pluggy` deste repositorio faz.
+   Para uso pessoal, o *Meu Pluggy* e gratuito por tempo indeterminado: e o
+   caminho mais curto para ver isto funcionando com dinheiro de verdade.
 2. **API direta de um banco** — o Banco Inter, por exemplo, publica API para
    titulares de conta PJ, com certificado proprio. Cobre um banco so.
 
@@ -106,31 +117,79 @@ Sobe em `127.0.0.1:8787/mcp`, sem estado (um servidor por requisicao) e com
 qualquer processo que alcance a porta le os dados. Exponha na rede so atras de
 TLS e autenticacao de verdade.
 
-## Ligando em banco de verdade (Pluggy)
+## Ligando em banco de verdade
 
-1. Crie a aplicacao no painel da Pluggy e pegue `clientId` e `clientSecret`.
-2. Conecte os bancos pelo Pluggy Connect. Cada conexao vira um **item**; anote
-   os ids.
-3. Preencha o `.env` (veja `.env.example`):
+### Custa quanto
+
+Para **uso pessoal**, nada: a Pluggy mantem o *Meu Pluggy*, gratuito por tempo
+indeterminado, para pessoa fisica conectar as proprias contas e consumir a API
+em ferramenta propria. A condicao e que as contas sejam suas, nominais. Uso
+comercial cai no plano pago (a partir de R$ 2.500/mes), que e outra conversa.
+
+### Passo a passo
+
+1. **Crie a conta no Meu Pluggy** e conecte seus bancos por la, pelo Open
+   Finance. Cada banco pede uma autorizacao propria, feita no ambiente do
+   proprio banco — sua senha nunca passa por este servidor.
+2. **Pegue `clientId` e `clientSecret`** no Dashboard da Pluggy e coloque no
+   `.env` (copie o `.env.example`).
+3. **Rode o fluxo de conexao:**
+
+   ```bash
+   npm run conectar
+   ```
+
+   Abre `http://127.0.0.1:8788`. Clique em *Abrir o Pluggy Connect*, autorize
+   quantos bancos quiser, e os ids das conexoes caem no `.env` sozinhos — o
+   provedor tambem troca para `pluggy` automaticamente. Se o widget nao carregar,
+   a mesma pagina tem um campo para colar o id manualmente, copiado do Dashboard.
+
+4. **Confira antes de confiar:**
+
+   ```bash
+   npm run diagnostico
+   ```
+
+   Autentica, lista conexoes, contas, cartoes, faturas e carteira, e aponta o que
+   costuma dar errado: consentimento vencido, conta que nao sincronizou, sinal de
+   valor invertido, ciclo de fatura deslocado, lancamento sem categoria. **Todo
+   digito sai mascarado** (`R$ ##.###,##`), entao da para colar a saida num chat
+   pedindo ajuda sem expor saldo, numero de conta ou CPF.
+
+### Quando todos os bancos aparecem com o mesmo nome
+
+Conectores agregadores — o Meu Pluggy entre eles — podem entregar contas de
+varios bancos sob uma conexao so, sem dizer de qual banco e cada conta. Nesse
+caso o servidor **nao inventa**: mantem o rotulo generico e o diagnostico avisa,
+ja imprimindo a linha pronta para voce corrigir:
 
 ```bash
-BANCO_MCP_PROVEDOR=pluggy
-PLUGGY_CLIENT_ID=...
-PLUGGY_CLIENT_SECRET=...
-PLUGGY_ITEM_IDS=item-um,item-dois
+BANCO_MCP_INSTITUICOES={"acc-123":"Nubank","acc-456":"Itau"}
 ```
 
-O mapeamento de campos segue a documentacao publica da Pluggy, mas **conector de
-banco varia**: confira os primeiros resultados contra o extrato oficial antes de
-confiar em qualquer total agregado. Dois pontos ja tratados no codigo, porque
-mordem: o sinal do valor (`type: DEBIT/CREDIT` prevalece sobre o sinal de
-`amount`) e o ciclo da fatura, montado a partir do `dueDate` do `/bills` com os
-lancamentos do periodo.
+Rotulo manual vence tudo; depois dele o servidor tenta o campo de instituicao que
+o proprio conector mandou; so entao cai no nome do conector.
+
+### O que conferir na primeira semana
+
+O mapeamento segue a documentacao publica da Pluggy, mas **conector de banco
+varia**. Confira uma compra conhecida contra o extrato oficial antes de confiar
+em total agregado. Dois pontos ja tratados no codigo, porque mordem: o sinal do
+valor (`type: DEBIT/CREDIT` prevalece sobre o sinal de `amount`) e o ciclo da
+fatura, montado a partir do `dueDate` do `/bills` com os lancamentos do periodo.
 
 O Open Finance de consulta nao expoe agendamento futuro — isso vive na iniciacao
 de pagamento, que este servidor nao toca. Por isso `listarAgendamentos` devolve
 vazio no adaptador Pluggy, e `listar_agendamentos` cai nas recorrencias
 detectadas no proprio extrato. Preferimos o vazio honesto a um numero inventado.
+
+### Seus dados vao para dentro da conversa
+
+Quando voce pergunta "com o que gastei esse mes", o extrato entra no contexto do
+modelo — e assim que ele consegue responder. O servidor roda na sua maquina e nao
+persiste nada, mas a resposta trafega. Isso vale para qualquer servidor MCP
+bancario, nao e particularidade deste. Pese contra a politica de retencao do
+cliente que voce usa.
 
 ## Arquitetura
 
@@ -160,17 +219,19 @@ qualquer adaptador futuro.
 npm test
 ```
 
-36 testes cobrindo formatacao monetaria, aritmetica de datas, invariantes do
+45 testes cobrindo formatacao monetaria, aritmetica de datas, invariantes do
 acervo sintetico (o saldo de cada conta fecha com o extrato; nenhuma compra
 entra em duas faturas), a regra de nao contar gasto duas vezes, as 13
 ferramentas de ponta a ponta por um cliente MCP em memoria, e o adaptador Pluggy
-com `fetch` de mentira — inclusive a trava de escrita.
+com `fetch` de mentira — inclusive a trava de escrita, a edicao cirurgica do
+`.env` e a resolucao de nome de instituicao.
 
 ## O que falta para virar produto
 
 Isto e o motor, nao o servico. Para chegar onde o produto original esta:
 
 - Cadastro, login e 2FA (TOTP ou passkey), com um consentimento por usuario.
+  Hoje a conexao e local: `npm run conectar` grava no seu `.env`.
 - Multi-tenant: hoje o processo serve um conjunto de conexoes, definido por
   variavel de ambiente.
 - Cofre de tokens com chave gerenciada, rotacao e revogacao em ate 30 dias apos

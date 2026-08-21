@@ -5,6 +5,7 @@ import {
   type ContaPluggy, type EmprestimoPluggy, type InvestimentoPluggy, type ItemPluggy,
   type TransacaoPluggy,
 } from './mapear.js';
+import { resolverInstituicao, rotulosManuais } from './instituicao.js';
 import { aplicarFiltro } from '../filtro.js';
 import { mesDe, mesesEntre, primeiroDia, somarDias, ultimoDia } from '../../util/datas.js';
 import type {
@@ -35,12 +36,15 @@ export class PluggyProvider implements BankProvider {
   readonly origem = 'Open Finance via Pluggy (agregador autorizado)';
 
   private itens: Cache<ItemPluggy[]> | null = null;
-  private contasBrutas: Cache<Array<{ conta: ContaPluggy; instituicao: string }>> | null = null;
+  private contasBrutas: Cache<Array<{ conta: ContaPluggy; instituicao: string; agregado: boolean }>> | null = null;
+  private readonly rotulos: Record<string, string>;
 
   constructor(
     private readonly cliente: ClientePluggy,
     private readonly itemIds: string[],
+    rotulos: Record<string, string> | string = process.env.BANCO_MCP_INSTITUICOES ?? '',
   ) {
+    this.rotulos = typeof rotulos === 'string' ? rotulosManuais(rotulos) : rotulos;
     if (itemIds.length === 0) {
       throw new Error(
         'Nenhum item da Pluggy configurado. Defina PLUGGY_ITEM_IDS com os ids das conexoes ' +
@@ -56,14 +60,16 @@ export class PluggyProvider implements BankProvider {
     return valor;
   }
 
-  private async carregarContas(): Promise<Array<{ conta: ContaPluggy; instituicao: string }>> {
+  async carregarContas(): Promise<Array<{ conta: ContaPluggy; instituicao: string; agregado: boolean }>> {
     if (this.contasBrutas && Date.now() < this.contasBrutas.expira) return this.contasBrutas.valor;
     const itens = await this.carregarItens();
     const listas = await Promise.all(
       itens.map(async (item) => {
         const contas = await this.cliente.paginar<ContaPluggy>('/accounts', { itemId: item.id });
-        const instituicao = item.connector?.name ?? item.id;
-        return contas.map((conta) => ({ conta, instituicao }));
+        return contas.map((conta) => {
+          const { nome, agregado } = resolverInstituicao(item, conta, this.rotulos);
+          return { conta, instituicao: nome, agregado };
+        });
       }),
     );
     const valor = listas.flat();

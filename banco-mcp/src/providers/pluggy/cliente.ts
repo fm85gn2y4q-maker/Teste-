@@ -76,6 +76,20 @@ export class ClientePluggy {
     return texto ? JSON.parse(texto) : null;
   }
 
+  /**
+   * Cria o token de curta duracao que o widget Pluggy Connect usa no navegador.
+   * E o unico POST alem do /auth: nao movimenta nada, so abre a tela em que o
+   * proprio usuario autoriza o banco.
+   */
+  async criarConnectToken(itemId?: string): Promise<string> {
+    const r = await this.requisicao('POST', '/connect_token', {
+      corpo: itemId ? { itemId } : {},
+    }) as { accessToken?: string; connectToken?: string };
+    const token = r.accessToken ?? r.connectToken;
+    if (!token) throw new Error('Pluggy nao devolveu o token de conexao.');
+    return token;
+  }
+
   get<T>(caminho: string, query?: Record<string, string | number | undefined>): Promise<T> {
     return this.requisicao('GET', caminho, query ? { query } : {}) as Promise<T>;
   }

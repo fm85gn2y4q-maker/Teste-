@@ -39,7 +39,7 @@ interface Recorrente {
 
 function recorrentes(mesInicial: string): Recorrente[] {
   return [
-    { contaId: 'itau-cc', dia: 5, descricao: 'SALARIO MENSAL', contraparte: 'TECNOVA SISTEMAS LTDA', categoria: 'Salario', metodo: 'salario', min: 1_248_000, max: 1_248_000, sinal: 1 },
+    { contaId: 'itau-cc', dia: 5, descricao: 'SALARIO MENSAL', contraparte: 'TECNOVA SISTEMAS LTDA', categoria: 'Salario', metodo: 'salario', min: 1_840_000, max: 1_840_000, sinal: 1 },
     { contaId: 'itau-cc', dia: 20, descricao: 'PRO-LABORE', contraparte: 'MENEGATTI CONSULTORIA ME', categoria: 'Renda extra', metodo: 'pix', min: 180_000, max: 420_000, sinal: 1 },
     { contaId: 'itau-cc', dia: 10, descricao: 'ALUGUEL RESIDENCIAL', contraparte: 'IMOBILIARIA VILA NOVA', categoria: 'Moradia', metodo: 'boleto', min: 235_000, max: 235_000, sinal: -1 },
     { contaId: 'itau-cc', dia: 10, descricao: 'CONDOMINIO EDIF ATLANTICA', categoria: 'Moradia', metodo: 'boleto', min: 68_000, max: 74_500, sinal: -1 },
@@ -49,8 +49,8 @@ function recorrentes(mesInicial: string): Recorrente[] {
     { contaId: 'itau-cc', dia: 8, descricao: 'BRADESCO SAUDE PLANO FAMILIA', categoria: 'Saude', metodo: 'debito_automatico', min: 189_000, max: 214_000, sinal: -1 },
     { contaId: 'itau-cc', dia: 7, descricao: 'COLEGIO SAO VICENTE MENSALIDADE', categoria: 'Educacao', metodo: 'boleto', min: 148_000, max: 159_000, sinal: -1 },
     { contaId: 'itau-cc', dia: 6, descricao: 'APLICACAO PROGRAMADA XP', contraparte: 'XP INVESTIMENTOS CCTVM', categoria: 'Investimentos', metodo: 'ted', min: 200_000, max: 200_000, sinal: -1 },
-    { contaId: 'itau-cc', dia: 5, descricao: 'PIX ENVIADO - CONTA NUBANK', contraparte: 'NU PAGAMENTOS SA', categoria: 'Transferencia', metodo: 'pix', min: 150_000, max: 150_000, sinal: -1 },
-    { contaId: 'nubank-cp', dia: 5, descricao: 'PIX RECEBIDO - ITAU', contraparte: 'ITAU UNIBANCO SA', categoria: 'Transferencia', metodo: 'pix', min: 150_000, max: 150_000, sinal: 1 },
+    { contaId: 'itau-cc', dia: 5, descricao: 'PIX ENVIADO - CONTA NUBANK', contraparte: 'NU PAGAMENTOS SA', categoria: 'Transferencia', metodo: 'pix', min: 300_000, max: 300_000, sinal: -1 },
+    { contaId: 'nubank-cp', dia: 5, descricao: 'PIX RECEBIDO - ITAU', contraparte: 'ITAU UNIBANCO SA', categoria: 'Transferencia', metodo: 'pix', min: 300_000, max: 300_000, sinal: 1 },
     { contaId: 'itau-cc', dia: 25, descricao: 'CONSIGNADO ITAU PARCELA', categoria: 'Emprestimos', metodo: 'debito_automatico', min: 89_740, max: 89_740, sinal: -1 },
     { contaId: 'itau-cc', dia: 12, descricao: 'FINANCIAMENTO VEICULAR PARCELA', categoria: 'Emprestimos', metodo: 'debito_automatico', min: 132_500, max: 132_500, sinal: -1 },
     { contaId: 'inter-cc', dia: 28, descricao: 'RENDIMENTO CDB LIQUIDEZ DIARIA', categoria: 'Rendimentos', metodo: 'rendimento', min: 42_000, max: 78_000, sinal: 1 },
@@ -110,7 +110,7 @@ const CONTAS_BASE: Array<Omit<Conta, 'saldo' | 'saldoDisponivel' | 'atualizadoEm
 const SALDO_INICIAL: Record<string, number> = {
   'itau-cc': 486_300,
   'itau-poup': 1_240_000,
-  'nubank-cp': 78_400,
+  'nubank-cp': 240_000,
   'inter-cc': 4_820_000,
 };
 
@@ -372,7 +372,9 @@ export function acervoMock(opcoes: { hoje?: string; semente?: number } = {}): Ac
   let seqPg = 0;
   for (const f of faturas) {
     if (f.status !== 'paga' || f.valorTotal === 0) continue;
-    const contaDebito = f.cartaoId === 'nubank-mc' ? 'nubank-cp' : 'itau-cc';
+    // As duas faturas caem na conta principal, como e o habito de quem
+    // centraliza pagamento — e evita que a conta de gastos fique negativa.
+    const contaDebito = 'itau-cc';
     transacoes.push({
       id: `pg-${++seqPg}`,
       contaId: contaDebito,

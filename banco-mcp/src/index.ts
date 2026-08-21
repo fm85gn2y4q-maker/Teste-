@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { resolve } from 'node:path';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { carregarConfig } from './config.js';
+import { carregarDotEnv } from './util/env.js';
 import { criarProvider } from './providers/index.js';
 import { criarServidor } from './server.js';
 import { FERRAMENTAS } from './tools/index.js';
 
+// O cliente MCP inicia o processo de qualquer diretorio: procura o .env ao lado
+// do pacote antes de olhar o cwd.
+carregarDotEnv(resolve(import.meta.dirname, '..'), process.cwd());
 const config = carregarConfig();
 const httpMode = process.argv.includes('--http');
 
