@@ -76,6 +76,11 @@ export class ClientePluggy {
     return texto ? JSON.parse(texto) : null;
   }
 
+  /** Confere se clientId e clientSecret sao aceitos. Lanca com o motivo se nao. */
+  async verificarCredenciais(): Promise<void> {
+    await this.autenticar();
+  }
+
   /**
    * Cria o token de curta duracao que o widget Pluggy Connect usa no navegador.
    * E o unico POST alem do /auth: nao movimenta nada, so abre a tela em que o

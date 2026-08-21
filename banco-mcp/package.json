@@ -18,6 +18,7 @@
     "dev": "tsc -p tsconfig.json --watch",
     "test": "tsc -p tsconfig.test.json && node --test dist-test/test/*.test.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "configurar": "npm run build --silent && node dist/configurar.js",
     "conectar": "npm run build --silent && node dist/conectar.js",
     "diagnostico": "npm run build --silent && node dist/diagnostico.js"
   },

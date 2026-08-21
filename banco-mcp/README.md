@@ -139,8 +139,21 @@ São **dois cadastros distintos**, e confundi-los e o tropeco mais comum:
    banco que quiser acompanhar. Cada um pede uma autorizacao propria, feita no
    ambiente do proprio banco — sua senha nunca passa por este servidor, nem pela
    Pluggy.
-2. **Cadastre-se em `dashboard.pluggy.ai`**, crie uma aplicacao e copie
-   `clientId` e `clientSecret` para o `.env` (copie o `.env.example`).
+2. **Cadastre-se em `dashboard.pluggy.ai`**, crie uma aplicacao e rode:
+
+   ```bash
+   npm run configurar
+   ```
+
+   Ele pede `clientId` e `clientSecret`, **confere com a Pluggy antes de gravar**
+   e escreve no `.env` com permissao 600. O secret nao e ecoado enquanto voce
+   digita, entao nao fica no scrollback do terminal.
+
+   > O par `clientId` + `clientSecret` da acesso de leitura a **todas** as suas
+   > contas conectadas. Ele mora no `.env`, que o `.gitignore` ja bloqueia.
+   > Nunca cole esse par em chat, ticket, issue ou commit — inclusive numa
+   > conversa com um assistente. Se acontecer, regenere as credenciais no
+   > Dashboard: revogar leva segundos, e a chave antiga morre na hora.
 3. **Rode o fluxo de conexao:**
 
    ```bash
