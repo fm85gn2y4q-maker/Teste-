@@ -1,0 +1,34 @@
+{
+  "name": "banco-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Servidor MCP read-only de Open Finance brasileiro: saldos, extratos, faturas, investimentos e emprestimos para Claude, Cursor e outros clientes MCP.",
+  "type": "module",
+  "bin": {
+    "banco-mcp": "./dist/index.js",
+    "banco-mcp-conectar": "./dist/conectar.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "start:http": "node dist/index.js --http",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/test/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "configurar": "npm run build --silent && node dist/configurar.js",
+    "conectar": "npm run build --silent && node dist/conectar.js",
+    "conexoes": "npm run build --silent && node dist/conectar.js --listar",
+    "diagnostico": "npm run build --silent && node dist/diagnostico.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.2"
+  }
+}

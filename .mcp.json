@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "banco": {
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR}/banco-mcp/dist/index.js"],
+      "env": {
+        "BANCO_MCP_PROVEDOR": "${BANCO_MCP_PROVEDOR:-mock}",
+        "PLUGGY_CLIENT_ID": "${PLUGGY_CLIENT_ID:-}",
+        "PLUGGY_CLIENT_SECRET": "${PLUGGY_CLIENT_SECRET:-}",
+        "PLUGGY_ITEM_IDS": "${PLUGGY_ITEM_IDS:-}",
+        "BANCO_MCP_INSTITUICOES": "${BANCO_MCP_INSTITUICOES:-}"
+      }
+    }
+  }
+}
