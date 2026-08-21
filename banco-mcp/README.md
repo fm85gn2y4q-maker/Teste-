@@ -26,6 +26,12 @@ Sem nem clonar antes (precisa de Node 20+ e `git`):
 curl -fsSL https://raw.githubusercontent.com/fm85gn2y4q-maker/Teste-/refs/heads/claude/create-iphone-app-9YNOb/banco-mcp/instalar.sh | bash
 ```
 
+No **Windows**, use o PowerShell (nao o Prompt de Comando) — nao precisa de WSL:
+
+```powershell
+irm https://raw.githubusercontent.com/fm85gn2y4q-maker/Teste-/refs/heads/claude/create-iphone-app-9YNOb/banco-mcp/instalar.ps1 | iex
+```
+
 O `refs/heads/` no meio da URL nao e enfeite: o branch tem barra no nome, e sem
 esse prefixo o GitHub nao consegue separar onde acaba o branch e comeca o
 caminho do arquivo — devolve 404.
