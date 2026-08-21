@@ -14,6 +14,12 @@ node dist/index.js              # stdio, modo demonstracao
 node dist/index.js --http       # HTTP em 127.0.0.1:8787/mcp
 ```
 
+Ou, de uma vez so, da maquina limpa ate o servidor registrado no Claude:
+
+```bash
+bash banco-mcp/instalar.sh
+```
+
 Para ligar nos seus bancos de verdade, sao tres comandos — o passo a passo esta
 em [Ligando em banco de verdade](#ligando-em-banco-de-verdade).
 
