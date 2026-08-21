@@ -128,19 +128,28 @@ comercial cai no plano pago (a partir de R$ 2.500/mes), que e outra conversa.
 
 ### Passo a passo
 
-1. **Crie a conta no Meu Pluggy** e conecte seus bancos por la, pelo Open
-   Finance. Cada banco pede uma autorizacao propria, feita no ambiente do
-   proprio banco — sua senha nunca passa por este servidor.
-2. **Pegue `clientId` e `clientSecret`** no Dashboard da Pluggy e coloque no
-   `.env` (copie o `.env.example`).
+São **dois cadastros distintos**, e confundi-los e o tropeco mais comum:
+
+| Onde | Para que |
+| --- | --- |
+| `meu.pluggy.ai` | Conectar seus bancos. E onde voce autoriza cada instituicao. |
+| `dashboard.pluggy.ai` | Pegar `clientId` e `clientSecret`. E o que este servidor usa. |
+
+1. **Cadastre-se em `meu.pluggy.ai`** e, em *Conectar Minha Conta*, adicione cada
+   banco que quiser acompanhar. Cada um pede uma autorizacao propria, feita no
+   ambiente do proprio banco — sua senha nunca passa por este servidor, nem pela
+   Pluggy.
+2. **Cadastre-se em `dashboard.pluggy.ai`**, crie uma aplicacao e copie
+   `clientId` e `clientSecret` para o `.env` (copie o `.env.example`).
 3. **Rode o fluxo de conexao:**
 
    ```bash
    npm run conectar
    ```
 
-   Abre `http://127.0.0.1:8788`. Clique em *Abrir o Pluggy Connect*, autorize
-   quantos bancos quiser, e os ids das conexoes caem no `.env` sozinhos — o
+   Abre `http://127.0.0.1:8788`. Clique em *Abrir o Pluggy Connect* e escolha o
+   conector **Meu Pluggy**, entrando com a conta do passo 1: e ele que traz as
+   contas que voce ja conectou. Os ids das conexoes caem no `.env` sozinhos — o
    provedor tambem troca para `pluggy` automaticamente. Se o widget nao carregar,
    a mesma pagina tem um campo para colar o id manualmente, copiado do Dashboard.
 
