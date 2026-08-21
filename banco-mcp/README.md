@@ -20,6 +20,16 @@ Ou, de uma vez so, da maquina limpa ate o servidor registrado no Claude:
 bash banco-mcp/instalar.sh
 ```
 
+Sem nem clonar antes (precisa de Node 20+ e `git`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fm85gn2y4q-maker/Teste-/refs/heads/claude/create-iphone-app-9YNOb/banco-mcp/instalar.sh | bash
+```
+
+O `refs/heads/` no meio da URL nao e enfeite: o branch tem barra no nome, e sem
+esse prefixo o GitHub nao consegue separar onde acaba o branch e comeca o
+caminho do arquivo — devolve 404.
+
 Para ligar nos seus bancos de verdade, sao tres comandos — o passo a passo esta
 em [Ligando em banco de verdade](#ligando-em-banco-de-verdade).
 
