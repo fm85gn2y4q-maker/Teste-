@@ -6,6 +6,7 @@
  * O relatorio mascara todo digito antes de imprimir: da para colar num chat
  * pedindo ajuda sem expor saldo, numero de conta nem CPF.
  */
+import { resolve } from 'node:path';
 import { carregarDotEnv } from './util/env.js';
 import { carregarConfig } from './config.js';
 import { criarProvider } from './providers/index.js';
@@ -145,7 +146,8 @@ async function main(): Promise<number> {
   titulo('Resultado');
   ok(`${contas.length + cartoes.length} produtos legiveis, 13 ferramentas prontas.`);
   console.log('\n  Plugue no Claude Code com:');
-  console.log(`    claude mcp add banco -- node ${process.cwd()}/dist/index.js\n`);
+  // O caminho e o do pacote, nao o de onde o comando foi chamado.
+  console.log(`    claude mcp add banco -- node ${resolve(import.meta.dirname, 'index.js')}\n`);
   return 0;
 }
 

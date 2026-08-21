@@ -73,9 +73,23 @@ export async function levantarGastos(
       .flatMap((f) => f.lancamentos)
       .filter((t) => (!opcoes.instituicaoId || cartaoDaInstituicao(cartoes, t.contaId, opcoes.instituicaoId)));
     const noPeriodo = aplicarFiltro(compras, { de: periodo.de, ate: periodo.ate });
-    if (noPeriodo.length > 0) {
-      notas.push(`Compras de cartao de credito somadas pela data da compra (${noPeriodo.length} lancamentos).`);
-      saidas = [...saidas, ...noPeriodo];
+
+    // Conta de cartao tambem tem credito: estorno, cashback e o proprio
+    // pagamento da fatura. Somar isso como gasto inverte o sinal do mes.
+    const debitos = noPeriodo.filter((t) => t.valor < 0);
+    const creditos = noPeriodo.filter((t) => t.valor > 0);
+
+    if (debitos.length > 0) {
+      notas.push(`Compras de cartao de credito somadas pela data da compra (${debitos.length} lancamentos).`);
+      saidas = [...saidas, ...debitos];
+    }
+    if (creditos.length > 0) {
+      const total = soma(creditos.map((t) => t.valor));
+      notas.push(
+        `${creditos.length} creditos no cartao (estorno, cashback ou pagamento de fatura) somam ` +
+        `${(total / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} e NAO foram ` +
+        'descontados do gasto — nao da para distinguir com seguranca um estorno de um pagamento de fatura.',
+      );
     }
   }
 

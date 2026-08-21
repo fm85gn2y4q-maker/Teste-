@@ -154,7 +154,15 @@ São **dois cadastros distintos**, e confundi-los e o tropeco mais comum:
    > Nunca cole esse par em chat, ticket, issue ou commit — inclusive numa
    > conversa com um assistente. Se acontecer, regenere as credenciais no
    > Dashboard: revogar leva segundos, e a chave antiga morre na hora.
-3. **Rode o fluxo de conexao:**
+3. **Traga as conexoes.** Se voce ja conectou seus bancos no passo 1, nao
+   precisa de navegador nenhum:
+
+   ```bash
+   npm run conexoes    # lista as conexoes da sua conta e grava os ids
+   ```
+
+   Se preferir conectar bancos novos na hora, ou se sua conta nao expuser a
+   lista pela API:
 
    ```bash
    npm run conectar
@@ -241,12 +249,17 @@ qualquer adaptador futuro.
 npm test
 ```
 
-45 testes cobrindo formatacao monetaria, aritmetica de datas, invariantes do
+46 testes cobrindo formatacao monetaria, aritmetica de datas, invariantes do
 acervo sintetico (o saldo de cada conta fecha com o extrato; nenhuma compra
 entra em duas faturas), a regra de nao contar gasto duas vezes, as 13
 ferramentas de ponta a ponta por um cliente MCP em memoria, e o adaptador Pluggy
 com `fetch` de mentira — inclusive a trava de escrita, a edicao cirurgica do
 `.env` e a resolucao de nome de instituicao.
+
+Alem dos testes, o pipeline inteiro ja foi exercitado contra um servidor HTTP
+que imita a Pluggy: autenticacao, listagem de conexoes, contas, extrato, fatura,
+carteira, credito, o diagnostico e as 13 ferramentas por um cliente MCP real.
+Foi esse exercicio que pegou o credito de cartao entrando como gasto.
 
 ## O que falta para virar produto
 

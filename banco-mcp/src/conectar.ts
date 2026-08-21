@@ -139,6 +139,50 @@ document.getElementById('abrir').onclick = async () => {
 <script src="${URL_WIDGET}" onerror="document.getElementById('estado').innerHTML='<span class=aviso>Nao consegui baixar o widget da Pluggy. Use o campo de colar o id abaixo.</span>'"></script>
 </body></html>`;
 
+/**
+ * Modo --listar: quem ja conectou os bancos no Meu Pluggy nao precisa de
+ * navegador nenhum. As conexoes ja existem na conta; aqui so perguntamos quais
+ * sao e gravamos os ids.
+ */
+async function listar(): Promise<number> {
+  log('\n  Procurando conexoes ja existentes na sua conta Pluggy...\n');
+
+  let itens: Array<{ id: string; status?: string; connector?: { name?: string } }>;
+  try {
+    itens = await cliente.paginar('/items');
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    log(`  Nao consegui listar: ${msg}\n`);
+    if (/40[45]/.test(msg)) {
+      log('  Esta conta nao expoe a lista de conexoes pela API.');
+      log('  Rode sem --listar para conectar pelo navegador, ou copie os ids do Dashboard.\n');
+    }
+    return 1;
+  }
+
+  if (itens.length === 0) {
+    log('  Nenhuma conexao encontrada.');
+    log('  Conecte seus bancos em meu.pluggy.ai e rode este comando de novo.\n');
+    return 1;
+  }
+
+  for (const i of itens) {
+    log(`  ${i.id}  ${i.connector?.name ?? '(conector desconhecido)'}  ${i.status ?? ''}`);
+  }
+
+  const gravados = gravarItens(itens.map((i) => i.id));
+  log(`\n  ${gravados.length} conexoes gravadas no .env.`);
+  log('  Proximo passo:  npm run diagnostico\n');
+  return 0;
+}
+
+if (process.argv.includes('--listar')) {
+  listar().then((c) => process.exit(c)).catch((e) => {
+    log(`  erro: ${e instanceof Error ? e.message : String(e)}`);
+    process.exit(1);
+  });
+}
+
 const servidor = createServer((req, res) => {
   void (async () => {
     const url = new URL(req.url ?? '/', `http://127.0.0.1:${PORTA}`);
@@ -182,11 +226,14 @@ const servidor = createServer((req, res) => {
   });
 });
 
-servidor.listen(PORTA, '127.0.0.1', () => {
+if (!process.argv.includes('--listar')) servidor.listen(PORTA, '127.0.0.1', () => {
   log('');
   log(`  Abra no navegador:  http://127.0.0.1:${PORTA}`);
   log('');
   log('  Conecte quantos bancos quiser. Cada um vira uma linha no .env.');
   log('  Quando terminar, encerre com Ctrl+C e rode:  npm run diagnostico');
+  log('');
+  log('  Se ja conectou tudo em meu.pluggy.ai, o navegador e dispensavel:');
+  log('    npm run conectar -- --listar');
   log('');
 });

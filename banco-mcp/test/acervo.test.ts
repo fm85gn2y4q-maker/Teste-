@@ -70,6 +70,38 @@ test('levantarGastos nao conta a mesma compra duas vezes', async () => {
   assert.ok(gastos.totalSaidas > 0);
 });
 
+test('credito no cartao nao vira gasto', async () => {
+  // Estorno, cashback e pagamento de fatura chegam como valor positivo na conta
+  // do cartao. Entrando na soma, o mes fecha com gasto negativo.
+  const base = new MockProvider({ hoje: HOJE, semente: 42 });
+  const periodo = resolverPeriodo({ mes: '2026-06' }, HOJE);
+
+  const comEstorno: typeof base = Object.create(base);
+  comEstorno.listarFaturas = async () => {
+    const faturas = await base.listarFaturas();
+    const alvo = faturas.find((f) => f.mesReferencia === '2026-06' && f.lancamentos.length > 0)!;
+    return faturas.map((f) => f !== alvo ? f : {
+      ...f,
+      lancamentos: [...f.lancamentos, {
+        ...alvo.lancamentos[0]!,
+        id: 'estorno-1',
+        // Data dentro do mes analisado: o ciclo da fatura de junho comeca em maio.
+        data: '2026-06-10',
+        descricao: 'ESTORNO COMPRA CANCELADA',
+        valor: 250_00,
+      }],
+    });
+  };
+
+  const gastos = await levantarGastos(comEstorno, periodo);
+  assert.ok(gastos.totalSaidas > 0, 'gasto do mes ficou negativo');
+  assert.equal(gastos.saidas.filter((t) => t.valor > 0).length, 0, 'credito entrou como saida');
+  assert.ok(
+    gastos.notas.some((n) => n.includes('creditos no cartao')),
+    'o credito sumiu do relatorio sem uma linha explicando',
+  );
+});
+
 test('patrimonio liquido desconta fatura em aberto e divida', async () => {
   const provider = new MockProvider({ hoje: HOJE, semente: 42 });
   const p = await levantarPatrimonio(provider);

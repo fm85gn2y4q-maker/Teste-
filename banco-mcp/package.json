@@ -20,6 +20,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "configurar": "npm run build --silent && node dist/configurar.js",
     "conectar": "npm run build --silent && node dist/conectar.js",
+    "conexoes": "npm run build --silent && node dist/conectar.js --listar",
     "diagnostico": "npm run build --silent && node dist/diagnostico.js"
   },
   "dependencies": {
