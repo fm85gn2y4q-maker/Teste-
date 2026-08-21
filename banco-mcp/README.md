@@ -110,21 +110,29 @@ claude mcp add banco -- node /caminho/para/banco-mcp/dist/index.js
 
 O repositorio ja vem configurado: `.mcp.json` registra o servidor e um hook de
 inicio de sessao instala as dependencias e compila. Toda sessao nova sobe com as
-13 ferramentas prontas, sem passo manual.
+13 ferramentas prontas, em **modo demonstracao**, sem passo manual.
 
-Por padrao roda em modo demonstracao. Para usar dados reais nas sessoes da web,
-defina as variaveis no ambiente do Claude Code (nao no `.env`, que nao vai para
-o repositorio):
+Para alcancar a Pluggy de dentro de uma sessao, o ambiente precisa liberar o
+dominio. No seletor de ambiente em `claude.ai/code` (o icone de nuvem acima da
+caixa de mensagem), engrenagem do ambiente > **Network access** > **Custom** >
+**Allowed domains**:
 
-```
-BANCO_MCP_PROVEDOR=pluggy
-PLUGGY_CLIENT_ID=...
-PLUGGY_CLIENT_SECRET=...
-PLUGGY_ITEM_IDS=...
+```text
+api.pluggy.ai
 ```
 
-E libere `api.pluggy.ai` na politica de rede do ambiente — sem isso o servidor
-sobe, mas nao alcanca a Pluggy.
+Marque **Also include default list of common package managers** — sem isso o
+`npm install` do hook para de funcionar, porque o registro do npm sai da lista.
+
+> **Nao coloque `PLUGGY_CLIENT_SECRET` no campo de variaveis de ambiente.**
+> A propria documentacao do Claude Code avisa que ambientes de nuvem nao tem
+> cofre de segredos e que os valores sao legiveis por quem usa o ambiente. Uma
+> credencial que le todas as suas contas bancarias nao pertence a um campo de
+> configuracao compartilhavel.
+>
+> Para dados bancarios reais, o lugar certo e a **sua maquina**: `.env` com
+> permissao 600, servidor rodando localmente, dados nao saindo dali. A sessao da
+> web fica com o modo demonstracao, que existe justamente para isso.
 
 ### Modo HTTP
 
