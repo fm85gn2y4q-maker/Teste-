@@ -106,6 +106,26 @@ claude mcp add banco -- node /caminho/para/banco-mcp/dist/index.js
 }
 ```
 
+### Claude Code na web
+
+O repositorio ja vem configurado: `.mcp.json` registra o servidor e um hook de
+inicio de sessao instala as dependencias e compila. Toda sessao nova sobe com as
+13 ferramentas prontas, sem passo manual.
+
+Por padrao roda em modo demonstracao. Para usar dados reais nas sessoes da web,
+defina as variaveis no ambiente do Claude Code (nao no `.env`, que nao vai para
+o repositorio):
+
+```
+BANCO_MCP_PROVEDOR=pluggy
+PLUGGY_CLIENT_ID=...
+PLUGGY_CLIENT_SECRET=...
+PLUGGY_ITEM_IDS=...
+```
+
+E libere `api.pluggy.ai` na politica de rede do ambiente — sem isso o servidor
+sobe, mas nao alcanca a Pluggy.
+
 ### Modo HTTP
 
 ```bash
