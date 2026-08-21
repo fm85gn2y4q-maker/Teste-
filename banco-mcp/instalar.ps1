@@ -46,6 +46,25 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
   return
 }
 
+# --- 2b. npm -----------------------------------------------------------------
+# O npm vem junto com o Node, mas pode ficar corrompido por atualizacao
+# interrompida ou por antivirus que poe um arquivo em quarentena. Melhor
+# descobrir isso agora do que no meio da instalacao.
+$npmVersao = ''
+try { $npmVersao = (npm -v 2>&1 | Out-String).Trim() } catch { $npmVersao = '' }
+if ($LASTEXITCODE -ne 0 -or $npmVersao -notmatch '^\d+\.') {
+  Erro 'O npm desta maquina esta quebrado.'
+  Write-Host 'Ele veio junto com o Node e nao esta conseguindo nem informar a propria versao.'
+  Write-Host ''
+  Write-Host 'Conserto: reinstale o Node, o que repara o npm junto.'
+  Write-Host '  winget install --id OpenJS.NodeJS.LTS --force'
+  Write-Host ''
+  Write-Host 'Ou baixe o instalador em https://nodejs.org e escolha Repair.'
+  Write-Host 'Depois FECHE e reabra o terminal, e rode este comando de novo.'
+  return
+}
+Write-Host "npm $npmVersao, ok."
+
 # --- 3. Codigo -------------------------------------------------------------
 if (Test-Path 'banco-mcp\package.json') {
   $Dir = (Resolve-Path 'banco-mcp').Path
@@ -69,7 +88,13 @@ Set-Location $Dir
 # --- 4. Dependencias e build ----------------------------------------------
 Passo 'Instalando dependencias e compilando'
 npm install --no-audit --no-fund --loglevel=error
-if ($LASTEXITCODE -ne 0) { Erro 'npm install falhou.'; return }
+if ($LASTEXITCODE -ne 0) {
+  Erro 'npm install falhou.'
+  Write-Host 'Se o erro acima menciona arquivos dentro de "Program Files\nodejs", o npm da'
+  Write-Host 'maquina esta corrompido — reinstale o Node para repara-lo:'
+  Write-Host '  winget install --id OpenJS.NodeJS.LTS --force'
+  return
+}
 npm run build --silent
 if ($LASTEXITCODE -ne 0) { Erro 'A compilacao falhou.'; return }
 Write-Host 'Compilado.'
