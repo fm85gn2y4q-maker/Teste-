@@ -25,6 +25,14 @@ if [ "$VERSAO" -lt 20 ]; then
 fi
 echo "Node $(node -v), ok."
 
+# --- 2b. npm ---------------------------------------------------------------
+if ! npm -v >/dev/null 2>&1; then
+  erro "O npm desta maquina esta quebrado: nao consegue nem informar a propria versao."
+  erro "Reinstale o Node, o que repara o npm junto: https://nodejs.org"
+  exit 1
+fi
+echo "npm $(npm -v), ok."
+
 # --- 2. Codigo -------------------------------------------------------------
 if [ -f "banco-mcp/package.json" ]; then
   DIR="$(pwd)/banco-mcp"
