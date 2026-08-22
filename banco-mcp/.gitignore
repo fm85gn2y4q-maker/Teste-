@@ -3,3 +3,6 @@ dist/
 dist-test/
 .env
 *.tsbuildinfo
+
+# Scripts descartaveis de teste manual
+*.tmp.mjs
