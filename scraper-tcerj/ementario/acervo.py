@@ -41,6 +41,10 @@ URL_PDF_ACORDAO = (
 URL_PROCESSO = (
     "https://www.tcerj.tc.br/consulta-processo/Processo/List?numeroProcesso={processo}"
 )
+# A Resposta a Consulta não se busca por número e ano como o acórdão: o PDF dela
+# tem identificador próprio, o `arquivoId`, que vem no payload da listagem. É o
+# mesmo endpoint que serve os atos normativos.
+URL_ARQUIVO = "https://www.tcerj.tc.br/cadastro-publicacoes-webapi/api/file/{id}"
 
 # Páginas públicas de onde cada espécie foi extraída — a tela de consulta serve
 # de referência quando não há documento próprio (caso das súmulas).
@@ -166,11 +170,25 @@ def separar_ementa(ementa: str | None) -> tuple[list[str], str]:
     return [], texto
 
 
-def montar_url_pdf(tipo: str, numero: str | None, ano: int | None) -> str | None:
-    """Endereço do PDF do acórdão, quando a espécie tiver um."""
-    if tipo != "acordao" or not numero or not ano:
-        return None
-    return URL_PDF_ACORDAO.format(numero=numero, ano=ano)
+def montar_url_pdf(tipo: str, numero: str | None, ano: int | None,
+                   arquivo_id: int | str | None = None) -> str | None:
+    """Endereço do documento, pelo caminho que cada espécie exige.
+
+    São dois caminhos, e confundi-los devolve `None` em silêncio — que foi o
+    que aconteceu: o inteiro teor das respostas a consulta foi coletado, e o
+    link delas continuou vazio porque a função só sabia montar o do acórdão.
+    Quem consultasse recebia o endereço do processo e o do portal, nunca o do
+    documento, e não tinha como conferir o que estava sendo citado.
+
+    - Acórdão: monta-se por número e ano.
+    - Resposta a Consulta: pelo `arquivoId`, que vem na listagem.
+    - Súmula: não tem documento próprio — o enunciado É o ato.
+    """
+    if tipo == "acordao":
+        return URL_PDF_ACORDAO.format(numero=numero, ano=ano) if numero and ano else None
+    if tipo == "resposta_consulta" and arquivo_id:
+        return URL_ARQUIVO.format(id=arquivo_id)
+    return None
 
 
 def montar_url_processo(processo: str | None) -> str | None:
@@ -895,9 +913,14 @@ class Acervo:
         tipo = linha["tipo"]
         assuntos = json.loads(linha["assuntos"] or "[]")
         revogacao = None
+        arquivo_id = None
         if tipo == "resposta_consulta" and "bruto" in linha.keys():
             from tcerj.consultas import dados_de_revogacao
             revogacao = dados_de_revogacao(linha["bruto"]) or None
+            try:
+                arquivo_id = json.loads(linha["bruto"] or "{}").get("arquivoId")
+            except (ValueError, TypeError):
+                arquivo_id = None
         return Resultado(
             id=linha["id"],
             tipo=tipo,
@@ -909,7 +932,8 @@ class Acervo:
             data_sessao=linha["data_sessao"],
             ano=linha["ano"],
             assuntos=assuntos,
-            url_documento=montar_url_pdf(tipo, linha["numero"], linha["ano"]),
+            url_documento=montar_url_pdf(tipo, linha["numero"], linha["ano"],
+                                         arquivo_id),
             url_processo=montar_url_processo(linha["processo"]),
             url_portal=PORTAIS.get(tipo, PORTAL_PADRAO),
             revogacao=revogacao,

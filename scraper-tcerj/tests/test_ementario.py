@@ -425,6 +425,28 @@ def test_cobertura_declara_a_data_por_especie(acervo):
     assert "Pesquisa Textual" in obs
 
 
+def test_resposta_a_consulta_tem_link_do_documento():
+    """Sem o link, a citação obriga a confiar — e foi o que aconteceu.
+
+    O inteiro teor das respostas foi coletado e o link continuou vazio, porque
+    `montar_url_pdf` só sabia montar o do acórdão. Quem consultava recebia o
+    endereço do processo e o do portal, nunca o do documento, e não tinha como
+    conferir o que estava sendo citado.
+    """
+    from ementario.acervo import montar_url_pdf
+
+    # Acórdão: por número e ano.
+    assert montar_url_pdf("acordao", "17798", 2026).endswith(
+        "/acordao/17798/2026?votoInteiro=true")
+    # Resposta a consulta: pelo arquivoId, que vem na listagem.
+    assert montar_url_pdf("resposta_consulta", "74", 2018, 613).endswith(
+        "/api/file/613")
+    # Sem arquivoId não se inventa endereço.
+    assert montar_url_pdf("resposta_consulta", "74", 2018) is None
+    # Súmula não tem documento próprio: o enunciado É o ato.
+    assert montar_url_pdf("sumula", "1", 2018, 999) is None
+
+
 def test_acervo_e_somente_leitura(acervo):
     import sqlite3
 
