@@ -87,7 +87,10 @@ Set-Location $Dir
 
 # --- 4. Dependencias e build ----------------------------------------------
 Passo 'Instalando dependencias e compilando'
-npm install --no-audit --no-fund --loglevel=error
+Write-Host 'Isso leva de um a varios minutos — no Windows o antivirus costuma'
+Write-Host 'inspecionar cada arquivo baixado. A saida do npm aparece abaixo.'
+Write-Host ''
+npm install --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) {
   Erro 'npm install falhou.'
   Write-Host 'Se o erro acima menciona arquivos dentro de "Program Files\nodejs", o npm da'
