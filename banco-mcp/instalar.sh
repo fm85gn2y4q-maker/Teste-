@@ -56,7 +56,8 @@ cd "$DIR"
 
 # --- 3. Dependencias e build ----------------------------------------------
 passo "Instalando dependencias e compilando"
-npm install --no-audit --no-fund --loglevel=error
+echo "Isso leva de um a varios minutos. A saida do npm aparece abaixo."
+npm install --no-audit --no-fund
 npm run build --silent
 echo "Compilado."
 
