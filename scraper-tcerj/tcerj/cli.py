@@ -157,6 +157,26 @@ def cmd_inteiro_teor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_consultas(args: argparse.Namespace) -> int:
+    from .consultas import coletar
+
+    config = Config.carregar(args.config)
+    if args.intervalo is not None:
+        config.intervalo_seg = args.intervalo
+    banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
+
+    def progresso(d: int, p: int, f: int) -> None:
+        print(f"  ... {d} respostas, {p} páginas, {f} falhas", flush=True)
+
+    with Armazenamento(banco) as armazenamento:
+        c = asyncio.run(coletar(config, armazenamento,
+                                max_documentos=args.max_documentos,
+                                ao_progresso=progresso))
+    print("\n" + f"Novas: {c['novos']} | páginas: {c['paginas']} "
+          f"| falhas: {c['falhas']} | sem arquivo: {c['sem_arquivo']}")
+    return 0
+
+
 def cmd_descobrir_acordaos(args: argparse.Namespace) -> int:
     from .http import Cliente
     from .pesquisa_textual import TETO, descobrir
@@ -349,6 +369,15 @@ def construir_parser() -> argparse.ArgumentParser:
              "mesmo custo de uma coleta — use quando houver motivo.",
     )
     p.set_defaults(func=cmd_inteiro_teor)
+
+    p = sub.add_parser(
+        "inteiro-teor-consultas",
+        help="baixa o inteiro teor das Respostas a Consulta (têm arquivo próprio)")
+    p.add_argument("--max-documentos", type=int)
+    p.add_argument("--intervalo", type=float,
+                   help="segundos entre requisições (servidor público)")
+    p.add_argument("--banco")
+    p.set_defaults(func=cmd_consultas)
 
     p = sub.add_parser(
         "descobrir-acordaos",

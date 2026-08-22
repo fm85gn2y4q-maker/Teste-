@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import pytest
@@ -358,6 +359,70 @@ def test_universo_usa_o_indice_de_onde_saiu_o_resultado(acervo_misto):
     """Trocar o denominador inverteria o sinal de "é amostra"."""
     assert acervo_misto.universo('"sobrepreço"') == 2               # acórdãos
     assert acervo_misto.universo('"sobrepreço"', em_ementas=True) == 1  # ementas
+
+
+# -- vigência da resposta a consulta ----------------------------------------
+#
+# A espécie tem peso próprio — é o que o Tribunal responde a quem pergunta em
+# tese — e PODE ser revogada. O campo esteve anos no payload sem ser lido.
+
+
+def test_resposta_a_consulta_revogada_sai_com_aviso():
+    from tcerj.consultas import dados_de_revogacao
+
+    bruto = json.dumps({
+        "revogada": True, "revogadaParcialmente": False,
+        "numeroRevogacao": 300, "dataRevogacao": "2026-05-18T00:00:00",
+        "justificativaRevogacao": "revogação da tese 2.6 do Prejulgado.",
+    })
+    d = dados_de_revogacao(bruto)
+    assert d["estado"] == "revogada"
+    assert d["por"] == 300
+    assert d["em"] == "2026-05-18"
+    assert "tese 2.6" in d["justificativa"]
+
+
+def test_revogacao_parcial_nao_e_revogacao_total():
+    """Confundir as duas apaga a parte que continua valendo."""
+    from tcerj.consultas import dados_de_revogacao
+
+    d = dados_de_revogacao(json.dumps(
+        {"revogada": False, "revogadaParcialmente": True}))
+    assert d["estado"] == "revogada_parcialmente"
+
+
+def test_consulta_vigente_nao_inventa_revogacao():
+    from tcerj.consultas import dados_de_revogacao
+
+    assert dados_de_revogacao(json.dumps({"revogada": False})) == {}
+    assert dados_de_revogacao(None) == {}
+    assert dados_de_revogacao("não é json") == {}
+
+
+def test_data_zero_da_api_nao_vira_data(acervo):
+    """A API usa 0001-01-01 para 'não revogado'. Isso não é uma data."""
+    from tcerj.consultas import dados_de_revogacao
+
+    d = dados_de_revogacao(json.dumps(
+        {"revogada": True, "dataRevogacao": "0001-01-01T00:00:00"}))
+    assert d["em"] is None
+
+
+def test_cobertura_declara_a_data_por_especie(acervo):
+    """As espécies não caminham juntas.
+
+    A resposta a consulta entra ao ser publicada; o acórdão só depois de
+    selecionado e ementado. Uma data só para o acervo faria quem pergunta pelo
+    julgado mais recente receber a de uma camada e atribuí-la ao todo.
+    """
+    especies = acervo.cobertura()["ementas"]["por_especie"]
+    assert especies, "sem espécies na cobertura"
+    for e in especies:
+        assert "julgado_mais_recente" in e
+        assert "sem_data_de_sessao" in e
+    obs = acervo.cobertura()["ementas"]["sobre_a_data_mais_recente"]
+    assert "POR ESPÉCIE" in obs
+    assert "Pesquisa Textual" in obs
 
 
 def test_acervo_e_somente_leitura(acervo):

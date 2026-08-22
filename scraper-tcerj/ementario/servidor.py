@@ -58,7 +58,8 @@ Dois acervos do Tribunal de Contas do Estado do Rio de Janeiro, no mesmo
 servidor e com ferramentas separadas:
 
     JURISPRUDÊNCIA   ementas de acórdãos, súmulas, respostas a consulta e
-                     questões de ordem, mais o inteiro teor dos acórdãos.
+                     questões de ordem, mais o inteiro teor dos acórdãos E
+                     das respostas a consulta.
     NORMAS           deliberações, resoluções, atos normativos, portarias e
                      notas técnicas do próprio Tribunal, de 1975 em diante,
                      inclusive o Regimento Interno.
@@ -86,8 +87,8 @@ Como responder ao advogado:
 DUAS BUSCAS, PROPOSITALMENTE SEPARADAS:
 - `pesquisar_jurisprudencia` procura nas **ementas** — o resumo oficial, com a
   tese já destilada pelo Tribunal.
-- `pesquisar_inteiro_teor` procura dentro dos **votos e acórdãos**, e devolve
-  a página. É onde está a fundamentação.
+- `pesquisar_inteiro_teor` procura dentro dos **votos, acórdãos e respostas a
+  consulta**, e devolve a página. É onde está a fundamentação.
 
 E duas ferramentas que não devolvem julgado, e sim o que se precisa saber para
 não errar o peso do que se achou: `sumulas_sobre` (há enunciado vinculante?) e
@@ -287,6 +288,18 @@ pode não ter.
 
 A ementa é o resumo oficial, não o acórdão. Quando a tese for decisiva para a
 peça, diga para conferir o inteiro teor pelo link antes de citar.
+
+RESPOSTA A CONSULTA TAMBÉM PODE SER REVOGADA
+
+Ela tem peso próprio: é o que o Tribunal responde a quem pergunta **em tese**,
+e vale como orientação, não como precedente de caso concreto. Tem inteiro teor
+— `pesquisar_inteiro_teor` alcança o texto dela, não só a ementa.
+
+E **pode ser revogada**. Quando for, o resultado traz `revogacao` e
+`aviso_vigencia`, com a justificativa que o Tribunal registrou. Sete das 572
+estão nessa condição, e algumas dizem expressamente que revogam uma *tese do
+Prejulgado*. Apresentar orientação revogada como vigente é o mesmo erro que o
+acervo normativo combate — numa base onde não se espera encontrá-lo.
 
 ACERVO NORMATIVO: A VIGÊNCIA É A REGRA QUE NÃO SE QUEBRA
 

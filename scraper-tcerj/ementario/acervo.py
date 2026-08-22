@@ -225,6 +225,11 @@ class Resultado:
     # diferença entre orientação que o Tribunal assume e decisão de caso
     # concreto que apenas existe.
     na_curadoria: bool = True
+    # Resposta a consulta pode ser REVOGADA, e a listagem diz quando. Nove das
+    # 572 estão nessa condição. O campo ficou anos no payload sem ser lido, e
+    # uma orientação revogada apresentada como vigente é o mesmo erro que o
+    # acervo normativo combate — numa base onde ninguém o esperava.
+    revogacao: dict[str, Any] | None = None
 
     @property
     def url(self) -> str:
@@ -239,6 +244,13 @@ class Resultado:
             "citacao": self.citacao,
             "trecho": self.trecho,
             "na_jurisprudencia_selecionada": self.na_curadoria,
+            **({"revogacao": self.revogacao,
+                "aviso_vigencia": (
+                    f"Esta Resposta a Consulta foi {self.revogacao['estado'].replace('_', ' ')}"
+                    + (f" pela de nº {self.revogacao['por']}" if self.revogacao.get("por") else "")
+                    + (f", em {self.revogacao['em']}" if self.revogacao.get("em") else "")
+                    + ". NÃO a apresente como orientação vigente do Tribunal.")}
+               if self.revogacao else {}),
             "peso_da_fonte": (
                 "Ementa da Jurisprudência Selecionada: o Serviço de Jurisprudência "
                 "do TCE-RJ escolheu divulgar este julgado como orientação."
@@ -655,16 +667,33 @@ class Acervo:
 
     def cobertura(self) -> dict[str, Any]:
         total = self.conexao.execute("SELECT COUNT(*) FROM documentos").fetchone()[0]
+        # A data do julgamento mais recente sai POR ESPÉCIE, e não uma só para
+        # o acervo.
+        #
+        # As três alimentam por caminhos distintos e não caminham juntas: as
+        # respostas a consulta entram assim que publicadas, enquanto o acórdão
+        # só aparece depois de o Serviço de Jurisprudência escolher e ementar.
+        # Medido: 22/07/2026 contra 27/05/2026, quase dois meses de diferença.
+        #
+        # Sem o corte por espécie, quem perguntasse "qual o julgado mais
+        # recente" receberia a data de uma camada e a atribuiria ao todo — e
+        # daí a "não há julgado posterior a maio" é um passo.
         especies = []
         for linha in self.conexao.execute(
-            "SELECT tipo, COUNT(*) n, MIN(ano) a, MAX(ano) b FROM documentos "
-            "GROUP BY tipo ORDER BY n DESC"
+            "SELECT tipo, COUNT(*) n, MIN(ano) a, MAX(ano) b,"
+            "       MIN(NULLIF(data_sessao, '')) de, MAX(NULLIF(data_sessao, '')) ate,"
+            "       SUM(CASE WHEN data_sessao IS NULL OR data_sessao = ''"
+            "                THEN 1 ELSE 0 END) sem_data"
+            " FROM documentos GROUP BY tipo ORDER BY n DESC"
         ):
             especies.append({
                 "especie": ROTULOS.get(linha["tipo"], linha["tipo"]),
                 "chave": linha["tipo"],
                 "quantidade": linha["n"],
                 "periodo": f"{linha['a']}–{linha['b']}" if linha["a"] else None,
+                "julgado_mais_antigo": linha["de"],
+                "julgado_mais_recente": linha["ate"],
+                "sem_data_de_sessao": linha["sem_data"],
             })
 
         relatores = [
@@ -737,12 +766,33 @@ class Acervo:
             "SELECT COUNT(*) FROM documentos WHERE tipo = 'sumula'"
         ).fetchone()[0]
 
+        # `_citacao` monta a referência a partir da linha inteira: pedir só
+        # algumas colunas rende KeyError na primeira que faltar.
+        linha = self.conexao.execute(
+            "SELECT * FROM documentos "
+            "WHERE data_sessao IS NOT NULL AND data_sessao <> '' "
+            "ORDER BY data_sessao DESC LIMIT 1").fetchone()
+        mais_recente = {
+            "especie": ROTULOS.get(linha["tipo"], linha["tipo"]),
+            "citacao": _citacao(linha),
+            "data_sessao": linha["data_sessao"],
+        } if linha else None
+
         return {
             "ementas": {
                 "total": total,
                 "por_especie": especies,
+                "documento_mais_recente": mais_recente,
                 "observacao": "Cada ementa é um ato de curadoria do Tribunal. Um mesmo "
                               "acórdão pode render mais de uma, com teses distintas.",
+                "sobre_a_data_mais_recente":
+                    "`julgado_mais_recente` é POR ESPÉCIE, e elas não caminham "
+                    "juntas: a resposta a consulta entra ao ser publicada, o "
+                    "acórdão só depois de selecionado e ementado. Ao dizer qual é "
+                    "o julgado mais recente, diga de que espécie — e lembre que os "
+                    "acórdãos vindos da Pesquisa Textual não têm data de sessão no "
+                    "registro, apenas o ano, de modo que a posição deles na linha "
+                    "do tempo é desconhecida sem abrir o documento.",
             },
             "inteiro_teor": {
                 "documentos_com_inteiro_teor": com_texto,
@@ -751,8 +801,10 @@ class Acervo:
                 "periodo_por_origem": periodos,
                 "acordaos_por_ano": por_ano,
                 "pendencias": pendencias,
-                "observacao": "Só acórdãos têm inteiro teor. Súmulas, respostas a "
-                              "consulta e questões de ordem existem apenas como ementa. "
+                "observacao": "Acórdãos e Respostas a Consulta têm inteiro teor. "
+                              "Súmulas e questões de ordem existem apenas como "
+                              "enunciado ou ementa — e no caso da súmula isso é "
+                              "correto: o enunciado É o ato. "
                               "O período acima é o do corpus textual, e NÃO coincide "
                               "necessariamente com o das ementas: nada anterior ao "
                               "primeiro ano listado foi coletado, e a ausência de um "
@@ -842,6 +894,10 @@ class Acervo:
 
         tipo = linha["tipo"]
         assuntos = json.loads(linha["assuntos"] or "[]")
+        revogacao = None
+        if tipo == "resposta_consulta" and "bruto" in linha.keys():
+            from tcerj.consultas import dados_de_revogacao
+            revogacao = dados_de_revogacao(linha["bruto"]) or None
         return Resultado(
             id=linha["id"],
             tipo=tipo,
@@ -856,6 +912,7 @@ class Acervo:
             url_documento=montar_url_pdf(tipo, linha["numero"], linha["ano"]),
             url_processo=montar_url_processo(linha["processo"]),
             url_portal=PORTAIS.get(tipo, PORTAL_PADRAO),
+            revogacao=revogacao,
         )
 
 

@@ -5,7 +5,7 @@ Janeiro, e os serve a assistentes de IA pelo protocolo MCP:
 
 | | |
 |---|---|
-| **Jurisprudência** | 1.671 ementas e o inteiro teor de **25.561 acórdãos** — 572.037 páginas |
+| **Jurisprudência** | 1.671 ementas e o inteiro teor de **25.561 acórdãos** e **555 respostas a consulta** — 576.741 páginas |
 | **Normas** | **973 atos** — deliberações, resoluções, atos normativos, portarias, notas técnicas e o Regimento Interno |
 
 Bancos SQLite com busca textual, exportáveis para JSONL e CSV. O coletor das
@@ -355,6 +355,27 @@ E duas armadilhas que só aparecem no uso:
   Por isso as expressões ficam em Python.
 - **O teto de 10.000 por consulta é real.** `"termo aditivo"` bateu nele, e esse
   recorte permanece incompleto. Contorna-se fatiando por ano ou município.
+
+## Respostas a Consulta — inteiro teor e vigência
+
+A espécie tem peso próprio: é o que o Tribunal responde a quem pergunta **em
+tese**, e vale como orientação, não como precedente de caso concreto.
+
+```bash
+python -m tcerj -c config.json inteiro-teor-consultas
+```
+
+**555 das 572** com texto, 4.704 páginas. O `arquivoId` já vinha no payload da
+listagem desde a coleta original — o PDF sempre esteve a uma requisição de
+distância, pelo mesmo endpoint `api/file/{id}` que o acervo normativo usa.
+
+Duas coisas que a listagem guardava e ninguém lia:
+
+- **A resposta a consulta pode ser REVOGADA.** Sete estão, e a justificativa às
+  vezes declara revogar uma *tese do Prejulgado*, numerada. O servidor devolve
+  `revogacao` e `aviso_vigencia` em cada resultado atingido.
+- **16 são PDF escaneado**, sem camada de texto — imagem pura, de 2018, 2020 e
+  2024. Não é falha da coleta; extrair exigiria OCR.
 
 ## Acervo normativo — deliberações, resoluções e o Regimento
 

@@ -17,7 +17,7 @@ processo:
 
 | | |
 |---|---|
-| **Jurisprudência** | ementas, súmulas, respostas a consulta e o inteiro teor dos acórdãos |
+| **Jurisprudência** | ementas e súmulas, mais o inteiro teor dos acórdãos e das respostas a consulta |
 | **Normas** | deliberações, resoluções, atos normativos, portarias e notas técnicas do Tribunal, inclusive o Regimento Interno |
 
 O usuário é advogado que atua em Direito Administrativo, licitações e
@@ -42,7 +42,7 @@ interpretador.
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-**164 testes**, alguns minutos (parte sobe Chromium contra um portal falso).
+**169 testes**, alguns minutos (parte sobe Chromium contra um portal falso).
 
 ## O que já foi coletado — NÃO refazer
 
@@ -52,8 +52,22 @@ interpretador.
 |---|---|
 | Ementas | **1.671** (1.067 acórdãos, 572 respostas a consulta, 28 súmulas, 4 questões de ordem) |
 | Acórdãos com inteiro teor | **25.561** |
-| Páginas | **572.037** (1,3 bilhão de caracteres) |
-| Período do corpus textual | **2021–2026**, nas duas origens |
+| Respostas a Consulta com inteiro teor | **555** de 572 |
+| Páginas | **576.741** (1,32 bilhão de caracteres) |
+| Período do corpus textual dos acórdãos | **2021–2026**, nas duas origens |
+
+**Resposta a Consulta tem inteiro teor desde 05/08/2026.** O `arquivoId`
+sempre esteve no payload guardado; o acervo declarava "só acórdãos têm inteiro
+teor" por omissão, não por impedimento. São 4.704 páginas, ~10 por documento.
+
+Das 17 que faltam, **16 são PDF escaneado** — imagem, sem camada de texto,
+espalhadas por 2018, 2020 e 2024. Extrair exigiria OCR. Uma não tem arquivo na
+listagem.
+
+**Resposta a Consulta pode ser REVOGADA**, e sete estão: 522/2025, 350/2022,
+293/2021, 179/2020, 42/2019, 74/2018 e 83/2018. A listagem traz `revogada`,
+`revogadaParcialmente` e a justificativa — que às vezes diz revogar uma *tese
+do Prejulgado*, numerada. O campo ficou anos sem ser lido.
 
 Banco: `scraper-tcerj\dados\tcerj.sqlite` (**2,8 GB**) — fora do Git.
 
@@ -176,7 +190,7 @@ que o portal serve é a Deliberação 338/2023, alterada pelas 341/2023 e
 alteravam o regimento **anterior** — citá-las como se alcançassem o texto atual
 seria erro.
 
-## Cinco coisas que custaram caro
+## Seis coisas que custaram caro
 
 **1. Identidade.** Um acórdão rende mais de uma ementa selecionada — teses
 distintas do mesmo julgamento. Espécie + número + ano **não** é chave única; as
@@ -195,7 +209,13 @@ durante a inserção falhava para todo revogador que chegasse antes do revogado 
 pela..."). A alteração do Regimento é declarada na **ativa**, na ementa de quem
 altera. O caso mais importante do acervo escapava pela conjugação do verbo.
 
-**5. `SUAS` colide com `suas`.** A sigla devolve 17.256 acórdãos — o mesmo que
+**5. As espécies não caminham juntas no tempo.** A resposta a consulta entra
+ao ser publicada; o acórdão só depois de selecionado e ementado. Em 05/08/2026
+a diferença era de quase dois meses — 22/07 contra 27/05. Dizer "o julgado mais
+recente é de maio" sem qualificar a espécie é dar a data de uma camada e
+atribuí-la ao todo. `cobertura_do_acervo` declara o corte por espécie.
+
+**6. `SUAS` colide com `suas`.** A sigla devolve 17.256 acórdãos — o mesmo que
 o pronome possessivo, porque o índice não distingue maiúsculas. Use
 `"Sistema Único de Assistência Social"`, que devolve 2.956.
 
