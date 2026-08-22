@@ -27,9 +27,13 @@ export async function perguntar(rotulo: string, oculto = false): Promise<string>
     let buffer = '';
 
     const encerrar = (): void => {
+      process.stdin.off('data', aoDigitar);
       process.stdin.setRawMode(false);
       process.stdin.pause();
-      process.stdin.off('data', aoDigitar);
+      // Solta o descritor: sem isso o libuv do Windows quebra com
+      // "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)" quando o
+      // processo termina com o handle ainda ativo.
+      process.stdin.unref();
       process.stdout.write('\n');
     };
 
@@ -48,11 +52,20 @@ export async function perguntar(rotulo: string, oculto = false): Promise<string>
         return;
       }
       if (codigo === DELETE || codigo === BACKSPACE) {
-        buffer = buffer.slice(0, -1);
+        if (buffer.length > 0) {
+          buffer = buffer.slice(0, -1);
+          // Apaga um asterisco da tela.
+          process.stdout.write('\b \b');
+        }
         return;
       }
       // Ignora sequencia de controle (setas, escape) e aceita o resto.
-      if (codigo !== undefined && codigo >= 32) buffer += texto;
+      if (codigo !== undefined && codigo >= 32) {
+        buffer += texto;
+        // Um asterisco por caractere: o valor continua escondido, mas quem
+        // digita ve que esta sendo recebido. Campo mudo parece travado.
+        process.stdout.write('*'.repeat(texto.length));
+      }
     }
 
     process.stdin.on('data', aoDigitar);

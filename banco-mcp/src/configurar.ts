@@ -58,7 +58,7 @@ async function main(): Promise<number> {
     return 1;
   }
 
-  const clientSecret = (await perguntar('  clientSecret: ', true)) || process.env.PLUGGY_CLIENT_SECRET || '';
+  const clientSecret = (await perguntar('  clientSecret (aparece como asteriscos): ', true)) || process.env.PLUGGY_CLIENT_SECRET || '';
   if (!clientSecret) {
     console.log('\n  Sem clientSecret nao da para seguir.\n');
     return 1;
@@ -103,7 +103,7 @@ async function gravar(clientId: string, clientSecret: string): Promise<number> {
   return 0;
 }
 
-main().then((c) => process.exit(c)).catch((e) => {
+main().then((c) => { process.exitCode = c; }).catch((e) => {
   console.log(`\n  ${e instanceof Error ? e.message : String(e)}\n`);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -151,9 +151,9 @@ async function main(): Promise<number> {
   return 0;
 }
 
-main().then((codigo) => process.exit(codigo)).catch((e) => {
+main().then((codigo) => { process.exitCode = codigo; }).catch((e) => {
   console.log(`\n  ERRO  ${e instanceof Error ? e.message : String(e)}`);
   console.log('\n  Se o erro for 401 ou 403, a credencial da Pluggy esta errada ou expirou.');
   console.log('  Se for 404 em /items, o id da conexao no .env nao existe mais — rode: npm run conectar\n');
-  process.exit(1);
+  process.exitCode = 1;
 });
