@@ -5,161 +5,263 @@ existe, onde está, o que está publicado e o que **não** refazer.
 
 Leia isto primeiro. Depois, conforme a tarefa: `METODO.md` (como foi feito e
 por quê), `README.md` (o coletor), `HOSPEDAGEM.md` (deploy),
+`PESQUISA_TEXTUAL_API.md` (a API que trouxe 24 mil acórdãos),
 `TESTE_ACEITACAO_v2.md` (como se avalia o comportamento).
 
 ---
 
 ## O que é
 
-Coletor e servidor MCP da jurisprudência do **TCE-RJ**. O usuário é advogado
-que atua em Direito Administrativo, licitações e contratos, com foco no Rio de
-Janeiro. O acervo serve para pesquisar precedente e **citar em peça** — daí a
-insistência em página, link de conferência e proveniência.
+Coletor e servidor MCP de **dois acervos do TCE-RJ**, servidos pelo mesmo
+processo:
+
+| | |
+|---|---|
+| **Jurisprudência** | ementas, súmulas, respostas a consulta e o inteiro teor dos acórdãos |
+| **Normas** | deliberações, resoluções, atos normativos, portarias e notas técnicas do Tribunal, inclusive o Regimento Interno |
+
+O usuário é advogado que atua em Direito Administrativo, licitações e
+contratos, com foco no Rio de Janeiro, e é Procurador do Município de Mesquita.
+O acervo serve para pesquisar e **citar em peça** — daí a insistência em
+página, link de conferência, proveniência e vigência.
 
 ## Onde está
 
 ```
-C:\Users\Matheus Menegatti\projetos\Teste-\scraper-tcerj
+projetos\Teste-\scraper-tcerj    jurisprudência + servidor MCP dos dois acervos
+projetos\Teste-\normas-tcerj     coletor das normas
 ```
 
 Branch: `claude/tce-rj-jurisprudencia-scraping-r2oi6p`
 Repositório: `github.com/fm85gn2y4q-maker/Teste-` (público)
 
-Ambiente pronto em `.venv` (Python 3.12, Playwright com Chromium, PyMuPDF, MCP).
+Ambiente pronto em `scraper-tcerj\.venv`. O coletor de normas roda com o mesmo
+interpretador.
 
 ```bash
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-150 testes. Rodam em ~1 min (7 sobem Chromium contra um portal falso local).
+**164 testes**, alguns minutos (parte sobe Chromium contra um portal falso).
 
 ## O que já foi coletado — NÃO refazer
+
+### Jurisprudência
 
 | | |
 |---|---|
 | Ementas | **1.671** (1.067 acórdãos, 572 respostas a consulta, 28 súmulas, 4 questões de ordem) |
-| Acórdãos com inteiro teor | **1.042** |
-| Páginas de voto | **16.343** (35,4 milhões de caracteres) |
+| Acórdãos com inteiro teor | **25.561** |
+| Páginas | **572.037** (1,3 bilhão de caracteres) |
+| Período do corpus textual | **2021–2026**, nas duas origens |
 
-Banco: `dados\tcerj.sqlite` (81,3 MB) — **fora do Git**, é artefato de dados.
+Banco: `scraper-tcerj\dados\tcerj.sqlite` (**2,8 GB**) — fora do Git.
 
-Coletar tudo de novo leva ~1h e bate 1.064 vezes no servidor do Tribunal. A
-coleta é incremental: `inteiro-teor` só busca o que falta. Não force.
+**Duas origens, e elas não têm o mesmo peso:**
 
-Três pendências, registradas como estado e não como erro: 1 acórdão cujo PDF o
-Tribunal não publica (404) e 2 ementas sem número de acórdão. A rotina
-incremental as reteta sozinha.
+```
+ 1.043   Jurisprudência Selecionada — curadoria do Serviço de Jurisprudência
+24.518   Pesquisa Textual — acórdãos reais, sem ementa oficial nem aval
+```
+
+Todo resultado declara `na_jurisprudencia_selecionada`. Antes da expansão o
+campo não teria valor informativo — é a ampliação que o cria.
+
+Os 24.518 vieram de **doze expressões exatas** de licitações e contratos:
+dispensa de licitação, inexigibilidade, pregão eletrônico, projeto básico,
+capacidade técnica, equilíbrio econômico-financeiro, fiscal do contrato, termo
+aditivo, sobrepreço, superfaturamento, jogo de planilha, notória
+especialização. `"termo aditivo"` bateu o teto de 10.000 — **esse recorte está
+incompleto**.
+
+Coleta completa: ~21 h e 25 mil requisições. É incremental; não force.
+
+50 pendências (0,2%): 45 acórdãos do bloco 46.959–46.999/2022 que a origem
+recusa com `400 Bad Request` de forma reprodutível, 3 sem publicação, 2 ementas
+cujo acórdão ainda não saiu.
+
+### Normas
+
+| espécie | atos | revogados | período |
+|---|---|---|---|
+| Resolução | 366 | 62 | 1975–2024 |
+| Deliberação | 273 | 102 | 1975–2024 |
+| Ato Normativo | 270 | 91 | 1980–2024 |
+| Súmula | 28 | — | 2018–2026 |
+| Portaria | 26 | 2 | 2019–2024 |
+| Nota Técnica | 10 | — | 2020–2025 |
+
+**973 atos, 5.042 páginas, 22 MB.** Banco:
+`normas-tcerj\dados\normas-tcerj.sqlite`.
+
+```bash
+python -m normas coletar && python -m normas textos && python -m normas relacoes
+```
+
+~25 min. O grafo de revogação vem pronto da fonte — 257 relações declaradas
+pelo próprio Tribunal, mais 16 revogações tácitas mineradas da prosa da ementa.
 
 ## O que está publicado
-
-**Serviço em produção (Render, plano gratuito):**
 
 ```
 https://ementario-tcerj.onrender.com/mcp
 ```
 
-Conectado como conector personalizado no Claude e no ChatGPT, sem
-autenticação. Dorme após ~15 min parado; a primeira consulta seguinte demora
-perto de um minuto.
+Render, plano gratuito, sem autenticação. Conectado no Claude e no ChatGPT.
+Hiberna após ~15 min; a consulta seguinte demora perto de um minuto.
 
-**Acervo como asset de release:**
+**O plano gratuito aguenta os 2,7 GB.** Isso foi testado, não deduzido. Houve
+uma recomendação errada de migrar para VPS ou plano pago, e ela vinha de
+confundir **disco persistente** — vedado no gratuito — com **dado dentro da
+imagem**, que é o que este projeto usa. O filesystem efêmero basta porque nada
+é escrito.
+
+**Acervos como assets de release:**
 
 ```
-tag acervo-v2.0.0 → ementario-tcerj-v2.0.0.db.gz (24,0 MB)
-sha256 513fd3146272d98a71dfa8b98aba5ce27b6262ce2f260360cbd0e2d135bab395
+acervo-v3.0.0 → ementario-tcerj-v3.0.0.db.gz (641 MB)
+  sha256 1e1c287b378285b45e79d1ea1d8f9e0eeafd788b8fcfe47b12d58657295814db
+
+normas-v1.0.0 → normas-tcerj-v1.0.0.db.gz (6,8 MB)
+  sha256 d88998db7d8d7fe2f9304900c16f9847a5897705639b4429448bfdf61a3538c4
 ```
 
-O `Dockerfile` baixa esse arquivo na construção e confere o hash. Publicar
-acervo novo = gerar `.gz`, criar release nova, trocar duas linhas no
-`Dockerfile` (ARG `ACERVO_URL` e `ACERVO_SHA256`), enviar.
-
-**Extensão local** (`.mcpb`) instalada no Claude Desktop, gerada por
-`empacotar_mcpb.py`. Contém uma cópia do acervo e roda por stdio.
+O `Dockerfile` baixa os dois na construção e confere os hashes. Publicar acervo
+novo = gerar `.gz`, criar release, trocar as linhas `ARG` correspondentes.
 
 ## Ferramentas que o servidor expõe
 
 ```
-pesquisar_jurisprudencia   busca nas ementas
-pesquisar_inteiro_teor     busca dentro dos votos, devolve a página
-ler_paginas                lê páginas contíguas, com expansão adiante
-obter_documento            ementa completa
-listar_documentos          varredura por espécie/ano/relator
-cobertura_do_acervo        volumes, período, limites
-search / fetch             fachadas para a pesquisa profunda do ChatGPT
+JURISPRUDÊNCIA
+  pesquisar_jurisprudencia   busca nas ementas
+  pesquisar_inteiro_teor     busca nos votos, devolve a página
+  panorama_do_tema           quantos acórdãos existem, por ano, quanto ficou por ler
+  sumulas_sobre              súmula antes de acórdão; sem casamento, devolve as 28
+  ler_paginas                páginas contíguas, com expansão adiante
+  obter_documento            ementa completa
+  listar_documentos          varredura por espécie/ano/relator
+
+NORMAS
+  pesquisar_normas           busca nas ementas dos atos
+  pesquisar_dispositivos     busca no texto, devolve a página
+  situacao_do_ato            vigente | revogado | revogado_tacitamente
+  historico_do_ato           o que revogou e o que o alterou
+  ler_norma                  páginas contíguas
+  listar_normas              por espécie, ano ou vigência
+
+COMUNS
+  cobertura_do_acervo        volumes, período e limites dos dois
+  search / fetch             fachadas para a pesquisa profunda do ChatGPT
 ```
 
-## Três coisas que custaram caro e não devem se perder
+## As réguas — e são duas, diferentes
 
-**1. Proveniência.** O PDF do acórdão reúne, no mesmo texto, a decisão
-colegiada, o relatório, as **alegações de defesa**, a instrução técnica, o
-parecer do MPC, precedentes transcritos e o voto. Para a busca são caracteres
-iguais. Um trecho de defesa apresentado como entendimento do Tribunal **inverte
-o precedente**. As instruções do servidor obrigam a verificar de onde vem o
-trecho antes de atribuí-lo à Corte.
+**Jurisprudência erra por PROVENIÊNCIA.** O PDF do acórdão reúne decisão
+colegiada, relatório, **alegações de defesa**, instrução técnica, parecer do
+MPC, precedentes transcritos e voto. Para a busca são caracteres iguais. Um
+trecho de defesa apresentado como entendimento do Tribunal **inverte o
+precedente**.
 
-**2. Identidade.** Um acórdão rende mais de uma ementa selecionada — teses
-distintas do mesmo julgamento. Espécie + número + ano **não** é chave única. As
-páginas pertencem ao documento oficial (`acordao-58739-2023`), não ao registro
-de ementa.
+**Norma erra por VIGÊNCIA.** Um quarto dos atos está revogado, e o PDF do
+revogado é idêntico, em aparência, ao do vigente. Nenhum resultado sai sem
+`situacao`.
 
-**3. Curadoria.** A base de acórdãos é a *Jurisprudência Selecionada*, não
-todos os acórdãos do Tribunal. Ausência aqui não prova que a tese não existe.
+Confundi-las é o erro que o servidor mais teme, e as instruções abrem
+declarando as duas.
+
+**Nenhum ato normativo tem texto consolidado.** Todo PDF é a redação original;
+alteração posterior é ato autônomo. Vale inclusive para o Regimento Interno: o
+que o portal serve é a Deliberação 338/2023, alterada pelas 341/2023 e
+347/2024. As outras 58 deliberações que mencionam o Regimento são anteriores e
+alteravam o regimento **anterior** — citá-las como se alcançassem o texto atual
+seria erro.
+
+## Cinco coisas que custaram caro
+
+**1. Identidade.** Um acórdão rende mais de uma ementa selecionada — teses
+distintas do mesmo julgamento. Espécie + número + ano **não** é chave única; as
+páginas pertencem ao documento oficial (`acordao-58739-2023`).
+
+**2. Número de ato não é chave.** A numeração das normas recicla a cada ano —
+as 26 portarias usam 11 números; o Ato Normativo nº 2 aparece em quatro
+arquivos. Coletar pelo número sobrescreve e pendura o texto no ato do ano
+errado, sem erro e sem aviso. A coleta usa `arquivoId`, que é único.
+
+**3. Ausência num grafo de revogação lê-se como vigência.** Resolver o vínculo
+durante a inserção falhava para todo revogador que chegasse antes do revogado —
+82 relações gravadas das 257 reais. Corrigido com segundo passe.
+
+**4. Voz verbal.** A extração de relações lia só a passiva ("Alterada
+pela..."). A alteração do Regimento é declarada na **ativa**, na ementa de quem
+altera. O caso mais importante do acervo escapava pela conjugação do verbo.
+
+**5. `SUAS` colide com `suas`.** A sigla devolve 17.256 acórdãos — o mesmo que
+o pronome possessivo, porque o índice não distingue maiúsculas. Use
+`"Sistema Único de Assistência Social"`, que devolve 2.956.
 
 ## Armadilhas conhecidas
 
-**Cache do conector.** Ao mudar ferramentas ou instruções, o Claude e o ChatGPT
+**Intervalo de versão aberto à direita.** `mcp>=1.28` sem teto quebrou três
+deploys quando a 2.0.0 saiu e removeu `mcp.server.fastmcp`. Funcionou num dia e
+quebrou no seguinte sem ninguém mexer em nada relevante — **o que muda no
+código não é o mesmo que o que muda no mundo**. Todos os requisitos declaram
+`<2`.
+
+**Cache do conector.** Ao mudar ferramentas ou instruções, Claude e ChatGPT
 continuam com a versão antiga. Desligar e religar não basta — é preciso
-**remover e recriar** o conector. Confirme com `cobertura_do_acervo`: tem de
-vir **1.042 documentos com inteiro teor**.
+**remover e recriar** o conector. Confirme com `cobertura_do_acervo`: têm de
+vir **25.561** acórdãos com inteiro teor e **16 ferramentas**.
+
+**Serviços órfãos no Render.** Serviço removido do `render.yaml` não é apagado:
+fica no painel e continua tentando construir a cada push. O Render também
+sufixa o nome quando ele já existe (`-kip3`), e aí a variável de domínio fica
+errada e o serviço responde **421 Invalid Host header** a tudo.
+
+**O painel do Render não é automatizável.** A extensão de navegador espera o
+`document_idle`, que aquela aplicação nunca atinge; toda leitura expira em 45 s.
+Apagar serviço e forçar deploy são cliques do usuário.
 
 **Python 3.13 quebrado nesta máquina.** Falta `html/entities.py`, `difflib` e
-`_curses`. A extensão `.mcpb` foi fixada no Python 3.12 por causa disso. Se for
-mexer nisso, o conserto é reparar a instalação do 3.13.
+`_curses`. A extensão `.mcpb` foi fixada no 3.12 por causa disso.
 
 **Espaços no caminho.** O Claude Desktop parte o `command` do manifesto no
-primeiro espaço. O empacotador converte para o nome curto 8.3 automaticamente.
+primeiro espaço. O empacotador converte para o nome curto 8.3.
 
-**Erro de processamento não se conserta rebaixando.** Se a extração ou a
-limpeza tiver defeito, use `reparar-inteiro-teor`, que refaz sobre o material
-guardado.
+**Erro de processamento não se conserta rebaixando.** Use
+`reparar-inteiro-teor`, que refaz sobre o material já guardado.
 
-## O que estava em aberto
+## O que está em aberto
 
-**Base de doutrina e pareceres.** Levantamento já feito: ~8.000 documentos e
-28 GB no perfil do usuário; a biblioteca fica em
+**Lei Orgânica do TCE-RJ** (Lei Complementar estadual nº 63/1990) não está em
+nenhum dos dois acervos: é lei da ALERJ, não ato do Tribunal. Conferir se está
+no MCP `legis-rj` antes de coletar em duplicidade.
+
+**`"termo aditivo"` incompleto.** Bateu o teto de 10.000 na descoberta.
+Completa-se fatiando por ano ou município.
+
+**Ato Normativo nº 1/1980** traz, no portal, o texto do de 1982 — erro da
+fonte, não da coleta. O texto verdadeiro não está disponível, e o ato é
+substantivo: a ementa registra oito alterações e a revogação pelo 160.
+
+**Base de doutrina.** Levantamento feito: ~8.000 documentos, 28 GB, em
 `~\OneDrive\Documentos\Livros`. Das 11 obras de licitações medidas, 8 têm texto
-aproveitável e 3 são digitalização sem OCR. **O Marçal Justen Filho sobre a
-14.133 (1.825 páginas) tem OCR degradado — 58% contra 71–87% das demais.**
-Transcrever dali produziria citação falsa.
+aproveitável e 3 são digitalização sem OCR. O **Marçal Justen Filho sobre a
+14.133 (1.825 páginas) tem OCR degradado — 58% contra 71–87% das demais**.
+Transcrever dali produziria citação falsa. O requisito é trecho literal com
+página e citação ABNT, o que exige ficha bibliográfica por obra.
 
-Requisito do usuário: transcrever o trecho literal, com **página**, e citar em
-**ABNT**. Isso exige ficha bibliográfica por obra, que não se extrai do PDF de
-forma confiável.
-
-**Pareceres da PGE/PGM:** estão em algum lugar do perfil do usuário; a busca
-foi interrompida antes de localizá-los.
-
-**Pesquisa Textual do TCE-RJ** (inteiro teor de decisões monocráticas e outras
-peças) foi mapeada mas não coletada — vive num iframe, exige termo de busca e
-devolve `quantidadeTotal: 10000` fixo. Ver `README.md`.
-
-> Atualização 01/08/2026: o formato do POST foi descoberto e verificado contra
-> o servidor. O `10000` é **teto**, não valor fixo — consultas estreitas
-> devolvem a contagem real, e o teto se contorna fatiando por município,
-> natureza ou período. Há filtro por município (`enteFederativoId`), e do
-> resultado se chega ao PDF pelo endpoint de documento que o coletor já usa.
-> Ver **`PESQUISA_TEXTUAL_API.md`**, que traz também a medição do teto da
-> curadoria e a lista do que não foi verificado.
-
-**Segunda rodada de testes de aceitação** deixou duas pendências: a leitura
-além da página ainda não é reflexo, e os casos-armadilha (Acórdãos 54691/2025 e
-6930/2025) não apareceram no ranqueamento.
+**Relatório da PGM sobre o ETP da Rede SUAS** entregue em duas versões `.docx`.
+Pendências registradas nele: CNPJ do Instituto AVANTE, Prejulgado nº 30/2023,
+texto integral das Súmulas 17 e 18/2023, e repetir as cinco conclusões
+negativas agora que o acervo está completo.
 
 ## Como o usuário trabalha
 
 Delega execução, mas julga desenho — e julga bem. Rejeitou embeddings três
-vezes com razão técnica, e cada rejeição se confirmou. Quer saber o que **não**
-foi verificado, e trata hipótese reprovada como resultado.
+vezes com razão técnica, e cada rejeição se confirmou. Cobrou *"você tentou
+pelo menos?"* sobre o plano gratuito do Render, e tinha razão: a recomendação
+de migrar era dedução não testada, e o teste levou minutos.
 
-Verifique antes de afirmar. Meça antes de otimizar. E quando ele ler material
-bruto, escute: a descoberta mais importante deste projeto veio daí.
+Quer saber o que **não** foi verificado, e trata hipótese reprovada como
+resultado. Verifique antes de afirmar. Meça antes de otimizar. E quando ele ler
+material bruto, escute: a descoberta mais importante deste projeto veio daí.

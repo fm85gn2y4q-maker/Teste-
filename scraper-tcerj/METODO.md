@@ -170,8 +170,8 @@ versão fixa → sha256 declarado → conferência no build → falha fechada
 ```
 
 O banco saiu do Git quando passou de 50 MB: é artefato de dados, não
-código-fonte. Vai comprimido como asset de release (81,3 → 24,0 MB), e a imagem
-o baixa na construção conferindo o hash. Se o arquivo publicado divergir, o
+código-fonte. Vai comprimido como asset de release — hoje 2,8 GB → 641 MB — e a
+imagem o baixa na construção conferindo o hash. Se o arquivo publicado divergir, o
 build falha em vez de subir um acervo diferente do declarado.
 
 ## 10. Teste de aceitação é comportamental, não automatizado

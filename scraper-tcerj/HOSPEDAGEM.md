@@ -4,8 +4,17 @@ Enquanto o servidor roda na sua máquina, ele morre com ela: extensão, túnel e
 conector, todos. Para consultar do celular ou com o computador desligado, o
 Ementário precisa estar num lugar que não desliga.
 
-São ~10 MB de SQLite e um processo Python que só lê. Cabe no nível gratuito de
-qualquer serviço sério.
+São **dois** bancos SQLite — 2,7 GB de jurisprudência e 22 MB de normas — e um
+processo Python que só lê.
+
+Parece muito para um plano gratuito, e essa impressão já custou uma
+recomendação errada de migrar para VPS ou plano pago. O que o plano gratuito
+veda é **disco persistente**; aqui não há disco: os bancos são camada de
+imagem, imutáveis, e o filesystem efêmero basta justamente porque nada é
+escrito. A memória também não é o gargalo que o tamanho sugere — o SQLite lê
+por páginas, com cache padrão de ~2 MB, e não carrega o banco na RAM.
+
+Testado, não deduzido: roda no gratuito do Render.
 
 ## Antes de começar, três coisas
 
@@ -58,20 +67,38 @@ coletar → testar → VACUUM → comprimir → asset de release
 
 Depois de coletar, gere o arquivo comprimido e anote o `sha256`. Publique-o em
 **Releases → Draft a new release**, com uma tag por versão do acervo
-(`acervo-v2.0.0`), arrastando o `.db.gz` para os assets.
+(hoje `acervo-v3.0.0` e `normas-v1.0.0`), arrastando o `.db.gz` para os assets.
 
 Não use `latest` em produção: versão fixa é o que torna o deploy reproduzível
 e o rollback trivial.
 
 ### 2. Apontar a versão e enviar o código
 
-No `render.yaml`, `ACERVO_URL` recebe o endereço do asset e `ACERVO_SHA256` a
-soma conferida na construção — se o arquivo mudar, o build falha em vez de
-subir um acervo diferente do esperado.
+As versões ficam no **`Dockerfile`**, como padrão dos `ARG` — e não no
+`render.yaml`. Nem todo serviço repassa argumento de construção, e depender
+disso já deixou a imagem sem acervo por um motivo invisível.
+
+São dois pares, um por acervo:
+
+```dockerfile
+ARG ACERVO_URL=...ementario-tcerj-v3.0.0.db.gz
+ARG ACERVO_SHA256=1e1c287b...
+ARG NORMAS_URL=...normas-tcerj-v1.0.0.db.gz
+ARG NORMAS_SHA256=d88998db...
+```
+
+O `sha256` é conferido na construção: se o arquivo publicado divergir, o build
+falha em vez de subir um acervo diferente do declarado.
 
 ```bash
-git add render.yaml scraper-tcerj && git commit -m "Publica acervo v2.0.0" && git push
+git add scraper-tcerj && git commit -m "Publica acervo v3.0.0" && git push
 ```
+
+**Fixe a versão das dependências pela direita.** `mcp>=1.28` sem teto quebrou
+três deploys quando a 2.0.0 saiu e removeu `mcp.server.fastmcp` — funcionou num
+dia e falhou no seguinte sem ninguém mexer em nada. Intervalo aberto é aposta
+em que ninguém quebre compatibilidade, e o número maior existe para dizer que
+quebrou.
 
 ### 2. Criar o serviço
 
