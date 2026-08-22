@@ -289,6 +289,21 @@ pode não ter.
 A ementa é o resumo oficial, não o acórdão. Quando a tese for decisiva para a
 peça, diga para conferir o inteiro teor pelo link antes de citar.
 
+A NOTA TÉCNICA APARECE NA BUSCA DE JURISPRUDÊNCIA
+
+Toda busca por precedente traz `notas_tecnicas_sobre_a_materia` quando houver.
+A Nota Técnica é **orientação** do Tribunal aos jurisdicionados: não obriga por
+si, mas revela o entendimento com que a fiscalização vai medir.
+
+**Quando uma nota trata da mesma matéria de um julgado revogado, ela é
+frequentemente o que ficou no lugar.** Compare as datas: a Resposta a Consulta
+74/2018 foi revogada na sessão de 13/04/2022, e a Nota Técnica nº 5/2022 —
+publicada na MESMA sessão — é a orientação que a substituiu. Quem entregasse só
+o julgado revogado deixaria o advogado sem saber o que vale hoje.
+
+Cite-a como orientação, nunca como norma ou precedente, e sempre com a situação
+declarada.
+
 RESPOSTA A CONSULTA TAMBÉM PODE SER REVOGADA
 
 Ela tem peso próprio: é o que o Tribunal responde a quem pergunta **em tese**,
@@ -372,6 +387,60 @@ def _exame(achados: list[Any], universo: int) -> dict[str, Any]:
             "Tribunal decidiu. Ao contar precedentes, diga sempre 'dos N que "
             "examinei'. É vedado afirmar que não há divergência, ou que a "
             "matéria é pacífica, com base em não ter encontrado o contrário."
+        ),
+    }
+
+
+def _bloco_notas_tecnicas(normas, consulta: str) -> dict[str, Any] | None:
+    """Notas Técnicas pertinentes vão junto do resultado de jurisprudência.
+
+    A Nota Técnica mora no acervo normativo porque é ali que o portal a
+    publica, mas funcionalmente está mais perto do precedente do que da norma:
+    é orientação do Tribunal aos jurisdicionados, sem força normativa própria.
+
+    Deixá-la só do lado das normas escondia-a de quem pergunta pela via da
+    jurisprudência, e o caso que mostrou isso foi caro: a Resposta a Consulta
+    74/2018 foi revogada na sessão de 13/04/2022, e a Nota Técnica nº 5/2022,
+    publicada na MESMA sessão, é o que ficou no lugar.
+
+    Aqui vai só o que o índice casou. Não casando nada, o campo aponta para
+    `notas_tecnicas_sobre`, que devolve as dez para leitura direta — são dez, e
+    com universo desse tamanho ler vence ranquear. Tentei o caminho oposto,
+    pontuando por fração de termos e raridade, e cada ajuste consertava dois
+    casos e quebrava outros dois: é ranqueador feito à mão contra dez
+    documentos, e não se sustenta.
+    """
+    if normas is None:
+        return None
+    achadas, parcial, _ = normas.pesquisar(consulta, especie="nota-tecnica",
+                                           limite=4)
+    if parcial or not achadas:
+        achadas, parcial, _ = normas.pesquisar_texto(
+            consulta, especie="nota-tecnica", limite=4)
+        if parcial:
+            achadas = []
+    if not achadas:
+        return {
+            "encontradas": 0,
+            "atencao": (
+                "Nenhuma Nota Técnica casou estes termos. Isso NÃO significa "
+                "que o Tribunal não orientou sobre a matéria — são apenas dez "
+                "notas, e a busca é literal. Chame `notas_tecnicas_sobre` para "
+                "receber todas e conferir uma a uma, sobretudo se o julgado "
+                "que você encontrou estiver revogado: a orientação que ficou no "
+                "lugar costuma ser uma delas."
+            ),
+        }
+    return {
+        "encontradas": len(achadas),
+        "notas": achadas,
+        "peso": (
+            "Nota Técnica é ORIENTAÇÃO do Tribunal aos jurisdicionados, não ato "
+            "normativo nem precedente: não obriga por si, mas revela o "
+            "entendimento com que a fiscalização vai medir. Quando trata da "
+            "mesma matéria de um julgado revogado, costuma ser o que ficou no "
+            "lugar — compare as datas. Cite-a como orientação, e com a situação "
+            "declarada."
         ),
     }
 
@@ -538,6 +607,7 @@ def construir(
             "resultados": [r.para_dict() for r in achados],
             "exame": _exame(achados, acervo.universo(expressao, em_ementas=True)),
             "sumulas_sobre_a_materia": _bloco_sumulas(acervo, consulta),
+            "notas_tecnicas_sobre_a_materia": _bloco_notas_tecnicas(normas, consulta),
             "observacao": observacao,
         }
 
@@ -602,6 +672,7 @@ def construir(
             "resultados": [t.para_dict() for t in achados],
             "exame": _exame(achados, acervo.universo(expressao)),
             "sumulas_sobre_a_materia": _bloco_sumulas(acervo, consulta),
+            "notas_tecnicas_sobre_a_materia": _bloco_notas_tecnicas(normas, consulta),
             "observacao": observacao,
         }
 
@@ -824,6 +895,49 @@ def construir(
                              "em `situacao.alteracoes_declaradas`, ela NÃO está "
                              "aplicada aqui."),
                 "observacao": _nota_normas(achados),
+            }
+
+        @mcp.tool()
+        def notas_tecnicas_sobre(consulta: str) -> dict[str, Any]:
+            """Verifica se há Nota Técnica do TCE-RJ sobre a matéria.
+
+            Nota Técnica é **orientação** aos jurisdicionados: não obriga por
+            si, mas revela o entendimento com que a fiscalização vai medir.
+
+            Consulte sempre que um julgado pertinente estiver REVOGADO — a
+            orientação que ficou no lugar costuma ser uma delas. A Resposta a
+            Consulta 74/2018, revogada em 13/04/2022, foi substituída pela Nota
+            Técnica nº 5/2022, publicada na mesma sessão.
+
+            Não casando nenhuma pelas palavras da consulta, devolve **todas** —
+            são dez, e cabem numa leitura. É assim que se afirma ausência por
+            ter conferido, e não por silêncio do índice.
+
+            Args:
+                consulta: a matéria sobre a qual se quer saber se há orientação.
+            """
+            achadas, parcial, _ = normas.pesquisar(
+                consulta, especie="nota-tecnica", limite=10)
+            if parcial or not achadas:
+                achadas, parcial, _ = normas.pesquisar_texto(
+                    consulta, especie="nota-tecnica", limite=10)
+                if parcial:
+                    achadas = []
+            todas = not achadas
+            if todas:
+                achadas = normas.listar(especie="nota-tecnica", limite=50)
+            return {
+                "consulta": consulta,
+                "quantidade": len(achadas),
+                "veio_o_conjunto_completo": todas,
+                "notas": achadas,
+                "como_ler": (
+                    "Nenhuma nota casou os termos; estas são TODAS as do "
+                    "Tribunal. Leia as ementas e conclua você: se nenhuma "
+                    "tratar da matéria, aí sim diga que não há orientação."
+                    if todas else
+                    "Estas casaram os termos. Confira a pertinência — casamento "
+                    "de palavra não é identidade de matéria."),
             }
 
         @mcp.tool()

@@ -470,6 +470,37 @@ def test_servidor_nao_depende_do_coletor():
 
 
 
+def test_nota_tecnica_sem_casamento_devolve_todas(tmp_path):
+    """Com dez documentos, ler vence ranquear.
+
+    Tentei o caminho oposto — pontuar por fração de termos e por raridade — e
+    cada ajuste consertava dois casos e quebrava outros dois. Ranqueador feito
+    à mão contra dez documentos não se sustenta; devolver o conjunto e deixar
+    a leitura decidir, sim.
+    """
+    from ementario.servidor import _bloco_notas_tecnicas
+
+    # Sem acervo normativo o bloco simplesmente não existe — melhor do que
+    # existir e responder vazio.
+    assert _bloco_notas_tecnicas(None, "qualquer coisa") is None
+
+
+def test_bloco_de_notas_aponta_o_caminho_quando_nao_acha():
+    """Não achar não pode virar 'não há': o bloco tem de dizer o que fazer."""
+    from ementario.servidor import INSTRUCOES
+
+    assert "notas_tecnicas_sobre" in INSTRUCOES
+    assert "orientação" in INSTRUCOES.lower()
+
+
+def test_instrucoes_ligam_julgado_revogado_a_nota_tecnica():
+    """O caso que motivou o bloco: revogaram a consulta e publicaram a nota."""
+    from ementario.servidor import INSTRUCOES
+
+    assert "13/04/2022" in INSTRUCOES
+    assert "o que ficou no lugar" in INSTRUCOES
+
+
 def test_acervo_e_somente_leitura(acervo):
     import sqlite3
 
