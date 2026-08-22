@@ -447,6 +447,29 @@ def test_resposta_a_consulta_tem_link_do_documento():
     assert montar_url_pdf("sumula", "1", 2018, 999) is None
 
 
+def test_servidor_nao_depende_do_coletor():
+    """A imagem leva só `ementario/`; `tcerj/` é o coletor e fica de fora.
+
+    Importar do coletor no caminho de leitura derruba TODA busca em produção
+    com `No module named 'tcerj'` — e não aparece em teste algum, porque na
+    máquina de desenvolvimento os dois pacotes estão presentes. Aconteceu.
+
+    Este teste lê o código-fonte em vez de importar, que é a única forma de
+    detectar a dependência sem reproduzir o ambiente da imagem.
+    """
+    import pathlib
+
+    raiz = pathlib.Path(__file__).resolve().parent.parent / "ementario"
+    ofensores = []
+    for arquivo in raiz.glob("*.py"):
+        for n, linha in enumerate(arquivo.read_text(encoding="utf-8").splitlines(), 1):
+            despido = linha.strip()
+            if despido.startswith(("import tcerj", "from tcerj")):
+                ofensores.append(f"{arquivo.name}:{n}  {despido}")
+    assert not ofensores, "o servidor importa do coletor: " + "; ".join(ofensores)
+
+
+
 def test_acervo_e_somente_leitura(acervo):
     import sqlite3
 

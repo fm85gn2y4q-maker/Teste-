@@ -170,6 +170,36 @@ def separar_ementa(ementa: str | None) -> tuple[list[str], str]:
     return [], texto
 
 
+def dados_de_revogacao(bruto: str | None) -> dict[str, Any]:
+    """O que a listagem diz sobre a vigência de uma Resposta a Consulta.
+
+    Vive aqui, e não no coletor, por uma razão de empacotamento que já quebrou
+    a produção uma vez: a imagem leva apenas `ementario/`. O pacote `tcerj` é o
+    coletor e fica de fora — importar dele no caminho de leitura derruba TODA
+    busca com `No module named 'tcerj'`, e o defeito não aparece em teste
+    algum, porque na máquina de desenvolvimento os dois estão presentes.
+    """
+    if not bruto:
+        return {}
+    import json as _json
+    try:
+        b = _json.loads(bruto)
+    except (ValueError, TypeError):
+        return {}
+    revogada = bool(b.get("revogada"))
+    parcial = bool(b.get("revogadaParcialmente"))
+    if not (revogada or parcial):
+        return {}
+    data = b.get("dataRevogacao") or ""
+    return {
+        "estado": "revogada_parcialmente" if parcial and not revogada else "revogada",
+        "por": b.get("numeroRevogacao") or None,
+        # A API usa 0001-01-01 para "não revogado". Isso não é uma data.
+        "em": data[:10] if data and not data.startswith("0001") else None,
+        "justificativa": (b.get("justificativaRevogacao") or "").strip() or None,
+    }
+
+
 def montar_url_pdf(tipo: str, numero: str | None, ano: int | None,
                    arquivo_id: int | str | None = None) -> str | None:
     """Endereço do documento, pelo caminho que cada espécie exige.
@@ -915,7 +945,6 @@ class Acervo:
         revogacao = None
         arquivo_id = None
         if tipo == "resposta_consulta" and "bruto" in linha.keys():
-            from tcerj.consultas import dados_de_revogacao
             revogacao = dados_de_revogacao(linha["bruto"]) or None
             try:
                 arquivo_id = json.loads(linha["bruto"] or "{}").get("arquivoId")

@@ -31,25 +31,9 @@ log = logging.getLogger(__name__)
 URL_ARQUIVO = "https://www.tcerj.tc.br/cadastro-publicacoes-webapi/api/file/{id}"
 
 
-def dados_de_revogacao(bruto: str | None) -> dict[str, Any]:
-    """Extrai do payload guardado o que a listagem diz sobre vigência."""
-    if not bruto:
-        return {}
-    try:
-        b = json.loads(bruto)
-    except (ValueError, TypeError):
-        return {}
-    revogada = bool(b.get("revogada"))
-    parcial = bool(b.get("revogadaParcialmente"))
-    if not (revogada or parcial):
-        return {}
-    data = b.get("dataRevogacao") or ""
-    return {
-        "estado": "revogada_parcialmente" if parcial and not revogada else "revogada",
-        "por": b.get("numeroRevogacao") or None,
-        "em": data[:10] if data and not data.startswith("0001") else None,
-        "justificativa": (b.get("justificativaRevogacao") or "").strip() or None,
-    }
+# A extração da vigência vive em `ementario.acervo`, e não aqui: é o pacote
+# que viaja na imagem do servidor. Reexportada para quem já a importava daqui.
+from ementario.acervo import dados_de_revogacao  # noqa: E402,F401
 
 
 async def coletar(
