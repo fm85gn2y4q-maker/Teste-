@@ -1,9 +1,15 @@
-# Coletor de jurisprudência do TCE-RJ
+# Coletor e servidor MCP do TCE-RJ
 
-Ferramenta para baixar e organizar os documentos de jurisprudência do Tribunal
-de Contas do Estado do Rio de Janeiro — acórdãos, súmulas, enunciados,
-deliberações, resoluções, pareceres prévios e respostas a consulta — num banco
-SQLite consultável, exportável para JSONL e CSV.
+Baixa e organiza dois acervos do Tribunal de Contas do Estado do Rio de
+Janeiro, e os serve a assistentes de IA pelo protocolo MCP:
+
+| | |
+|---|---|
+| **Jurisprudência** | 1.671 ementas e o inteiro teor de **25.561 acórdãos** — 572.037 páginas |
+| **Normas** | **973 atos** — deliberações, resoluções, atos normativos, portarias, notas técnicas e o Regimento Interno |
+
+Bancos SQLite com busca textual, exportáveis para JSONL e CSV. O coletor das
+normas fica em **`../normas-tcerj/`**; o servidor, aqui, serve os dois.
 
 ## Estado atual — leia antes de usar
 
@@ -26,8 +32,11 @@ Duas ressalvas que mudam a expectativa sobre o acervo:
 - A Jurisprudência Selecionada é **curadoria**, não o acervo integral: são as
   ementas escolhidas pelo Serviço de Jurisprudência, não todos os acórdãos do
   Tribunal.
-- **Deliberações e Resoluções não ficam neste portal.** O menu redireciona para
-  `atosoficiais.com.br`, um serviço de terceiro. Não há coleta delas aqui.
+- **Deliberações e Resoluções ficam no mesmo domínio**, no Portal de Normas e
+  Publicações — não em `atosoficiais.com.br`, para onde um menu redireciona.
+  São 973 atos numa API REST limpa (`/cadastro-publicacoes-webapi/api/{Especie}`),
+  coletados por `normas-tcerj/` e servidos pelo mesmo servidor MCP. Ver a seção
+  **Acervo normativo**, adiante.
 
 Não existe base própria de "enunciado" (o enunciado é o conteúdo da súmula) nem
 de "parecer prévio".
@@ -192,9 +201,34 @@ python -m ementario --http     # HTTP em 127.0.0.1:8765
 python -m ementario.publicar   # HTTP + túnel HTTPS público — para o ChatGPT
 ```
 
-Ferramentas: `pesquisar_jurisprudencia`, `obter_documento`, `listar_documentos`,
-`cobertura_do_acervo`, mais `search`/`fetch` no formato que a pesquisa profunda
-do ChatGPT exige.
+São **16 ferramentas**, e elas se dividem por acervo porque as duas perguntas
+perigosas são diferentes — na jurisprudência, *de quem é este trecho*; nas
+normas, *isto ainda vale*:
+
+```
+JURISPRUDÊNCIA
+  pesquisar_jurisprudencia   busca nas ementas
+  pesquisar_inteiro_teor     busca nos votos, devolve a página
+  panorama_do_tema           quantos acórdãos existem, por ano, quanto ficou por ler
+  sumulas_sobre              súmula antes de acórdão; sem casamento, devolve as 28
+  ler_paginas                páginas contíguas, com expansão adiante
+  obter_documento / listar_documentos
+
+NORMAS
+  pesquisar_normas           busca nas ementas dos atos
+  pesquisar_dispositivos     busca no texto, devolve a página
+  situacao_do_ato            vigente | revogado | revogado_tacitamente
+  historico_do_ato           o que revogou e o que o alterou
+  ler_norma / listar_normas
+
+COMUNS
+  cobertura_do_acervo        volumes, período e limites dos dois
+  search / fetch             formato que a pesquisa profunda do ChatGPT exige
+```
+
+O acervo normativo é **opcional**: sem o banco dele, o servidor sobe com as dez
+ferramentas de jurisprudência e registra o motivo no log. Um acervo acessório
+ausente não derruba o principal.
 
 A busca é pensada para pergunta de gente, não para sintaxe: ignora acento,
 descarta palavras vazias ("posso", "qual", "em") e, se exigir todos os termos
@@ -284,38 +318,71 @@ não foi identificado; elas ficam com o link do processo.
 
 ## O que estas bases não entregam
 
-Nenhum dos quatro endpoints devolve `url`, `url_pdf` ou órgão julgador — os
-campos ficam vazios porque não existem no payload, não por falha de extração.
+Nenhum dos quatro endpoints devolve `url`, `url_pdf` ou órgão julgador: os
+campos não existem no payload. Os endereços de conferência que o servidor
+apresenta são **montados** a partir do número e do ano, contra endpoints
+levantados à mão no portal — não vêm da listagem.
+
 Os acórdãos não trazem data de publicação (só a data do voto); as súmulas não
 têm processo nem relator, o que é correto.
 
-## Pesquisa Textual — mapeada, ainda não coletada
+## Pesquisa Textual — coletada
 
-É a base do **inteiro teor dos votos e acórdãos**, e a mais valiosa que ficou
-de fora. O formulário vive num *iframe* (`/pesquisa-textual/app`), razão pela
-qual `descobrir` não o enxerga: ele inspeciona apenas o quadro principal.
+É a base do **inteiro teor**, e era a mais valiosa que faltava. Hoje responde
+por **24.518 dos 25.561 acórdãos** com texto no acervo.
 
+O formulário vive num *iframe* (`/pesquisa-textual/app`), razão pela qual
+`descobrir` não o enxergava: ele inspeciona apenas o quadro principal. O
+formato do POST, os operadores e os catálogos estão em
+**`PESQUISA_TEXTUAL_API.md`**.
+
+Três coisas que a coleta precisou resolver, e que o pipeline comum não fazia:
+
+1. **A lista é aninhada.** O item externo é o *processo*; os documentos ficam um
+   nível abaixo.
+2. **O servidor injeta marcação de destaque** em torno de cada ocorrência do
+   termo, inclusive dentro de palavras (`DECISÃO` volta como
+   `<mark>DE</mark>CISÃO`).
+3. **O `numero` do registro é o do processo**, não o do documento. Usar a lista
+   de apelidos comum produziria citações falsas.
+
+E duas armadilhas que só aparecem no uso:
+
+- **As aspas da expressão exata precisam chegar intactas ao servidor.** Passadas
+  pela linha de comando, o shell as come, a busca vira palavras soltas e
+  "contratação de pessoal por prazo determinado" entra como se fosse licitação.
+  Foram 5.143 acórdãos do tema errado, descartados antes de qualquer download.
+  Por isso as expressões ficam em Python.
+- **O teto de 10.000 por consulta é real.** `"termo aditivo"` bateu nele, e esse
+  recorte permanece incompleto. Contorna-se fatiando por ano ou município.
+
+## Acervo normativo — deliberações, resoluções e o Regimento
+
+Coletor em **`../normas-tcerj/`**, banco próprio, servido pelo mesmo processo
+MCP. **973 atos, 1975–2026, 5.042 páginas.**
+
+```bash
+python -m normas coletar    # metadados e o grafo de revogação
+python -m normas textos     # os PDFs, um por vez
+python -m normas relacoes   # alterações e revogações tácitas da prosa da ementa
 ```
-POST /liana-pesquisa-externo/api/pesquisatextual/pagina/{pagina}/tamanhoPagina/{tamanho}
-corpo: {"comTodasAsPalavras": "...", "bases": {"votos": true, "acordaos": false, ...},
-        "retornaTextoDocumento": true, "pagina": 1, "quantidadePorPagina": 20}
-```
 
-O texto integral vem em `resultados[].resultados[].texto`, junto de `categoria`
-("VOTO") e `idDocumento`. Coletá-la exige três coisas que o pipeline ainda não
-faz:
+A fonte entrega o **grafo de revogação pronto**: cada ato declara por quem foi
+revogado e o que revogou. Num acervo de normas a vigência é o risco central, e
+aqui ela é metadado oficial — não inferência sobre o texto.
 
-1. **Achatar a lista aninhada.** O item externo é o *processo*; os documentos
-   ficam um nível abaixo, e `caminho_itens` só percorre um nível.
-2. **Remover a marcação de destaque.** O servidor injeta `<mark
-   class="highlight">` em torno de cada ocorrência do termo, inclusive dentro
-   de palavras (`DECISÃO` volta como `<mark>DE</mark>CISÃO`).
-3. **Mapear os campos de outro jeito.** O `numero` do registro é o número do
-   *processo*, não do documento; usar a lista de apelidos atual produziria
-   citações falsas como "Acórdão 228647/2026".
+Duas coisas que a coleta descobriu e que mudam o desenho:
 
-Some-se a isso que a base **não é enumerável**: exige termo de busca e devolve
-sempre `quantidadeTotal: 10000`, um teto fixo, não a contagem real.
+- **Número de ato não é chave.** A numeração recicla a cada ano: as 26 portarias
+  usam 11 números. O portal oferece download em lote por espécie, mas nomeia os
+  arquivos só pelo número — casar por ele pendura o texto no ato do ano errado,
+  sem erro e sem aviso. A coleta baixa um arquivo por vez, por `arquivoId`.
+- **Não existe texto consolidado.** Todo PDF é a redação original; alteração
+  posterior é ato autônomo. Vale para o Regimento Interno: o que o portal serve
+  é a Deliberação 338/2023, alterada pelas 341/2023 e 347/2024.
+
+A **Lei Orgânica** (Lei Complementar estadual nº 63/1990) não está aqui: é lei
+da ALERJ, não ato do Tribunal.
 
 ## Limitações conhecidas
 
@@ -324,6 +391,7 @@ sempre `quantidadeTotal: 10000`, um teto fixo, não a contagem real.
   escolha ainda merece revisão humana, como a saída do comando avisa.
 - Os seletores padrão são genéricos. Se o modo `navegador` trouxer pouca coisa,
   ajuste `item_resultado` e `proxima_pagina` para o layout real.
-- Documentos que só existem em PDF são registrados com a URL do arquivo
-  (`url_pdf`), sem extração do texto — falta um passo de OCR/parse de PDF.
+- O texto dos PDFs é extraído por PyMuPDF, página a página, e há remoção de
+  moldura repetida. Não há OCR: PDF sem camada de texto entra como
+  `sem_texto` — no acervo atual isso não ocorreu.
 - Não há agendamento embutido para coleta incremental periódica.
