@@ -177,9 +177,9 @@ async function listar(): Promise<number> {
 }
 
 if (process.argv.includes('--listar')) {
-  listar().then((c) => process.exit(c)).catch((e) => {
+  listar().then((c) => { process.exitCode = c; }).catch((e) => {
     log(`  erro: ${e instanceof Error ? e.message : String(e)}`);
-    process.exit(1);
+    process.exitCode = 1;
   });
 }
 
