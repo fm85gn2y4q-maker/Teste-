@@ -172,9 +172,11 @@ COMUNS
 **A Nota Técnica atravessa os dois acervos.** É coletada com as normas, porque
 é ali que o portal a publica, mas funcionalmente está mais perto do precedente:
 é orientação, sem força normativa própria. Por isso toda busca de jurisprudência
-traz `notas_tecnicas_sobre_a_materia`. O caso que exigiu isso: a Resposta a
-Consulta 74/2018 foi revogada na sessão de 13/04/2022 e a **Nota Técnica nº
-5/2022**, publicada na MESMA sessão, é o que ficou no lugar.
+traz `notas_tecnicas_sobre_a_materia`. O caso que exigiu isso: as Respostas a
+Consulta 74/2018 e 83/2018 foram revogadas pelo mesmo voto, na sessão de
+13/04/2022, e a **Nota Técnica nº 5/2022** é da mesma sessão. Que ela tenha
+ficado no lugar é **inferência** — forte quanto à metodologia, não provada
+quanto a uniforme escolar, que a nota não menciona.
 
 O campo é lembrete, não filtro — as ementas das notas usam vocabulário que
 ninguém digita ("metodologia", "repercussão"), e a busca literal quase nunca

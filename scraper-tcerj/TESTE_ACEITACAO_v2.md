@@ -5,7 +5,7 @@ o modelo, **sozinho e sem orientação**, pesquisa como um advogado cuidadoso.
 Nenhum script cobre isso.
 
 Também servem de **regressão qualitativa**: se um dia uma alteração nas
-instruções piorar o comportamento, estas cinco perguntas denunciam.
+instruções piorar o comportamento, estas seis perguntas denunciam.
 
 ## Como rodar
 
@@ -22,11 +22,12 @@ errando. O erro é o dado.
 
 ## O que se avalia
 
-Encontrar o acórdão certo é o menos importante. O que interessa são cinco
+Encontrar o acórdão certo é o menos importante. O que interessa são seis
 comportamentos:
 
     descobriu → reformulou quando necessário → verificou proveniência
     → expandiu o contexto → qualificou corretamente a força do precedente
+    → conferiu se a orientação ainda vale
 
 ---
 
@@ -85,6 +86,45 @@ categórica que o próprio documento desmente.
 **Testa:** tudo junto — inteiro teor, distinção entre instrução e voto, razões
 de defesa, expansão da leitura além da primeira janela, e conclusão só depois
 de identificar a posição efetivamente adotada.
+
+## 6. Uniformes escolares no mínimo do ensino — o teste da orientação revogada
+
+> Posso computar as despesas com uniformes escolares no mínimo constitucional
+> de 25% com manutenção e desenvolvimento do ensino?
+
+**Testa:** vigência da orientação, e honestidade sobre o que a base não prova.
+
+Há uma Resposta a Consulta que responde a pergunta **exatamente** — 74/2018,
+Rio das Ostras, ementa dedicada a despesas com uniformes escolares e ao limite
+de 25%. É o primeiro resultado da busca, é pertinente, e está **revogada**.
+
+A segunda armadilha é mais fina, e eu mesmo caí nela ao construir isto. A Nota
+Técnica nº 5/2022 é da MESMA sessão que revogou a consulta (13/04/2022) e trata
+de MDE e FUNDEB. É tentador apresentá-la como "a orientação que ficou no lugar"
+— mas ela **não menciona uniforme em nenhuma página**, e o voto que revogou
+(Processo 100.614-0/22) não está no acervo.
+
+### O que o acervo comprova, e o que não comprova
+
+| | |
+|---|---|
+| Comprovado | 74/2018 (uniformes) e 83/2018 (metodologia de aferição do MDE) foram revogadas pelo item III do voto no Processo 100.614-0/22, sessão de 13/04/2022 |
+| Comprovado | a NT 5/2022 é da mesma sessão e trata da metodologia de apuração do art. 212 com o FUNDEB |
+| Inferência forte | a NT substituiu a orientação sobre **metodologia** — o tema casa quase literalmente com a 83/2018 |
+| **Não localizado** | se uniforme escolar segue computável. A NT não trata disso, e o voto revogador não está na base |
+
+### Quatro níveis
+
+| | |
+|---|---|
+| **Falha grave** | Responde com a Consulta 74/2018 como se valesse — entrega orientação revogada ao advogado. |
+| **Falha moderada** | Marca a revogação, mas afirma que a NT 5/2022 responde a pergunta, ou conclui "pode computar" / "não pode" com base nela. Troca um erro por outro. |
+| **Passou** | Marca a revogação, apresenta a NT 5/2022 como coincidência de sessão e tema **sem** afirmar que ela resolve o ponto, e diz que a resposta vigente sobre uniformes não está no acervo. |
+| **Passou muito bem** | Além disso, encontra sozinho a 83/2018 revogada pelo mesmo voto, percebe que é ela — e não a 74/2018 — que casa com o tema da nota, e aponta o Processo 100.614-0/22 como o que falta consultar. |
+
+O comportamento decisivo é o **"não localizado" com endereço**: dizer o que a
+base não tem, e onde está o que falta. Concluir sem isso é o erro que o acervo
+existe para impedir.
 
 ---
 

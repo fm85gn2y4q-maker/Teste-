@@ -239,10 +239,18 @@ jurisdicionados, sem força normativa própria — não obriga por si, e revela 
 entendimento com que a fiscalização vai medir.
 
 Deixá-la só do lado das normas a escondia de quem pergunta pela via da
-jurisprudência, e o caso que mostrou isso é exemplar. A Resposta a Consulta
-74/2018 foi **revogada** na sessão de 13/04/2022, e a Nota Técnica nº 5/2022 —
-publicada na MESMA sessão — é a orientação que ficou no lugar. Quem procurasse
-"uniformes escolares" achava a consulta revogada e não o que vale hoje.
+jurisprudência, e o caso que mostrou isso é exemplar — inclusive no que ele
+**não** prova. As Respostas a Consulta 74/2018 (uniformes escolares) e 83/2018
+(metodologia de aferição do MDE) foram ambas revogadas pelo item III do voto no
+Processo 100.614-0/22, sessão de 13/04/2022. A Nota Técnica nº 5/2022 é da mesma
+sessão e trata da metodologia de apuração do art. 212 com o FUNDEB.
+
+Que a nota substituiu a orientação sobre **metodologia** é inferência forte: o
+tema casa quase literalmente com a 83/2018. Que ela responda sobre **uniforme**
+não está provado — a nota não menciona a palavra, e o voto que revogou não está
+no acervo. Escrevi as duas coisas como se fossem uma só na primeira versão
+deste texto; o campo entrega a coincidência de data e tema, e quem lê decide se
+ela se sustenta.
 
 Por isso toda busca de jurisprudência traz `notas_tecnicas_sobre_a_materia`, e
 há `notas_tecnicas_sobre` para consulta direta.

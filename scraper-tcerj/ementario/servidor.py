@@ -295,11 +295,21 @@ Toda busca por precedente traz `notas_tecnicas_sobre_a_materia` quando houver.
 A Nota Técnica é **orientação** do Tribunal aos jurisdicionados: não obriga por
 si, mas revela o entendimento com que a fiscalização vai medir.
 
-**Quando uma nota trata da mesma matéria de um julgado revogado, ela é
-frequentemente o que ficou no lugar.** Compare as datas: a Resposta a Consulta
-74/2018 foi revogada na sessão de 13/04/2022, e a Nota Técnica nº 5/2022 —
-publicada na MESMA sessão — é a orientação que a substituiu. Quem entregasse só
-o julgado revogado deixaria o advogado sem saber o que vale hoje.
+**Quando uma nota trata da mesma matéria de um julgado revogado, ela PODE ser
+o que ficou no lugar — e isso se verifica, não se presume.** As Respostas a
+Consulta 74/2018 (uniformes escolares no mínimo do ensino) e 83/2018
+(metodologia de aferição do MDE) foram ambas revogadas pelo item III do voto no
+Processo 100.614-0/22, na sessão de 13/04/2022; a Nota Técnica nº 5/2022 é da
+MESMA sessão e trata da metodologia de apuração do art. 212 com o FUNDEB.
+
+Que a nota substituiu a orientação sobre **metodologia** é inferência forte: o
+tema casa quase literalmente com a 83/2018. Que ela responda sobre **uniforme
+escolar** NÃO está provado — a nota não menciona uniforme, e o voto que revogou
+não está no acervo. Diga qual das duas coisas você está afirmando.
+
+Quem entregasse só o julgado revogado deixaria o advogado sem saber o que vale
+hoje; quem afirmasse que a nota o substituiu ponto por ponto trocaria um erro
+por outro.
 
 Cite-a como orientação, nunca como norma ou precedente, e sempre com a situação
 declarada.
@@ -399,9 +409,10 @@ def _bloco_notas_tecnicas(normas, consulta: str) -> dict[str, Any] | None:
     é orientação do Tribunal aos jurisdicionados, sem força normativa própria.
 
     Deixá-la só do lado das normas escondia-a de quem pergunta pela via da
-    jurisprudência, e o caso que mostrou isso foi caro: a Resposta a Consulta
-    74/2018 foi revogada na sessão de 13/04/2022, e a Nota Técnica nº 5/2022,
-    publicada na MESMA sessão, é o que ficou no lugar.
+    jurisprudência. O caso que mostrou isso: as Respostas a Consulta 74/2018 e
+    83/2018 foram revogadas na sessão de 13/04/2022, e a Nota Técnica nº 5/2022
+    é da mesma sessão. Que ela tenha substituído a orientação é INFERÊNCIA — o
+    campo entrega a coincidência, e quem lê decide se ela se sustenta.
 
     Aqui vai só o que o índice casou. Não casando nada, o campo aponta para
     `notas_tecnicas_sobre`, que devolve as dez para leitura direta — são dez, e
