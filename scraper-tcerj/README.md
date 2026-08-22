@@ -171,7 +171,7 @@ pytest                      # tudo
 pytest -m "not integracao"  # sem navegador, roda em segundos
 ```
 
-São 113. Os testes de integração sobem um portal falso em `localhost` e o
+São 174. Os testes de integração sobem um portal falso em `localhost` e o
 percorrem com Chromium de verdade — foi assim que apareceram dois defeitos
 reais: números de quatro dígitos truncados ("1234" lido como "123") e páginas
 servidas sem charset, que chegavam como `ACÃ“RDÃƒO` e quebravam toda a extração.
@@ -201,7 +201,7 @@ python -m ementario --http     # HTTP em 127.0.0.1:8765
 python -m ementario.publicar   # HTTP + túnel HTTPS público — para o ChatGPT
 ```
 
-São **16 ferramentas**, e elas se dividem por acervo porque as duas perguntas
+São **17 ferramentas**, e elas se dividem por acervo porque as duas perguntas
 perigosas são diferentes — na jurisprudência, *de quem é este trecho*; nas
 normas, *isto ainda vale*:
 
@@ -217,6 +217,7 @@ JURISPRUDÊNCIA
 NORMAS
   pesquisar_normas           busca nas ementas dos atos
   pesquisar_dispositivos     busca no texto, devolve a página
+  notas_tecnicas_sobre       orientação do TCE; sem casamento, devolve as 10
   situacao_do_ato            vigente | revogado | revogado_tacitamente
   historico_do_ato           o que revogou e o que o alterou
   ler_norma / listar_normas
@@ -229,6 +230,29 @@ COMUNS
 O acervo normativo é **opcional**: sem o banco dele, o servidor sobe com as dez
 ferramentas de jurisprudência e registra o motivo no log. Um acervo acessório
 ausente não derruba o principal.
+
+### A Nota Técnica atravessa os dois acervos
+
+Ela é coletada com as normas, porque é ali que o portal a publica. Mas
+funcionalmente está mais perto do precedente: é **orientação** do Tribunal aos
+jurisdicionados, sem força normativa própria — não obriga por si, e revela o
+entendimento com que a fiscalização vai medir.
+
+Deixá-la só do lado das normas a escondia de quem pergunta pela via da
+jurisprudência, e o caso que mostrou isso é exemplar. A Resposta a Consulta
+74/2018 foi **revogada** na sessão de 13/04/2022, e a Nota Técnica nº 5/2022 —
+publicada na MESMA sessão — é a orientação que ficou no lugar. Quem procurasse
+"uniformes escolares" achava a consulta revogada e não o que vale hoje.
+
+Por isso toda busca de jurisprudência traz `notas_tecnicas_sobre_a_materia`, e
+há `notas_tecnicas_sobre` para consulta direta.
+
+**O campo é lembrete, não filtro** — e vale saber disso. As ementas das notas
+falam em "metodologia", "repercussão", "capitalização"; ninguém pergunta assim.
+Na prática a busca literal quase nunca casa, e o campo cai no aviso de que há
+dez notas por conferir. A ferramenta dedicada então **devolve as dez**: com
+universo desse tamanho, ler vence ranquear.
+
 
 A busca é pensada para pergunta de gente, não para sintaxe: ignora acento,
 descarta palavras vazias ("posso", "qual", "em") e, se exigir todos os termos

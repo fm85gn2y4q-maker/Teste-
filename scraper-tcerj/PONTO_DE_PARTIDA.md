@@ -42,7 +42,7 @@ interpretador.
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-**169 testes**, alguns minutos (parte sobe Chromium contra um portal falso).
+**174 testes**, alguns minutos (parte sobe Chromium contra um portal falso).
 
 ## O que já foi coletado — NÃO refazer
 
@@ -158,6 +158,7 @@ JURISPRUDÊNCIA
 NORMAS
   pesquisar_normas           busca nas ementas dos atos
   pesquisar_dispositivos     busca no texto, devolve a página
+  notas_tecnicas_sobre       orientação do TCE; sem casamento, devolve as 10
   situacao_do_ato            vigente | revogado | revogado_tacitamente
   historico_do_ato           o que revogou e o que o alterou
   ler_norma                  páginas contíguas
@@ -167,6 +168,18 @@ COMUNS
   cobertura_do_acervo        volumes, período e limites dos dois
   search / fetch             fachadas para a pesquisa profunda do ChatGPT
 ```
+
+**A Nota Técnica atravessa os dois acervos.** É coletada com as normas, porque
+é ali que o portal a publica, mas funcionalmente está mais perto do precedente:
+é orientação, sem força normativa própria. Por isso toda busca de jurisprudência
+traz `notas_tecnicas_sobre_a_materia`. O caso que exigiu isso: a Resposta a
+Consulta 74/2018 foi revogada na sessão de 13/04/2022 e a **Nota Técnica nº
+5/2022**, publicada na MESMA sessão, é o que ficou no lugar.
+
+O campo é lembrete, não filtro — as ementas das notas usam vocabulário que
+ninguém digita ("metodologia", "repercussão"), e a busca literal quase nunca
+casa. Nesse caso ele aponta para `notas_tecnicas_sobre`, que devolve as dez:
+com universo desse tamanho, ler vence ranquear.
 
 ## As réguas — e são duas, diferentes
 
@@ -230,7 +243,7 @@ código não é o mesmo que o que muda no mundo**. Todos os requisitos declaram
 **Cache do conector.** Ao mudar ferramentas ou instruções, Claude e ChatGPT
 continuam com a versão antiga. Desligar e religar não basta — é preciso
 **remover e recriar** o conector. Confirme com `cobertura_do_acervo`: têm de
-vir **25.561** acórdãos com inteiro teor e **16 ferramentas**.
+vir **25.561** acórdãos com inteiro teor e **17 ferramentas**.
 
 **Serviços órfãos no Render.** Serviço removido do `render.yaml` não é apagado:
 fica no painel e continua tentando construir a cada push. O Render também

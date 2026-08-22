@@ -176,7 +176,7 @@ build falha em vez de subir um acervo diferente do declarado.
 
 ## 10. Teste de aceitação é comportamental, não automatizado
 
-150 testes automatizados não medem se o modelo pesquisa como um advogado
+174 testes automatizados não medem se o modelo pesquisa como um advogado
 cuidadoso. Para isso, cinco perguntas reais, em chat limpo, sem palavra-chave e
 sem intervenção — *o erro é o dado*.
 
@@ -187,6 +187,30 @@ cache e o teste inteiro foi inválido.
 O ganho ficou demonstrado por comparação direta: a mesma pergunta que os dois
 responderam **"não localizado"** na v1 foi respondida com precedente, página e
 link 40 minutos depois. Única variável: o inteiro teor.
+
+
+## 11. Ranqueador ajustado à mão contra dez documentos não se sustenta
+
+Para escolher quais Notas Técnicas anexar à busca de jurisprudência, tentei
+pontuar pertinência: fração de termos casados, depois limiar de dois terços,
+depois exigência do termo mais raro. Cada ajuste consertava dois casos do meu
+próprio conjunto de teste e quebrava outros dois.
+
+- exigir TODOS os termos perdia a NT 5/2022, porque a pergunta diz "escolares"
+  e o documento diz "merenda escolar";
+- dois terços admitiam notas de compras para "visita técnica habilitação
+  licitação", porque "técnica" e "licitação" estão em quase todas;
+- o termo raro consertava essa e derrubava outras duas.
+
+O defeito não era o limiar. Era estar **calibrando contra casos que eu mesmo
+escolhera** — o que produz a sensação de progresso sem produzir generalização.
+Hesitei tempo demais antes de reconhecer isso.
+
+A saída foi o padrão já validado para súmula: busca literal, e devolução do
+**conjunto** quando ela não casa. Afirmar ausência passa a depender de leitura,
+não do silêncio do índice. Vale sempre que o universo couber numa leitura — 28
+súmulas, 10 notas — e deixa de valer nos 25.561 acórdãos, onde ranquear é a
+única opção e por isso o acervo declara os limites em vez de escondê-los.
 
 ---
 
