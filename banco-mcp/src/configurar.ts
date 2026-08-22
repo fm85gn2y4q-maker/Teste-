@@ -14,7 +14,37 @@ import { ClientePluggy } from './providers/pluggy/cliente.js';
 const CAMINHO = resolve(process.cwd(), '.env');
 carregarDotEnv(process.cwd());
 
+/**
+ * Quando o instalador chega por `irm | iex` (ou `curl | bash`), a entrada
+ * padrao do shell ja foi consumida pelo cano e o processo filho herda um stdin
+ * fechado: qualquer pergunta le vazio na hora. Nesse caso o shell coleta as
+ * credenciais e as repassa por ambiente, e este comando roda sem perguntar.
+ */
+function credenciaisDoAmbiente(): { clientId: string; clientSecret: string } | null {
+  const clientId = process.env.PLUGGY_CLIENT_ID?.trim();
+  const clientSecret = process.env.PLUGGY_CLIENT_SECRET?.trim();
+  return clientId && clientSecret ? { clientId, clientSecret } : null;
+}
+
 async function main(): Promise<number> {
+  if (process.argv.includes('--do-ambiente')) {
+    const doAmbiente = credenciaisDoAmbiente();
+    if (!doAmbiente) {
+      console.log('\n  --do-ambiente exige PLUGGY_CLIENT_ID e PLUGGY_CLIENT_SECRET definidos.\n');
+      return 1;
+    }
+    return await gravar(doAmbiente.clientId, doAmbiente.clientSecret);
+  }
+
+  if (!process.stdin.isTTY) {
+    console.log('\n  Este comando precisa de um terminal interativo para perguntar as credenciais,');
+    console.log('  e a entrada padrao deste processo esta fechada — costuma acontecer quando o');
+    console.log('  instalador vem por "irm | iex" ou "curl | bash".\n');
+    console.log('  Rode direto na pasta do projeto:\n');
+    console.log('    npm run configurar\n');
+    return 1;
+  }
+
   console.log('\nCredenciais da Pluggy (Dashboard > sua aplicacao)');
   console.log('Elas ficam so neste computador, no arquivo .env. Nao cole clientSecret');
   console.log('em chat, ticket ou commit: quem tem o par le todas as suas contas.\n');
@@ -34,6 +64,10 @@ async function main(): Promise<number> {
     return 1;
   }
 
+  return await gravar(clientId, clientSecret);
+}
+
+async function gravar(clientId: string, clientSecret: string): Promise<number> {
   const baseUrl = process.env.PLUGGY_BASE_URL ?? 'https://api.pluggy.ai';
   process.stdout.write('\n  Conferindo com a Pluggy... ');
   try {

@@ -122,7 +122,28 @@ funciona em modo demonstracao e voce liga depois rodando "npm run configurar".
 
 $resposta = Read-Host "`nConfigurar credenciais agora? [s/N]"
 if ($resposta -eq 's' -or $resposta -eq 'S') {
-  node dist\configurar.js
+  # O PowerShell pergunta, nao o Node: quando o instalador chega por "irm | iex"
+  # a entrada padrao ja foi consumida pelo cano, e um prompt do Node leria vazio.
+  Write-Host ''
+  Write-Host 'As credenciais ficam so neste computador, no arquivo .env.'
+  Write-Host 'Nao cole clientSecret em chat, ticket ou commit.'
+  Write-Host ''
+  $clientId = Read-Host '  clientId'
+  $segredo  = Read-Host '  clientSecret (nao aparece enquanto voce digita)' -AsSecureString
+  $clientSecret = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($segredo))
+
+  if ([string]::IsNullOrWhiteSpace($clientId) -or [string]::IsNullOrWhiteSpace($clientSecret)) {
+    Erro 'clientId ou clientSecret vazio — pulando a configuracao.'
+    Write-Host "Para configurar depois:  cd $Dir ; npm run configurar"
+    $resposta = 'n'
+  } else {
+    $env:PLUGGY_CLIENT_ID = $clientId
+    $env:PLUGGY_CLIENT_SECRET = $clientSecret
+    node dist\configurar.js --do-ambiente
+  }
+}
+if ($resposta -eq 's' -or $resposta -eq 'S') {
   Passo 'Buscando as conexoes ja existentes na sua conta'
   node dist\conectar.js --listar
   if ($LASTEXITCODE -ne 0) {
@@ -147,6 +168,6 @@ O comando "claude" nao esta no PATH. Quando instalar o Claude Code, rode:
 
 Ou, no app de desktop / Cursor, acrescente ao arquivo de configuracao MCP:
 
-  "banco": { "command": "node", "args": ["$($indexJs -replace '\\','\\\\')"] }
+  "banco": { "command": "node", "args": [$($indexJs | ConvertTo-Json)] }
 "@
 }

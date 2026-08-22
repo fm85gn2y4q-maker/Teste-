@@ -95,7 +95,31 @@ else
 fi
 
 if [ "${RESPOSTA:-n}" = "s" ] || [ "${RESPOSTA:-n}" = "S" ]; then
-  node dist/configurar.js
+  # Quem pergunta e o shell, nao o node: com "curl | bash" a entrada padrao ja
+  # foi consumida pelo cano, e um prompt do node leria vazio na hora.
+  echo
+  echo "As credenciais ficam so neste computador, no arquivo .env."
+  echo "Nao cole clientSecret em chat, ticket ou commit."
+  echo
+  printf '  clientId: '
+  read -r CLIENT_ID 2>/dev/null </dev/tty || CLIENT_ID=""
+  printf '  clientSecret (nao aparece enquanto voce digita): '
+  stty -echo 2>/dev/null </dev/tty || true
+  read -r CLIENT_SECRET 2>/dev/null </dev/tty || CLIENT_SECRET=""
+  stty echo 2>/dev/null </dev/tty || true
+  echo
+
+  if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ]; then
+    erro "clientId ou clientSecret vazio — pulando a configuracao."
+    echo "Para configurar depois:  cd $DIR && npm run configurar"
+    RESPOSTA="n"
+  else
+    PLUGGY_CLIENT_ID="$CLIENT_ID" PLUGGY_CLIENT_SECRET="$CLIENT_SECRET" \
+      node dist/configurar.js --do-ambiente
+  fi
+fi
+
+if [ "${RESPOSTA:-n}" = "s" ] || [ "${RESPOSTA:-n}" = "S" ]; then
   passo "Buscando as conexoes ja existentes na sua conta"
   node dist/conectar.js --listar || {
     echo
