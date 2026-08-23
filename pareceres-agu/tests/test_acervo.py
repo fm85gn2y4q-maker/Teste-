@@ -106,8 +106,9 @@ def test_pagina_de_ocr_nunca_passa_por_transcricao_fiel(acervo):
     exatamente o que se copia para uma peça."""
     linha = acervo.con.execute(
         "SELECT codigo FROM documentos WHERE origem_texto = 'ocr' LIMIT 1").fetchone()
-    if not linha:
-        return  # OCR ainda não rodou nesta máquina
+    assert linha, ("nenhum documento de OCR no acervo. Este teste antes retornava "
+                   "em silêncio aqui, e por isso passou numa reindexação que "
+                   "perdeu os 369 documentos reconhecidos.")
     ficha = acervo.obter(linha[0]).para_dict()
     assert ficha["texto_veio_de_ocr"] is True
     assert isinstance(ficha["ocr_confianca"], int)
@@ -182,3 +183,39 @@ def test_o_balde_residual_nao_tem_autor_unico(acervo):
 
 def test_aviso_de_ente_esta_na_cobertura(acervo):
     assert "Município" in acervo.cobertura()["aviso_ente_federado"]
+
+
+# ----------------------------------------------------------------- pisos
+#
+# Uma reindexação leu um sistema de arquivos instável e produziu um índice com
+# ZERO documentos de OCR e 455 documentos a menos com texto. Os 81 testes
+# passaram: os de OCR começavam com "se não houver linha, retorna", e os de
+# cobertura só exigiam mínimos que o índice degradado ainda cumpria.
+#
+# Teste que se desliga sozinho quando o dado some não é teste. Estes fixam o
+# piso do que o acervo tem de ter para ser o acervo.
+
+def test_o_corpus_de_ocr_nao_pode_encolher_em_silencio(acervo):
+    n = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE origem_texto = 'ocr'").fetchone()[0]
+    assert n >= 300, f"só {n} documentos de OCR; eram 369 — a reindexação leu menos do que existe"
+
+
+def test_o_texto_pesquisavel_nao_pode_encolher_em_silencio(acervo):
+    n = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE tem_texto = 1").fetchone()[0]
+    assert n >= 1700, f"só {n} documentos com texto; eram 1.852"
+
+
+def test_o_acervo_tem_as_cinco_fontes_com_volume_esperado(acervo):
+    por_fonte = dict(acervo.con.execute(
+        "SELECT fonte, COUNT(*) FROM documentos GROUP BY 1"))
+    pisos = {"vinculante": 210, "conuni": 1700, "referencial": 850,
+             "on": 100, "sumula": 86}
+    for fonte, piso in pisos.items():
+        assert por_fonte.get(fonte, 0) >= piso, (fonte, por_fonte.get(fonte, 0), piso)
+
+
+def test_paginas_indexadas_nao_pode_encolher_em_silencio(acervo):
+    n = acervo.con.execute("SELECT COUNT(*) FROM paginas").fetchone()[0]
+    assert n >= 8500, f"só {n} páginas indexadas; eram 9.369"
