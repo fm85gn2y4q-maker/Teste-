@@ -11,6 +11,7 @@ import re
 import sqlite3
 import sys
 from collections import Counter
+import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -18,9 +19,16 @@ import autoridade  # noqa: E402
 import referencias  # noqa: E402
 
 AQUI = Path(__file__).resolve().parent
-ACERVO = Path.home() / "Documents" / "AGU_Acervo_Consultivo"
-PDFS = ACERVO / "pdfs"
-OCR = ACERVO / "ocr"
+# O banco fica no disco rápido; a matéria-prima pode morar no HD externo.
+# Medido nesta máquina: SQLite servido de USB paga 16 a 30 s por busca no
+# inteiro teor, contra 0,01 s no NVMe — é latência de salto aleatório do FTS5,
+# não tamanho. Já os PDFs e o OCR só são lidos na reindexação, e ali o disco
+# lento não incomoda.
+ACERVO = Path(os.environ.get(
+    "AGU_ACERVO", str(Path.home() / "Documents" / "AGU_Acervo_Consultivo")))
+BRUTOS = Path(os.environ.get("AGU_BRUTOS", str(ACERVO)))
+PDFS = BRUTOS / "pdfs"
+OCR = BRUTOS / "ocr"
 BANCO = ACERVO / "agu_consultivo.db"
 
 # ---------------------------------------------------------------- proveniência

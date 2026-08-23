@@ -24,10 +24,17 @@ import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-ACERVO = Path.home() / "Documents" / "AGU_Acervo_Consultivo"
-PDFS = ACERVO / "pdfs"
-SAIDA = ACERVO / "ocr"
-TESSDATA = ACERVO / "tessdata"
+# O banco fica no disco rápido; a matéria-prima pode morar no HD externo.
+# Medido nesta máquina: SQLite servido de USB paga 16 a 30 s por busca no
+# inteiro teor, contra 0,01 s no NVMe — é latência de salto aleatório do FTS5,
+# não tamanho. Já os PDFs e o OCR só são lidos na reindexação, e ali o disco
+# lento não incomoda.
+ACERVO = Path(os.environ.get(
+    "AGU_ACERVO", str(Path.home() / "Documents" / "AGU_Acervo_Consultivo")))
+BRUTOS = Path(os.environ.get("AGU_BRUTOS", str(ACERVO)))
+PDFS = BRUTOS / "pdfs"
+SAIDA = BRUTOS / "ocr"
+TESSDATA = BRUTOS / "tessdata"
 TESSERACT = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
 BANCO = ACERVO / "agu_consultivo.db"
 
