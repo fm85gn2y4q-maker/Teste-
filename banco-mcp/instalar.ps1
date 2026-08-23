@@ -108,6 +108,9 @@ Passo 'Testando o servidor em modo demonstracao'
 # depender de como o PowerShell repassa JavaScript embutido para o node.
 $env:BANCO_MCP_PROVEDOR = 'mock'
 node dist\diagnostico.js
+# Limpa: variavel de ambiente vence o .env por desenho, entao deixa-la aqui
+# faria o servidor continuar em modo demonstracao mesmo depois de configurado.
+Remove-Item Env:\BANCO_MCP_PROVEDOR -ErrorAction SilentlyContinue
 
 # --- 6. Dados reais? -------------------------------------------------------
 Passo 'Dados reais do seu banco?'
