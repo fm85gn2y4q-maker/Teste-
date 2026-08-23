@@ -113,7 +113,10 @@ async function salvar(itemId) {
     body: JSON.stringify({ itemId }),
   });
   const dados = await r.json();
-  if (!r.ok) { estado.textContent = 'Nao consegui gravar: ' + (dados.erro || r.status); return; }
+  if (!r.ok) {
+    estado.innerHTML = '<span class="aviso">' + (dados.erro || ('erro ' + r.status)) + '</span>';
+    return;
+  }
   lista.innerHTML = dados.itens.map((i) => '<li><code>' + i + '</code></li>').join('');
   estado.textContent = 'Conexao gravada. Pode conectar outro banco.';
 }
@@ -218,6 +221,18 @@ const servidor = createServer((req, res) => {
       if (!/^[a-zA-Z0-9-]{8,64}$/.test(itemId)) {
         res.writeHead(400, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ erro: 'itemId invalido' }));
+        return;
+      }
+      // Os dois sao UUID e ficam lado a lado no Dashboard, entao trocar um pelo
+      // outro e o erro natural. O clientId identifica a aplicacao; o itemId, uma
+      // conexao com um banco. Gravar o primeiro faria toda consulta dar 404.
+      if (itemId === config.pluggy.clientId) {
+        res.writeHead(400, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({
+          erro: 'Esse e o seu clientId, nao o id de uma conexao. O itemId nasce quando ' +
+            'voce conecta um banco — pelo botao acima, ou no Dashboard conectando o ' +
+            'conector Meu Pluggy. Sao UUIDs parecidos e ficam perto um do outro na tela.',
+        }));
         return;
       }
       const itens = gravarItens([itemId]);
