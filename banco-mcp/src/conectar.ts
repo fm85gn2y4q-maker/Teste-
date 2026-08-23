@@ -153,9 +153,15 @@ async function listar(): Promise<number> {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     log(`  Nao consegui listar: ${msg}\n`);
-    if (/40[45]/.test(msg)) {
-      log('  Esta conta nao expoe a lista de conexoes pela API.');
-      log('  Rode sem --listar para conectar pelo navegador, ou copie os ids do Dashboard.\n');
+    // A Pluggy responde 401 a quem pede a lista inteira de items, e 404/405 a
+    // quem cai num endpoint que a conta nao tem. Nos tres casos a saida e a
+    // mesma: conectar pelo navegador. So um erro de rede merece outra leitura.
+    if (/40[1345]/.test(msg)) {
+      log('  Esta conta nao expoe a lista de conexoes pela API — e comum, nao e erro seu.');
+      log('  A credencial esta certa (a autenticacao passou); o que falta e o id de');
+      log('  cada conexao. Pegue-os pelo navegador:\n');
+      log('    npm run conectar\n');
+      log('  Ou copie os ids no Dashboard da Pluggy e ponha em PLUGGY_ITEM_IDS no .env.\n');
     }
     return 1;
   }
