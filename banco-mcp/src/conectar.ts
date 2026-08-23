@@ -19,8 +19,11 @@ carregarDotEnv();
 const config = carregarConfig();
 const CAMINHO_ENV = resolve(process.cwd(), '.env');
 const PORTA = Number(process.env.BANCO_MCP_PORTA_CONEXAO ?? 8788);
+// O pacote publicado nao traz bundle de navegador e depende de zoid e
+// jwt-decode, entao servi-lo local exigiria um empacotador. O /+esm do
+// jsDelivr resolve as dependencias e entrega um modulo pronto.
 const URL_WIDGET = process.env.PLUGGY_CONNECT_URL
-  ?? 'https://cdn.pluggy.ai/pluggy-connect/v2.9.0/pluggy-connect.js';
+  ?? 'https://cdn.jsdelivr.net/npm/pluggy-connect-sdk@2.14.2/+esm';
 
 function log(msg: string): void {
   process.stdout.write(`${msg}\n`);
@@ -87,7 +90,9 @@ const PAGINA = (token: string) => `<!doctype html>
 
 <div class="caixa" id="manual">
   <strong>Ou cole o id da conexao</strong>
-  <p class="sub">No Dashboard da Pluggy, cada banco conectado tem um <code>itemId</code>.</p>
+  <p class="sub">No Dashboard da Pluggy: abra sua aplicacao, conecte o conector
+  <strong>Meu Pluggy</strong> entrando com a conta onde seus bancos ja estao, e
+  copie o <code>itemId</code> que aparecer. Este caminho nao depende de CDN.</p>
   <p><input id="itemId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
   <button class="secundario" id="salvarManual">Salvar</button></p>
 </div>
@@ -98,7 +103,7 @@ const PAGINA = (token: string) => `<!doctype html>
   <p class="sub">Quando terminar, feche esta aba e volte ao terminal.</p>
 </div>
 
-<script>
+<script type="module">
 const estado = document.getElementById('estado');
 const lista = document.getElementById('lista');
 
@@ -113,30 +118,31 @@ async function salvar(itemId) {
   estado.textContent = 'Conexao gravada. Pode conectar outro banco.';
 }
 
+// O campo manual nao depende de nada externo: e o caminho que sempre funciona.
 document.getElementById('salvarManual').onclick = () => {
   const v = document.getElementById('itemId').value.trim();
   if (v) salvar(v);
 };
 
-document.getElementById('abrir').onclick = async () => {
-  if (typeof PluggyConnect === 'undefined') {
-    estado.innerHTML = '<span class="aviso">O widget da Pluggy nao carregou. ' +
-      'Verifique a conexao ou defina PLUGGY_CONNECT_URL com a versao atual do script. ' +
-      'Enquanto isso, use o campo de colar o id abaixo.</span>';
-    return;
-  }
-  estado.textContent = 'Abrindo...';
-  const r = await fetch('/token');
-  const { token } = await r.json();
-  new PluggyConnect({
-    connectToken: token,
-    includeSandbox: ${config.pluggy.baseUrl.includes('sandbox') ? 'true' : 'false'},
-    onSuccess: (dados) => salvar(dados?.item?.id),
-    onError: (e) => { estado.textContent = 'O Connect devolveu um erro: ' + JSON.stringify(e); },
-  }).init();
-};
+// O widget depende de CDN, e CDN cai. Se nao carregar, a pagina continua util.
+try {
+  const { PluggyConnect } = await import('${URL_WIDGET}');
+  document.getElementById('abrir').onclick = async () => {
+    estado.textContent = 'Abrindo...';
+    const { token } = await (await fetch('/token')).json();
+    new PluggyConnect({
+      connectToken: token,
+      includeSandbox: ${config.pluggy.baseUrl.includes('sandbox') ? 'true' : 'false'},
+      onSuccess: (dados) => salvar(dados?.item?.id),
+      onError: (e) => { estado.textContent = 'O Connect devolveu um erro: ' + JSON.stringify(e); },
+    }).init();
+  };
+} catch (e) {
+  document.getElementById('abrir').disabled = true;
+  estado.innerHTML = '<span class="aviso">Nao consegui carregar o widget da Pluggy ' +
+    '(' + (e?.message || e) + '). Use o campo abaixo — ele nao depende de CDN.</span>';
+}
 </script>
-<script src="${URL_WIDGET}" onerror="document.getElementById('estado').innerHTML='<span class=aviso>Nao consegui baixar o widget da Pluggy. Use o campo de colar o id abaixo.</span>'"></script>
 </body></html>`;
 
 /**
