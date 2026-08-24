@@ -49,7 +49,7 @@ python pipeline/enxugar.py
 Depois, comprima e calcule o hash:
 
 ```bash
-python -c "import gzip,shutil,hashlib,os; src=os.path.expanduser('~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres_enxuto.db'); dst='pge-rj-pareceres-v1.0.0.db.gz'; f=open(src,'rb'); g=gzip.open(dst,'wb',6); shutil.copyfileobj(f,g,1<<20); g.close(); h=hashlib.sha256(); fh=open(dst,'rb'); [h.update(b) for b in iter(lambda: fh.read(1<<20), b'')]; print(dst, os.path.getsize(dst), h.hexdigest())"
+python -c "import gzip,shutil,hashlib,os; src=r'D:\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres_enxuto.db'; dst='pge-rj-pareceres-v1.0.0.db.gz'; f=open(src,'rb'); g=gzip.open(dst,'wb',6); shutil.copyfileobj(f,g,1<<20); g.close(); h=hashlib.sha256(); fh=open(dst,'rb'); [h.update(b) for b in iter(lambda: fh.read(1<<20), b'')]; print(dst, os.path.getsize(dst), h.hexdigest())"
 ```
 
 Crie a release e suba o arquivo:

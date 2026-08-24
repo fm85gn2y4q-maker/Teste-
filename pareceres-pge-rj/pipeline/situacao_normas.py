@@ -26,9 +26,7 @@ import re
 import sqlite3
 import unicodedata
 
-DB = os.environ.get(
-    "PARECERES_BANCO",
-    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres.db")
+from caminhos import DB
 
 
 def norm(s):

@@ -30,8 +30,7 @@ DESTINO = RAIZ / "dist" / "pareceres-pge-rj.mcpb"
 # O acervo é artefato de dados e mora fora do repositório.
 BANCO = Path(os.environ.get(
     "PARECERES_BANCO",
-    os.path.expanduser(
-        "~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres_enxuto.db")))
+    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres_enxuto.db"))
 
 # O Claude Desktop não usa o interpretador do projeto: pega o primeiro `python`
 # do PATH dele. Como `pydantic_core` é binário compilado, um .pyd de cp312 não

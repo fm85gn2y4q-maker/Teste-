@@ -4,7 +4,7 @@
 import csv, json, os, collections
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
+from caminhos import BASE
 UPLOAD = "https://documentacao.pge.rj.gov.br/scripts/bnweb/bnmapi.exe?router=upload/%s"
 DETALHE = "https://documentacao.pge.rj.gov.br/bnportal/pt-BR/detalhes/%s"
 

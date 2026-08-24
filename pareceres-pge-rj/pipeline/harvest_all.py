@@ -75,6 +75,10 @@ def main():
             out.flush()
             open(STATE, "w").write(str(p))
             print("pagina %d/%d  +%d  acumulado=%d" % (p, pages, novos, len(seen)), flush=True)
+    import datetime
+    # A cobertura declara a data da coleta; sem isto ela envelhece calada.
+    open(os.path.join(os.path.dirname(OUT), "coletado_em.txt"), "w").write(
+        datetime.date.today().isoformat() + "\n")
     print("FIM. registros unicos =", len(seen), flush=True)
 
 

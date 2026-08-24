@@ -34,10 +34,20 @@ def test_operadores_escritos_pelo_usuario_passam_adiante():
 # ------------------------------------------------------------- ficha e busca
 def test_cobertura_declara_os_limites(acervo):
     c = acervo.cobertura()
-    assert c["documentos"] == "49139"
-    assert c["paginas"] == "348060"
+    assert c["documentos"] == str(
+        acervo.con.execute("SELECT COUNT(*) FROM documentos").fetchone()[0])
+    assert c["paginas"] == str(
+        acervo.con.execute("SELECT COUNT(*) FROM paginas").fetchone()[0])
+    assert int(c["documentos"]) >= 49201
     assert "PERSUASIVO" in c["autoridade"]
     assert "no_recorte" in c["recorte"]
+
+
+def test_cobertura_registra_a_data_da_coleta(acervo):
+    """A data era constante no codigo e sobreviveu a uma recoleta inteira,
+    dizendo ao consulente que o acervo parava numa data que ja nao era a dele."""
+    c = acervo.cobertura()
+    assert c["coletado_em"] >= "2026-08-23"
 
 
 def test_pesquisa_por_ementa(acervo):

@@ -8,21 +8,28 @@
      OCR, variantes duplicadas de sumula/acordao/precedente)
 
 Ler do PDF e muito mais rapido que reler o texto de dentro do FTS.
+
+    python passada2.py           # refaz tudo: 23 mil PDFs, horas
+    python passada2.py --novos   # so quem ainda nao tem pagina no banco
+
+O modo `--novos` nao usa `novos.txt`: usa o banco. Documento com PDF em disco
+e sem nenhuma linha em `paginas` e o que falta processar -- criterio que
+tambem recupera o que ficou pelo caminho num download interrompido, coisa que
+uma lista de codigos novos nao alcanca.
 """
 import collections
 import glob
 import os
 import re
 import sqlite3
+import sys
 import time
 
 import fitz
 
+from caminhos import BASE, DB
 from conclusao import conclusao_de
 from corrigir import extrai
-
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-DB = os.path.join(BASE, "pge_rj_pareceres.db")
 
 DDL = """
 CREATE TABLE IF NOT EXISTS paginas (
@@ -30,10 +37,14 @@ CREATE TABLE IF NOT EXISTS paginas (
 CREATE VIRTUAL TABLE IF NOT EXISTS paginas_fts USING fts5(
   codigo UNINDEXED, pagina UNINDEXED, texto,
   tokenize="unicode61 remove_diacritics 2");
+CREATE TABLE IF NOT EXISTS citacoes (codigo INTEGER, especie TEXT, referencia TEXT,
+  qualificador TEXT, ocorrencias INTEGER);
 """
 
 
 def main():
+    incremental = "--novos" in sys.argv
+
     con = sqlite3.connect(DB)
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA synchronous=NORMAL")
@@ -43,11 +54,12 @@ def main():
             con.execute("ALTER TABLE documentos ADD COLUMN %s TEXT" % col)
         except sqlite3.OperationalError:
             pass
-    con.execute("DELETE FROM paginas")
-    con.execute("DELETE FROM paginas_fts")
-    con.execute("DROP TABLE IF EXISTS citacoes")
-    con.execute("""CREATE TABLE citacoes (codigo INTEGER, especie TEXT, referencia TEXT,
-                   qualificador TEXT, ocorrencias INTEGER)""")
+    if not incremental:
+        con.execute("DELETE FROM paginas")
+        con.execute("DELETE FROM paginas_fts")
+        con.execute("DROP TABLE IF EXISTS citacoes")
+        con.execute("""CREATE TABLE citacoes (codigo INTEGER, especie TEXT, referencia TEXT,
+                       qualificador TEXT, ocorrencias INTEGER)""")
     con.commit()
 
     porcod = collections.defaultdict(list)
@@ -58,6 +70,16 @@ def main():
     codigos = sorted(porcod, reverse=True)
     print("documentos com PDF: %d (arquivos: %d)"
           % (len(codigos), sum(len(v) for v in porcod.values())), flush=True)
+
+    if incremental:
+        prontos = {c for (c,) in con.execute("SELECT DISTINCT codigo FROM paginas")}
+        codigos = [c for c in codigos if c not in prontos]
+        print("ja processados: %d | a processar agora: %d" % (len(prontos), len(codigos)),
+              flush=True)
+        if not codigos:
+            print("nada a fazer.", flush=True)
+            con.close()
+            return
 
     t0, tipos, npag = time.time(), collections.Counter(), 0
     for i, cod in enumerate(codigos, 1):
@@ -72,6 +94,13 @@ def main():
                 paginas.append(d[p].get_text())
             d.close()
         txt = "\n".join(paginas)
+
+        # Reexecutar sobre um codigo ja visto nao pode empilhar segunda copia
+        # das paginas nem das citacoes: o FTS aceita duplicata calada, e o
+        # resultado e a mesma pagina aparecendo duas vezes na busca.
+        if incremental:
+            con.execute("DELETE FROM paginas_fts WHERE codigo=?", (cod,))
+            con.execute("DELETE FROM citacoes WHERE codigo=?", (cod,))
 
         # Colunas nomeadas: a tabela ganha `secao` e `transcricao` na passada
         # seguinte, e a insercao por posicao quebrava na reexecucao.

@@ -4,8 +4,7 @@ legislacao/precedentes/jurisprudencia citados e monta um banco SQLite com
 busca em texto integral (FTS5)."""
 import fitz, glob, json, os, re, sqlite3, sys, time, unicodedata, collections
 
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-PDFDIR = os.path.join(BASE, "PDFs")
+from caminhos import BASE, PDFS as PDFDIR
 AQUI = os.path.dirname(os.path.abspath(__file__))
 SEL = os.path.join(AQUI, "selecionados.jsonl")
 DB = os.path.join(BASE, "pge_rj_pareceres.db")

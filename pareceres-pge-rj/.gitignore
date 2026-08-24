@@ -14,6 +14,12 @@ dados/
 # PDFs do acervo (12,4 GB)
 PDFs/
 
+# Estado transitorio de uma atualizacao: a lista de codigos que a coleta
+# trouxe e a referencia usada para conferir uma refatoracao. Servem para a
+# corrida em andamento, nao para o historico.
+novos.txt
+_referencia_secoes.json
+
 # Ambiente
 .venv/
 __pycache__/

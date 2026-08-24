@@ -17,9 +17,7 @@ from conclusao import conclusao_de
 from regime import regime_e_alerta
 from rodape import limpa_rodape
 
-DB = os.environ.get(
-    "PARECERES_BANCO",
-    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres.db")
+from caminhos import DB
 
 
 def main():

@@ -7,8 +7,7 @@ Reaproveita o texto ja guardado no banco - nao rele os PDFs, salvo os 10.
 """
 import collections, glob, os, re, sqlite3, sys, time, unicodedata
 
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-DB = os.path.join(BASE, "pge_rj_pareceres.db")
+from caminhos import BASE, DB
 
 
 def norm(s):

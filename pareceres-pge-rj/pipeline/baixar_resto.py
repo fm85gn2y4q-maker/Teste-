@@ -18,8 +18,7 @@ import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-PDFDIR = os.path.join(BASE, "PDFs")
+from caminhos import BASE, PDFS as PDFDIR
 AQUI = os.path.dirname(os.path.abspath(__file__))
 CATALOGO = os.environ.get("PARECERES_CATALOGO", os.path.join(AQUI, "catalogo_pgerj_total.jsonl"))
 UPLOAD = "https://documentacao.pge.rj.gov.br/scripts/bnweb/bnmapi.exe?router=upload/%s"

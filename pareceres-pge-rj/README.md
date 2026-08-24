@@ -13,17 +13,31 @@ autoridade diferentes, e numa tabela só essa diferença vira metadado ignoráve
 
 | | |
 |---|---|
-| Documentos | 14.420 |
-| Com inteiro teor | 8.559 |
-| Só ficha e ementa | 5.861 |
-| Páginas indexadas | 177.156 |
-| Sem camada de texto | 291 |
-| Período | 1961 a 2026 |
-| Citações mapeadas | 76.017 |
+| Documentos | 49.139 |
+| Com inteiro teor | 23.097 |
+| Só ficha e ementa | 26.042 |
+| Páginas indexadas | 348.060 |
+| Sem camada de texto | 850 |
+| Período | 1960 a 2026 |
+| Citações mapeadas | 170.028 |
 
-Banco: `~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres.db` (1,3 GB),
-fora do repositório — é artefato de dados. O caminho pode ser passado com
-`--banco` ou pela variável `PARECERES_BANCO`.
+São os números do acervo **integral**. O recorte temático de contratações
+continua marcado — 14.420 documentos com `no_recorte = 1`, filtráveis por
+`listar_documentos`. Ele não foi diluído: virou filtro. E a distinção importa,
+porque ausência no recorte não é ausência no acervo — o Parecer LRB 01/2007,
+de Barroso, sobre defesa de agentes públicos, está fora dele por ser matéria
+institucional, não de contratação.
+
+O acervo está partido em dois discos, de propósito:
+
+| | onde | por quê |
+|---|---|---|
+| 26 GB de PDF | HD externo | material frio, só relido em reindexação completa |
+| 1,3 GB de banco | NVMe | responde a cada pergunta: 485 MB/s contra 42 MB/s, e 0,3 MB/s na leitura aleatória do FTS5 no externo |
+
+Nenhum dos dois vai para o repositório — são artefato de dados. Os caminhos
+vivem em `pipeline/caminhos.py` e podem ser trocados por `PARECERES_ACERVO` e
+`PARECERES_BANCO`.
 
 ## Como rodar
 
@@ -46,7 +60,7 @@ O SDK precisa ser da série 1.x: o `mcp` 2.0 removeu `mcp.server.fastmcp`.
       "args": ["-m", "pareceres"],
       "env": {
         "PYTHONPATH": "C:\\Users\\Matheus Menegatti\\projetos\\Teste-\\pareceres-pge-rj",
-        "PARECERES_BANCO": "C:\\Users\\Matheus Menegatti\\Documents\\PGE-RJ_Pareceres_Contratacoes\\pge_rj_pareceres.db",
+        "PARECERES_BANCO": "D:\\PGE-RJ_Pareceres_Contratacoes\\pge_rj_pareceres.db",
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUTF8": "1"
       }

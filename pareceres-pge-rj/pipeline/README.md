@@ -4,7 +4,7 @@ Receita para reconstruir `pge_rj_pareceres.db` do zero, na ordem em que as
 etapas rodaram. Cada script é executável direto e imprime o que fez.
 
 O banco é artefato de dados e fica fora do repositório, em
-`~/Documents/PGE-RJ_Pareceres_Contratacoes/`. Os arquivos intermediários
+`D:\PGE-RJ_Pareceres_Contratacoes\`. Os arquivos intermediários
 (`.jsonl`) são gravados **ao lado dos scripts**, nesta pasta.
 
 **O pipeline não roda no `.venv` do servidor.** São dependências diferentes de
@@ -75,9 +75,11 @@ citações.
 
 ## Limites conhecidos
 
-- Caminhos absolutos no topo dos scripts, apontando para `Documents\PGE-RJ_...`.
-  Trocar de máquina exige editá-los (ou exportar `PARECERES_BANCO`).
-- As etapas 5 a 8 **reconstroem** as tabelas que tocam; não são incrementais.
+- O caminho do acervo vive num lugar só, `caminhos.py`. Trocar de disco é
+  trocar uma linha, ou exportar `PARECERES_ACERVO`/`PARECERES_BANCO`.
+- As etapas 5 a 8 **reconstroem** as tabelas que tocam. Para incorporar só o
+  que chegou depois da última coleta há o par `atualizar.py` +
+  `incrementar.py`, que roda as mesmas etapas com `--novos`.
   A etapa 4 é retomável (pula o que já está em disco).
 - 291 PDFs são digitalização sem camada de texto e ficam invisíveis à busca.
   Precisariam de OCR, que não está instalado nesta máquina.

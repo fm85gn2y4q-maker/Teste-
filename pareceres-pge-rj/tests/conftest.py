@@ -16,7 +16,7 @@ sys.path.insert(0, str(RAIZ / "pipeline"))
 
 BANCO = Path(os.environ.get(
     "PARECERES_BANCO",
-    os.path.expanduser("~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres.db")))
+    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres.db"))
 
 
 @pytest.fixture(scope="session")

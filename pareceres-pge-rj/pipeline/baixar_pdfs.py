@@ -4,8 +4,7 @@ Retomavel: pula o que ja existe em disco."""
 import json, os, re, sys, threading, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-PDFDIR = os.path.join(BASE, "PDFs")
+from caminhos import BASE, PDFS as PDFDIR
 CAT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "selecionados.jsonl")
 UPLOAD = "https://documentacao.pge.rj.gov.br/scripts/bnweb/bnmapi.exe?router=upload/%s"
 FALHAS = os.path.join(BASE, "_falhas_download.txt")

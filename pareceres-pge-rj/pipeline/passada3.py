@@ -15,6 +15,7 @@ poder virar ferramenta de consulta para uma IA.
 Le as paginas do indice numa varredura sequencial (rapido); nao rele PDFs.
 """
 import collections
+import io
 import os
 import re
 import sqlite3
@@ -24,8 +25,13 @@ import unicodedata
 
 from regime import regime_e_alerta  # unica fonte da verdade
 
-BASE = r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes"
-DB = os.path.join(BASE, "pge_rj_pareceres.db")
+from caminhos import BASE, DB
+
+AQUI = os.path.dirname(os.path.abspath(__file__))
+# Escrito pelo coletor. A data da coleta era constante no codigo e
+# sobrevivia a recoletas inteiras, dizendo ao consulente que o acervo
+# parava numa data que ja nao era a dele.
+COLETA = os.path.join(AQUI, "coletado_em.txt")
 
 
 def norm(s):
@@ -155,9 +161,16 @@ def main():
 
     # ---------- 1. tesauro medido -------------------------------------------
     print("[1] tesauro: medindo cada variante no acervo", flush=True)
+    # A transacao de escrita fecha ANTES das varreduras. O DROP/CREATE abria
+    # uma transacao que ficava aberta durante as ~120 consultas ao FTS -- ou
+    # seja, minutos segurando trava de escrita -- e o INSERT no fim morria com
+    # "disk I/O error" numa maquina com 0,4 GB de RAM livre e 37 GB de commit
+    # charge. Medir e leitura; so a gravacao precisa de transacao, e curta.
     con.execute("DROP TABLE IF EXISTS sinonimos")
     con.execute("""CREATE TABLE sinonimos (conceito TEXT, variante TEXT,
                    documentos INTEGER, paginas INTEGER)""")
+    con.commit()
+
     linhas = []
     for conceito, variantes in TESAURO.items():
         for v in variantes:
@@ -168,6 +181,8 @@ def main():
             except sqlite3.OperationalError:
                 d = p = 0
             linhas.append((conceito, v, d, p))
+    con.commit()
+
     con.executemany("INSERT INTO sinonimos VALUES (?,?,?,?)", linhas)
     con.execute("CREATE INDEX ix_sin_con ON sinonimos(conceito)")
     con.commit()
@@ -180,15 +195,23 @@ def main():
             con.execute("ALTER TABLE paginas ADD COLUMN %s %s" % (col, tipo))
         except sqlite3.OperationalError:
             pass
+    # Uma passada, um documento por vez. Antes isto carregava as 349 mil
+    # paginas do acervo para a memoria de uma vez, e a etapa morreu com
+    # 0xC0000142 (o processo nem subiu) numa maquina com 0,4 GB livres de
+    # 15,6 GB. O `ORDER BY codigo, pagina` ja entrega as paginas agrupadas:
+    # basta fechar o documento quando o codigo muda.
+    #
+    # Leitor e escritor em conexoes separadas de proposito -- commitar no meio
+    # de um SELECT aberto na MESMA conexao e pedir para o cursor de leitura
+    # virar terreno movedico.
     t0 = time.time()
-    porcod = collections.defaultdict(list)
-    for cod, pag, txt in con.execute("SELECT codigo,pagina,texto FROM paginas_fts ORDER BY codigo,pagina"):
-        porcod[cod].append((pag, txt or ""))
-    print("    %d documentos lidos em %.0fs" % (len(porcod), time.time() - t0), flush=True)
-
+    leitor = sqlite3.connect(DB)
     ups, secoes = [], collections.Counter()
     conclusoes = dict(con.execute("SELECT codigo, conclusao FROM documentos"))
-    for cod, pags in porcod.items():
+    ndocs = 0
+
+    def classifica(cod, pags):
+        """As paginas de UM documento viram (secao, transcricao) cada uma."""
         fim_rel = None
         for pag, txt in pags:
             if FIM_RELATORIO.search(norm(txt)):
@@ -212,8 +235,30 @@ def main():
                 sec = "indefinida"
             secoes[sec] += 1
             ups.append((sec, mede_transcricao(txt), cod, pag))
-    con.executemany("UPDATE paginas SET secao=?, transcricao=? WHERE codigo=? AND pagina=?", ups)
-    con.commit()
+
+    def descarrega():
+        con.executemany(
+            "UPDATE paginas SET secao=?, transcricao=? WHERE codigo=? AND pagina=?", ups)
+        con.commit()
+        del ups[:]
+
+    atual, pags = None, []
+    for cod, pag, txt in leitor.execute(
+            "SELECT codigo,pagina,texto FROM paginas_fts ORDER BY codigo,pagina"):
+        if cod != atual:
+            if atual is not None:
+                classifica(atual, pags)
+                ndocs += 1
+            atual, pags = cod, []
+            if len(ups) >= 20000:
+                descarrega()
+        pags.append((pag, txt or ""))
+    if atual is not None:
+        classifica(atual, pags)
+        ndocs += 1
+    descarrega()
+    leitor.close()
+    print("    %d documentos em %.0fs" % (ndocs, time.time() - t0), flush=True)
     print("    paginas classificadas: %s" % dict(secoes), flush=True)
 
     # ---------- 3. vigencia e regime ----------------------------------------
@@ -242,7 +287,8 @@ def main():
     g = lambda s: con.execute(s).fetchone()[0]
     dados = [
         ("fonte", "Acervo publico da Procuradoria-Geral do Estado do Rio de Janeiro (BNPortal)"),
-        ("coletado_em", "2026-07-30"),
+        ("coletado_em", (io.open(COLETA, encoding="utf-8").read().strip()
+                         if os.path.exists(COLETA) else "(nao registrada)")),
         ("documentos", str(g("SELECT COUNT(*) FROM documentos"))),
         ("com_inteiro_teor", str(g("SELECT COUNT(*) FROM documentos WHERE paginas>0"))),
         ("so_ficha_sem_pdf", str(g("SELECT COUNT(*) FROM documentos WHERE paginas=0"))),
@@ -253,10 +299,13 @@ def main():
         ("anteriores_a_14133", str(g("SELECT COUNT(*) FROM documentos WHERE ano<2021"))),
         ("autoridade", "Parecer da PGE-RJ vincula a Administracao estadual fluminense nos termos "
                        "da legislacao propria. Para municipio e precedente PERSUASIVO, nao norma."),
+        # O numero do recorte era literal aqui e voltava ao valor antigo a cada
+        # execucao, mesmo depois de o acervo crescer. Agora e contado.
         ("recorte", "Acervo INTEGRAL da PGE-RJ. O recorte tematico de contratacoes, acordos "
-                    "e parcerias permanece marcado no campo no_recorte (14.420 documentos) e "
+                    "e parcerias permanece marcado no campo no_recorte (%s documentos) e "
                     "pode ser usado como filtro em listar_documentos. Fora dele ha materia de "
-                    "pessoal, tributaria, previdenciaria e constitucional."),
+                    "pessoal, tributaria, previdenciaria e constitucional."
+                    % g("SELECT COUNT(*) FROM documentos WHERE no_recorte=1")),
         ("limite_busca", "A busca e literal. Consulte a tabela sinonimos antes de concluir que "
                          "o acervo nao trata de um tema."),
     ]

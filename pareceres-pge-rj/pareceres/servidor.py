@@ -162,11 +162,22 @@ def _caminho_padrao() -> Path:
     do_ambiente = os.environ.get("PARECERES_BANCO")
     if do_ambiente:
         return Path(do_ambiente)
-    local = Path(__file__).resolve().parent.parent / "dados" / "pge_rj_pareceres.db"
-    if local.exists():
-        return local
-    return Path(os.path.expanduser(
-        "~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres.db"))
+    # Na ordem em que o banco costuma estar: junto do pacote (imagem e .mcpb),
+    # no disco rapido e, por ultimo, no HD externo -- que guarda uma copia
+    # identica, mas onde a leitura aleatoria do FTS5 cai para 0,3 MB/s e cada
+    # consulta vira dezenas de segundos. O HD e o ultimo recurso, nao o
+    # primeiro. O ultimo candidato e devolvido mesmo sem existir: quem chama
+    # precisa do caminho para dizer onde procurou.
+    candidatos = [
+        Path(__file__).resolve().parent.parent / "dados" / "pge_rj_pareceres.db",
+        Path(os.path.expanduser(
+            "~/Documents/PGE-RJ_Pareceres_Contratacoes/pge_rj_pareceres.db")),
+        Path(r"D:\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres.db"),
+    ]
+    for c in candidatos:
+        if c.exists():
+            return c
+    return candidatos[-1]
 
 
 def construir(banco: str | None = None, dominios: list[str] | None = None,

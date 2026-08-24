@@ -32,9 +32,20 @@ def test_as_instrucoes_carregam_as_tres_regras(servidor):
     assert "PERSUASIVO" in texto
 
 
-def test_cobertura(servidor):
+def test_cobertura_nao_mente_sobre_o_tamanho(servidor, acervo):
+    """A cobertura e o que o servidor declara ao consulente. Ela ja ficou para
+    tras de uma coleta -- dizia 49.139 com 49.201 no banco -- porque era
+    reconstruida numa etapa que morreu no meio. Fixar o numero no teste so
+    obriga a edita-lo a cada coleta; o que importa e que ele bata com a
+    contagem real."""
     d = chamar(servidor, "cobertura_do_acervo")
-    assert d["documentos"] == "49139" and d["paginas"] == "348060"
+    docs = acervo.con.execute("SELECT COUNT(*) FROM documentos").fetchone()[0]
+    pags = acervo.con.execute("SELECT COUNT(*) FROM paginas").fetchone()[0]
+    assert d["documentos"] == str(docs)
+    assert d["paginas"] == str(pags)
+    # piso: acervo truncado passaria na igualdade acima, porque a cobertura
+    # seria reconstruida sobre o proprio truncamento
+    assert docs >= 49201 and pags >= 349255
 
 
 def test_busca_estreita_demais_cai_para_qualquer_termo(servidor):
