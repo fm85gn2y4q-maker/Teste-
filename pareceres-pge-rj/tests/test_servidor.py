@@ -181,3 +181,24 @@ def test_situacao_da_norma_sem_apontamento(servidor):
 def test_instrucoes_mandam_conferir_a_situacao_da_norma(servidor):
     texto = servidor.instructions or ""
     assert "situacao_da_norma" in texto
+
+
+def test_instrucoes_contam_em_vez_de_afirmar(servidor, acervo):
+    """Os numeros das instrucoes eram literais. Depois de uma coleta o servidor
+    anunciava "49.139 documentos" com 49.201 no banco -- e e a primeira coisa
+    que o assistente repete ao advogado. Um deles ja estava errado por dois
+    (26.042 contra 26.044) sem que ninguem notasse."""
+    texto = servidor.instructions or ""
+    assert "@" not in texto, "marcador nao substituido nas instrucoes"
+
+    def br(n):
+        return "{:,}".format(n).replace(",", ".")
+
+    docs = acervo.con.execute("SELECT COUNT(*) FROM documentos").fetchone()[0]
+    teor = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE paginas>0").fetchone()[0]
+    pags = acervo.con.execute("SELECT COUNT(*) FROM paginas").fetchone()[0]
+    so_ficha = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE paginas=0").fetchone()[0]
+    for n in (docs, teor, pags, so_ficha):
+        assert br(n) in texto, "instrucoes nao anunciam %s" % br(n)

@@ -66,12 +66,13 @@ mesma forma por todo serviço. Menos lugares onde errar.
 O acervo atualmente declarado no `Dockerfile`:
 
 ```
-sha256  95b7d8a31a3889863cfc34bc798630c581634b7c1edf47f71e287b6c50739e43
+pareceres-pge-rj-v2.1.0   coleta de 23/08/2026   506 MB comprimidos
+sha256  b8f1055699f7b32bed5a49a7e2cd57ed3aefa3e6f34550f5fd7d3dc13306d795
 ```
 
-**Esse asset ainda não existe.** A URL está no Dockerfile, mas o arquivo
-precisa ser publicado na release antes do primeiro deploy — a construção falha
-na conferência do hash se ele não estiver lá, que é o comportamento desejado.
+Publicado. A construção confere o hash e falha se não bater, que é o
+comportamento desejado — asset ausente ou trocado derruba o deploy em vez de
+servir acervo errado em silêncio.
 
 ---
 

@@ -14,7 +14,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
-from .acervo import Acervo
+from .acervo import CONCLUSAO_PROPRIA, Acervo
 
 _LOCAIS = ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
 
@@ -39,15 +39,15 @@ def seguranca_de_transporte(dominios: list[str] | None) -> TransportSecuritySett
     )
 
 
-INSTRUCOES = """
+MOLDE_INSTRUCOES = """
 Acervo consultivo da Procuradoria-Geral do Estado do Rio de Janeiro sobre
 contratações, acordos e parcerias — licitação, contratação direta, contrato
 administrativo, convênio, terceiro setor (OS, OSCIP, MROSC), concessão,
 permissão e uso de bem público. Desde a coleta integral, cobre TODO o acervo
-consultivo da Procuradoria: 49.139 documentos, 23.097 com inteiro teor, 348.060
-páginas, de 1960 a 2026.
+consultivo da Procuradoria: @DOCS@ documentos, @TEOR@ com inteiro teor, @PAGS@
+páginas, de @PERIODO@.
 
-O recorte de contratações continua marcado — 14.420 documentos com
+O recorte de contratações continua marcado — @RECORTE@ documentos com
 `no_recorte = 1`, filtráveis por `listar_documentos`. Fora dele há matéria de
 pessoal, tributária, previdenciária e constitucional.
 
@@ -60,7 +60,7 @@ que afetarem a resposta.
 REGRA 1 — A BUSCA É LITERAL; O VOCABULÁRIO JURÍDICO NÃO É
 
 Uma só formulação falha por motivo puramente lexical. Medido neste acervo:
-"reequilíbrio econômico-financeiro" acha 265 documentos; "equilíbrio
+"reequilíbrio econômico-financeiro" acha @REEQUILIBRIO@ documentos; "equilíbrio
 econômico-financeiro", 800; "reajustamento de preços", 401; "revisão
 contratual", 133. Somadas, 1.917 — quem busca só a primeira forma perde 86%.
 
@@ -79,7 +79,7 @@ Procuradoria inverte o parecer.
 
 Cada página devolvida traz `secao` (relatório, fundamentação, conclusão ou não
 identificada), `transcricao_percent` (0 a 100) e, quando for o caso,
-`aviso_proveniencia`. 18% das páginas do acervo têm transcrição igual ou
+`aviso_proveniencia`. @PCT_TRANSCRICAO@% das páginas do acervo têm transcrição igual ou
 superior a 50 — são 63.582 —, e 18.907 delas estão dentro da fundamentação:
 é ali que a confusão acontece.
 
@@ -87,12 +87,12 @@ Nunca atribua um trecho à PGE-RJ sem verificar esses campos. Ao citar, diga de
 onde veio: "consta da conclusão, à p. 14" e "consta de doutrina transcrita à
 p. 9" têm pesos diferentes numa peça.
 
-REGRA 3 — VIGÊNCIA: 90% DO ACERVO É ANTERIOR À LEI 14.133/2021
+REGRA 3 — VIGÊNCIA: @PCT_ANTIGO@% DO ACERVO É ANTERIOR À LEI 14.133/2021
 
-Um precedente envelhece; uma norma morre. Dos 49.139 documentos, 44.383 são
-anteriores a 2021. Entre os que têm inteiro teor, 4.535 respondem sob a Lei
-8.666/93 — revogada desde 30/12/2023 — e apenas 111 aplicam exclusivamente a
-Lei 14.133/2021.
+Um precedente envelhece; uma norma morre. Dos @DOCS@ documentos, @ANTIGOS@ são
+anteriores a 2021. Entre os que têm inteiro teor, @SOB_8666@ respondem sob a Lei
+8.666/93 — revogada desde 30/12/2023 — e apenas @SOB_14133@ aplicam exclusivamente
+a Lei 14.133/2021.
 
 Cada documento traz `regime` e, quando cabível, `alerta_vigencia`. Nunca
 responda pergunta de Lei 14.133 com parecer de regime 8.666 sem declarar isso.
@@ -141,8 +141,8 @@ Parecer da PGE-RJ vincula a Administração ESTADUAL fluminense nos termos da
 legislação própria. Para um município é precedente PERSUASIVO, não norma. Diga
 isso sempre que a consulta for de interesse municipal.
 
-26.042 documentos têm apenas ficha e ementa, sem inteiro teor — mais da metade
-do acervo. Outros 850 são digitalização sem camada de texto, invisíveis à busca
+@SO_FICHA@ documentos têm apenas ficha e ementa, sem inteiro teor — mais da metade
+do acervo. Outros @SEM_TEXTO@ são digitalização sem camada de texto, invisíveis à busca
 textual.
 
 Isso pesa: dizer "não encontrei" sobre uma base em que metade não tem texto
@@ -151,11 +151,70 @@ procure também na ementa, e declare o limite na resposta.
 
 CONCLUSÃO: NEM TODA CONCLUSÃO É CONCLUSÃO
 
-`conclusao_e_do_parecer` distingue a conclusão própria (14.606 documentos) do
-despacho que apenas chancela parecer alheio (4.225). Onde nenhuma fórmula foi
-identificada (4.266), vem `fecho_bruto` — o fim literal do documento, sem
+`conclusao_e_do_parecer` distingue a conclusão própria (@CONC_PROPRIA@ documentos) do
+despacho que apenas chancela parecer alheio (@CONC_ALHEIA@). Onde nenhuma fórmula foi
+identificada (@CONC_NENHUMA@), vem `fecho_bruto` — o fim literal do documento, sem
 interpretação. Não apresente fecho bruto como se fosse conclusão.
 """.strip()
+
+
+def instrucoes(acervo: Any) -> str:
+    """As instrucoes com os numeros do banco que esta servindo.
+
+    Eram literais no texto. Depois de uma coleta o servidor passava a dizer
+    "49.139 documentos" com 49.201 no banco -- e essa e a primeira coisa que o
+    assistente repete ao advogado. Numero que envelhece calado ja custou tres
+    correcoes neste projeto (a cobertura, o recorte e aqui); a resposta e a
+    mesma nas tres: contar em vez de escrever.
+
+    Se a consulta falhar, o texto sai com os marcadores visiveis em vez de com
+    numero inventado -- feio de proposito, porque erro que aparece se conserta.
+    """
+    def n(sql: str) -> str:
+        return "{:,}".format(
+            acervo.con.execute(sql).fetchone()[0]).replace(",", ".")
+
+    docs = acervo.con.execute("SELECT COUNT(*) FROM documentos").fetchone()[0]
+    antigos = acervo.con.execute(
+        "SELECT COUNT(*) FROM documentos WHERE ano<2021").fetchone()[0]
+    valores = {
+        "@DOCS@": "{:,}".format(docs).replace(",", "."),
+        "@TEOR@": n("SELECT COUNT(*) FROM documentos WHERE paginas>0"),
+        "@PAGS@": n("SELECT COUNT(*) FROM paginas"),
+        "@RECORTE@": n("SELECT COUNT(*) FROM documentos WHERE no_recorte=1"),
+        "@ANTIGOS@": "{:,}".format(antigos).replace(",", "."),
+        "@PCT_ANTIGO@": str(round(100.0 * antigos / max(docs, 1))),
+        "@SOB_8666@": n("SELECT COUNT(*) FROM documentos WHERE paginas>0 "
+                        "AND regime = 'Lei 8.666/1993'"),
+        "@SOB_14133@": n("SELECT COUNT(*) FROM documentos WHERE paginas>0 "
+                         "AND regime = 'Lei 14.133/2021'"),
+        "@SO_FICHA@": n("SELECT COUNT(*) FROM documentos WHERE paginas=0"),
+        "@SEM_TEXTO@": n("SELECT COUNT(*) FROM documentos "
+                         "WHERE paginas>0 AND tem_texto=0"),
+        "@REEQUILIBRIO@": n("SELECT COALESCE(MAX(documentos),0) FROM sinonimos "
+                            "WHERE variante LIKE 'reequil%'"),
+        "@PCT_TRANSCRICAO@": str(round(100.0 * acervo.con.execute(
+            "SELECT COUNT(*) FROM paginas WHERE transcricao>=50").fetchone()[0]
+            / max(acervo.con.execute(
+                "SELECT COUNT(*) FROM paginas").fetchone()[0], 1))),
+        # A mesma constante que decide o campo `conclusao_e_do_parecer`: se a
+        # lista mudar, o numero anunciado muda junto.
+        "@CONC_PROPRIA@": n(
+            "SELECT COUNT(*) FROM documentos WHERE paginas>0 AND conclusao_tipo IN (%s)"
+            % ",".join("'%s'" % x for x in CONCLUSAO_PROPRIA)),
+        "@CONC_ALHEIA@": n(
+            "SELECT COUNT(*) FROM documentos WHERE paginas>0 "
+            "AND COALESCE(conclusao,'') <> '' AND conclusao_tipo NOT IN (%s)"
+            % ",".join("'%s'" % x for x in CONCLUSAO_PROPRIA)),
+        "@CONC_NENHUMA@": n("SELECT COUNT(*) FROM documentos "
+                            "WHERE paginas>0 AND COALESCE(conclusao,'') = ''"),
+        "@PERIODO@": "%s a %s" % tuple(acervo.con.execute(
+            "SELECT MIN(ano), MAX(ano) FROM documentos WHERE ano>1900").fetchone()),
+    }
+    texto = MOLDE_INSTRUCOES
+    for marca, valor in valores.items():
+        texto = texto.replace(marca, valor)
+    return texto
 
 
 def _caminho_padrao() -> Path:
@@ -186,7 +245,7 @@ def construir(banco: str | None = None, dominios: list[str] | None = None,
 
     mcp = FastMCP(
         "Pareceres PGE-RJ",
-        instructions=INSTRUCOES,
+        instructions=instrucoes(acervo),
         transport_security=seguranca_de_transporte(dominios),
         **ajustes,
     )
