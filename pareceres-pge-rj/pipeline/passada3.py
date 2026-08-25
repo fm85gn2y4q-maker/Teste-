@@ -285,6 +285,10 @@ def main():
     con.execute("DROP TABLE IF EXISTS cobertura")
     con.execute("CREATE TABLE cobertura (chave TEXT, valor TEXT)")
     g = lambda s: con.execute(s).fetchone()[0]
+    # Ponto de milhar: o numero era literal no texto e ja vinha formatado; ao
+    # passar a ser contado, saiu cru -- "14420 documentos" na resposta ao
+    # advogado.
+    br = lambda n: "{:,}".format(n).replace(",", ".")
     dados = [
         ("fonte", "Acervo publico da Procuradoria-Geral do Estado do Rio de Janeiro (BNPortal)"),
         ("coletado_em", (io.open(COLETA, encoding="utf-8").read().strip()
@@ -305,7 +309,7 @@ def main():
                     "e parcerias permanece marcado no campo no_recorte (%s documentos) e "
                     "pode ser usado como filtro em listar_documentos. Fora dele ha materia de "
                     "pessoal, tributaria, previdenciaria e constitucional."
-                    % g("SELECT COUNT(*) FROM documentos WHERE no_recorte=1")),
+                    % br(g("SELECT COUNT(*) FROM documentos WHERE no_recorte=1"))),
         ("limite_busca", "A busca e literal. Consulte a tabela sinonimos antes de concluir que "
                          "o acervo nao trata de um tema."),
     ]

@@ -15,16 +15,18 @@ O acervo tem **766 MB**, contra os ~10 MB do Ementário. Isso muda o cálculo.
 
 | | Ementário (TCE-RJ) | Pareceres (PGE-RJ) |
 |---|---|---|
-| Acervo na imagem | ~10 MB | **766 MB** |
-| Comprimido (asset) | 24 MB | **266 MB** |
+| Acervo na imagem | ~10 MB | **1,4 GB** |
+| Comprimido (asset) | 24 MB | **506 MB** |
 
-**Não verifiquei se o plano gratuito do Render comporta uma imagem desse
-tamanho.** O plano free tem 512 MB de RAM, e o disco da instância é efêmero
-mas precisa caber a imagem. O SQLite é lido do disco, não carregado em
-memória, então a RAM tende a bastar — o risco está no disco e no tempo de
-construção, que inclui baixar e descomprimir 266 MB.
+**O plano gratuito comporta — verificado em 24/08/2026.** A dúvida ficou aberta
+por dois deploys; está respondida. O free tem 512 MB de RAM, e ela basta porque
+o SQLite é lido do disco, não carregado em memória. Baixar 506 MB, descomprimir
+1,4 GB e montar a imagem levou poucos minutos, e o serviço subiu servindo o
+acervo de 49.201 documentos.
 
-Se o deploy falhar por espaço, há três saídas, em ordem de esforço:
+Isso não é licença para crescer sem olhar: a margem não foi medida, só o
+sucesso. Se um dia o deploy falhar por espaço, há três saídas, em ordem de
+esforço:
 
 1. **Plano pago** com mais disco — é a solução direta.
 2. **Servir só a ficha**, deixando o inteiro teor de fora da imagem: sem
