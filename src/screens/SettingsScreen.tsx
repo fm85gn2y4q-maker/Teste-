@@ -1,203 +1,151 @@
-import React, { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useStore } from '../store/useStore';
+import { COLORS } from '../theme';
+import { formatBRL } from '../utils/format';
 
-const PURPLE = '#6C3DE8';
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Stepper({
+  value,
+  onChange,
+  step,
+  min,
+  max,
+  format,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  step: number;
+  min: number;
+  max: number;
+  format: (value: number) => string;
+}) {
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionBody}>{children}</View>
-    </View>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
+    <View style={styles.stepper}>
+      <Pressable
+        style={[styles.stepButton, value <= min && styles.stepButtonDisabled]}
+        onPress={() => onChange(Math.max(min, value - step))}
+      >
+        <Text style={styles.stepButtonText}>−</Text>
+      </Pressable>
+      <Text style={styles.stepValue}>{format(value)}</Text>
+      <Pressable
+        style={[styles.stepButton, value >= max && styles.stepButtonDisabled]}
+        onPress={() => onChange(Math.min(max, value + step))}
+      >
+        <Text style={styles.stepButtonText}>+</Text>
+      </Pressable>
     </View>
   );
 }
 
 export function SettingsScreen() {
-  const { apiToken, setApiToken, watchlist, refreshAll } = useStore();
-  const [tokenInput, setTokenInput] = useState(apiToken);
-
-  const saveToken = () => {
-    setApiToken(tokenInput.trim());
-    Alert.alert('Token salvo', 'Recarregando dados com o novo token…', [
-      { text: 'OK', onPress: () => refreshAll() },
-    ]);
-  };
+  const { maxStops, costPerKm, setMaxStops, setCostPerKm } = useStore();
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Configurações</Text>
+        <Text style={styles.title}>Configurações do plano</Text>
+        <Text style={styles.subtitle}>Ajuste como o plano inteligente é calculado</Text>
       </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.content}>
 
-          <Section title="API de Dados (Brapi)">
-            <Text style={styles.helpText}>
-              O app usa a Brapi (brapi.dev) para dados da B3. Sem token, as requisições são limitadas. Crie uma conta grátis ou Pro para obter seu token.
-            </Text>
-            <TextInput
-              style={styles.tokenInput}
-              value={tokenInput}
-              onChangeText={setTokenInput}
-              placeholder="Cole seu token Brapi aqui..."
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry
-            />
-            <TouchableOpacity style={styles.saveBtn} onPress={saveToken}>
-              <Text style={styles.saveBtnText}>Salvar e Recarregar</Text>
-            </TouchableOpacity>
-          </Section>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Máximo de mercados por plano</Text>
+          <Text style={styles.cardHint}>
+            Quantos mercados diferentes você aceita visitar em uma mesma compra.
+          </Text>
+          <Stepper
+            value={maxStops}
+            onChange={setMaxStops}
+            step={1}
+            min={1}
+            max={4}
+            format={(v) => `${v} ${v === 1 ? 'mercado' : 'mercados'}`}
+          />
+        </View>
 
-          <Section title="Análise Técnica">
-            <InfoRow label="Escolas ativas" value="Indicadores · Candlestick · Price Action" />
-            <InfoRow label="Timeframe padrão" value="Diário (6 meses)" />
-            <InfoRow label="Score de convergência" value="Média ponderada (-100 a +100)" />
-            <InfoRow label="Pesos" value="Indicadores 40% · Candle 30% · PA 30%" />
-          </Section>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Custo de deslocamento por km</Text>
+          <Text style={styles.cardHint}>
+            Custo estimado (combustível/app de transporte/tempo) por km rodado, contado em ida e
+            volta até cada mercado. Mercados de bairros vizinhos só valem a pena quando o preço
+            compensa a distância.
+          </Text>
+          <Stepper
+            value={costPerKm}
+            onChange={setCostPerKm}
+            step={0.5}
+            min={0}
+            max={6}
+            format={(v) => `${formatBRL(v)}/km`}
+          />
+        </View>
 
-          <Section title="Sobre o Scoring">
-            <View style={styles.scoreGuide}>
-              {[
-                { range: '+60 a +100', label: 'Forte Alta', color: '#16A34A' },
-                { range: '+30 a +59', label: 'Alta Moderada', color: '#65A30D' },
-                { range: '-29 a +29', label: 'Neutro', color: '#CA8A04' },
-                { range: '-59 a -30', label: 'Baixa Moderada', color: '#EA580C' },
-                { range: '-100 a -60', label: 'Forte Baixa', color: '#DC2626' },
-              ].map((g) => (
-                <View key={g.range} style={styles.guideRow}>
-                  <View style={[styles.guideColor, { backgroundColor: g.color }]} />
-                  <Text style={styles.guideRange}>{g.range}</Text>
-                  <Text style={[styles.guideLabel, { color: g.color }]}>{g.label}</Text>
-                </View>
-              ))}
-            </View>
-          </Section>
-
-          <Section title="Watchlist">
-            <InfoRow label="Ativos monitorados" value={String(watchlist.length)} />
-            <InfoRow label="Dados em tempo real" value="Não (atualização manual)" />
-            <InfoRow label="Delay" value="Fim do pregão (EOD)" />
-            <TouchableOpacity
-              style={[styles.saveBtn, { backgroundColor: '#F3F4F6' }]}
-              onPress={() => refreshAll()}
-            >
-              <Text style={[styles.saveBtnText, { color: PURPLE }]}>Atualizar todos os ativos</Text>
-            </TouchableOpacity>
-          </Section>
-
-          <View style={styles.disclaimerBox}>
-            <Text style={styles.disclaimerTitle}>⚠️ Aviso Legal</Text>
-            <Text style={styles.disclaimerText}>
-              Este aplicativo é uma ferramenta de visualização e análise técnica para fins educacionais e informativos. Não constitui recomendação de investimento, análise de valores mobiliários ou consultoria financeira. As métricas apresentadas não devem ser utilizadas isoladamente para decisões de investimento. Resultados passados não garantem resultados futuros. Invista com responsabilidade.
-            </Text>
-          </View>
-
-          <Text style={styles.version}>Grafista B3 · MVP v1.0 · Expo React Native</Text>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <View style={styles.aboutCard}>
+          <Text style={styles.aboutTitle}>Como funciona</Text>
+          <Text style={styles.aboutText}>
+            O app compara sua lista nos mercados do seu bairro e dos bairros vizinhos, aplicando as
+            promoções de cada um e somando o custo de deslocamento pela distância real. Depois
+            testa todas as combinações de mercados (até o limite configurado) e atribui cada item
+            ao mercado mais barato — assim ele só recomenda ir mais longe, ou dividir a compra,
+            quando o custo-benefício realmente compensa.
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F9FAFB' },
+  safe: { flex: 1, backgroundColor: COLORS.bg },
   header: {
-    backgroundColor: PURPLE,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  content: { padding: 16, paddingBottom: 40 },
-
-  section: { marginBottom: 16 },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#9CA3AF',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  sectionBody: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  helpText: { fontSize: 13, color: '#6B7280', lineHeight: 20, marginBottom: 12 },
-  tokenInput: {
-    height: 44,
+  title: { fontSize: 22, fontWeight: '800', color: '#fff' },
+  subtitle: { fontSize: 13, color: '#DCFCE7', marginTop: 4 },
+  content: { padding: 20 },
+  card: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: '#111827',
-    marginBottom: 10,
+    borderColor: COLORS.border,
+    padding: 18,
+    marginBottom: 14,
   },
-  saveBtn: {
-    backgroundColor: PURPLE,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-
-  infoRow: {
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.text },
+  cardHint: { fontSize: 13, color: COLORS.textMuted, marginTop: 4, lineHeight: 19 },
+  stepper: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    marginTop: 14,
+    backgroundColor: COLORS.bg,
+    borderRadius: 12,
+    padding: 8,
   },
-  infoLabel: { fontSize: 13, color: '#6B7280' },
-  infoValue: { fontSize: 13, color: '#374151', fontWeight: '500', flex: 1, textAlign: 'right' },
-
-  scoreGuide: { gap: 6 },
-  guideRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3 },
-  guideColor: { width: 10, height: 10, borderRadius: 5, marginRight: 10 },
-  guideRange: { width: 100, fontSize: 12, color: '#6B7280' },
-  guideLabel: { fontSize: 12, fontWeight: '700' },
-
-  disclaimerBox: {
-    backgroundColor: '#FEF9C3',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: '#CA8A04',
+  stepButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: COLORS.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  disclaimerTitle: { fontSize: 13, fontWeight: '700', color: '#92400E', marginBottom: 6 },
-  disclaimerText: { fontSize: 12, color: '#78350F', lineHeight: 18 },
-  version: { fontSize: 11, color: '#D1D5DB', textAlign: 'center' },
+  stepButtonDisabled: { opacity: 0.35 },
+  stepButtonText: { fontSize: 22, fontWeight: '800', color: COLORS.primaryDark },
+  stepValue: { fontSize: 17, fontWeight: '800', color: COLORS.text },
+  aboutCard: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 16,
+    padding: 18,
+  },
+  aboutTitle: { fontSize: 15, fontWeight: '800', color: COLORS.info, marginBottom: 6 },
+  aboutText: { fontSize: 13, color: '#1E3A8A', lineHeight: 20 },
 });

@@ -1,127 +1,67 @@
 import { create } from 'zustand';
-import { WatchlistAsset, MarketData } from '../analysis/types';
-import { fetchMarketData, setApiToken } from '../api/brapi';
-import { runConvergenceAnalysis } from '../analysis/convergence';
+import { ShoppingItem } from '../types';
+import { DEFAULT_PLANNER_OPTIONS } from '../engine/planner';
 
-const DEFAULT_WATCHLIST = ['PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'WEGE3'];
+interface AppState {
+  bairroId: string;
+  items: ShoppingItem[];
+  maxStops: number;
+  costPerKm: number;
 
-interface StoreState {
-  // Configuração
-  apiToken: string;
-  setApiToken: (token: string) => void;
-
-  // Watchlist
-  watchlist: WatchlistAsset[];
-  addTicker: (ticker: string) => void;
-  removeTicker: (ticker: string) => void;
-
-  // Dados de mercado carregados
-  marketDataMap: Record<string, MarketData>;
-
-  // Loading / error
-  loadingTickers: Set<string>;
-  errors: Record<string, string>;
-
-  // Ações
-  refreshTicker: (ticker: string) => Promise<void>;
-  refreshAll: () => Promise<void>;
-  initWatchlist: () => void;
+  setBairro: (bairroId: string) => void;
+  addItem: (productId: string, quantity?: number) => void;
+  removeItem: (productId: string) => void;
+  setQuantity: (productId: string, quantity: number) => void;
+  mergeItems: (items: ShoppingItem[]) => void;
+  clearList: () => void;
+  setMaxStops: (value: number) => void;
+  setCostPerKm: (value: number) => void;
 }
 
-export const useStore = create<StoreState>((set, get) => ({
-  apiToken: '',
-  setApiToken: (token) => {
-    setApiToken(token);
-    set({ apiToken: token });
-  },
+export const useStore = create<AppState>((set) => ({
+  bairroId: 'barra',
+  items: [],
+  maxStops: DEFAULT_PLANNER_OPTIONS.maxStops,
+  costPerKm: DEFAULT_PLANNER_OPTIONS.costPerKm,
 
-  watchlist: DEFAULT_WATCHLIST.map((ticker) => ({
-    ticker,
-    name: ticker,
-    currentPrice: 0,
-    change: 0,
-  })),
+  setBairro: (bairroId) => set({ bairroId }),
 
-  marketDataMap: {},
-  loadingTickers: new Set(),
-  errors: {},
-
-  addTicker: (ticker) => {
-    const { watchlist } = get();
-    if (watchlist.find((a) => a.ticker === ticker)) return;
-    set((s) => ({
-      watchlist: [
-        ...s.watchlist,
-        { ticker, name: ticker, currentPrice: 0, change: 0 },
-      ],
-    }));
-    get().refreshTicker(ticker);
-  },
-
-  removeTicker: (ticker) => {
-    set((s) => ({
-      watchlist: s.watchlist.filter((a) => a.ticker !== ticker),
-    }));
-  },
-
-  refreshTicker: async (ticker) => {
-    set((s) => {
-      const loading = new Set(s.loadingTickers);
-      loading.add(ticker);
-      return { loadingTickers: loading };
-    });
-
-    try {
-      const data = await fetchMarketData(ticker, '6mo', '1d');
-      const convergence = data.candles.length >= 30
-        ? runConvergenceAnalysis(ticker, data.candles)
-        : undefined;
-
-      set((s) => {
-        const loading = new Set(s.loadingTickers);
-        loading.delete(ticker);
-        const errors = { ...s.errors };
-        delete errors[ticker];
-
+  addItem: (productId, quantity = 1) =>
+    set((state) => {
+      const existing = state.items.find((i) => i.productId === productId);
+      if (existing) {
         return {
-          loadingTickers: loading,
-          errors,
-          marketDataMap: { ...s.marketDataMap, [ticker]: data },
-          watchlist: s.watchlist.map((a) =>
-            a.ticker === ticker
-              ? {
-                  ...a,
-                  name: data.name,
-                  currentPrice: data.currentPrice,
-                  change: data.change,
-                  convergence,
-                  lastUpdated: Date.now(),
-                }
-              : a,
+          items: state.items.map((i) =>
+            i.productId === productId ? { ...i, quantity: i.quantity + quantity } : i,
           ),
         };
-      });
-    } catch (err: any) {
-      set((s) => {
-        const loading = new Set(s.loadingTickers);
-        loading.delete(ticker);
-        return {
-          loadingTickers: loading,
-          errors: { ...s.errors, [ticker]: err.message ?? 'Erro desconhecido' },
-        };
-      });
-    }
-  },
+      }
+      return { items: [...state.items, { productId, quantity }] };
+    }),
 
-  refreshAll: async () => {
-    const { watchlist, refreshTicker } = get();
-    // Sequencial para não sobrecarregar a API (sem WebSocket)
-    for (const asset of watchlist) {
-      await refreshTicker(asset.ticker);
-    }
-  },
+  removeItem: (productId) =>
+    set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
 
-  initWatchlist: () => {
-    get().refreshAll();
-  },
+  setQuantity: (productId, quantity) =>
+    set((state) => ({
+      items:
+        quantity <= 0
+          ? state.items.filter((i) => i.productId !== productId)
+          : state.items.map((i) => (i.productId === productId ? { ...i, quantity } : i)),
+    })),
+
+  mergeItems: (incoming) =>
+    set((state) => {
+      const merged = new Map(state.items.map((i) => [i.productId, i.quantity]));
+      for (const item of incoming) {
+        merged.set(item.productId, (merged.get(item.productId) ?? 0) + item.quantity);
+      }
+      return {
+        items: [...merged.entries()].map(([productId, quantity]) => ({ productId, quantity })),
+      };
+    }),
+
+  clearList: () => set({ items: [] }),
+  setMaxStops: (value) => set({ maxStops: Math.min(4, Math.max(1, value)) }),
+  setCostPerKm: (value) => set({ costPerKm: Math.max(0, Math.round(value * 100) / 100) }),
 }));
