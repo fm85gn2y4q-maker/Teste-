@@ -369,7 +369,12 @@ class Armazenamento:
             parametros.append(tipo.value)
         # Já tentados e recusados pela origem não voltam à fila sozinhos: o
         # 404 é ausência estrutural, não falha a repetir a cada execução.
-        sql.append("    AND o.status_coleta NOT IN ('http_404', 'sem_numero_acordao')")
+        # `fora_do_recorte` marca o que foi deliberadamente deixado de fora —
+        # em 2026, o registro de ato de pessoal, que é 91% dos acórdãos e não
+        # traz tese. Fica no banco como referência (o acórdão existe e foi
+        # visto), mas não volta à fila de download a cada execução.
+        sql.append("    AND o.status_coleta NOT IN "
+                   "('http_404', 'sem_numero_acordao', 'fora_do_recorte')")
         sql.append(")")
         sql.append(
             "GROUP BY oficial HAVING oficial NOT IN (SELECT documento_id FROM paginas)"

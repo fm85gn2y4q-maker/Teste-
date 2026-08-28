@@ -179,30 +179,74 @@ def cmd_consultas(args: argparse.Namespace) -> int:
 
 def cmd_descobrir_acordaos(args: argparse.Namespace) -> int:
     from .http import Cliente
-    from .pesquisa_textual import TETO, descobrir
+    from .pesquisa_textual import TETO, descobrir, naturezas_de_pessoal, e_ato_de_pessoal
 
     config = Config.carregar(args.config)
     if args.intervalo is not None:
         config.intervalo_seg = args.intervalo
     banco = Path(args.banco or Path(config.diretorio_saida) / "tcerj.sqlite")
 
+    def _fatias() -> list[tuple[str | None, str | None]]:
+        """Os recortes de data a percorrer."""
+        if not args.por_mes:
+            return [(args.desde, args.ate)]
+        if not (args.desde and args.ate):
+            raise SystemExit("--por-mes exige --desde e --ate")
+        import calendar
+        ai, mi = int(args.desde[:4]), int(args.desde[5:7])
+        af, mf = int(args.ate[:4]), int(args.ate[5:7])
+        fatias = []
+        while (ai, mi) <= (af, mf):
+            ultimo = calendar.monthrange(ai, mi)[1]
+            fatias.append((f"{ai}-{mi:02d}-01", f"{ai}-{mi:02d}-{ultimo:02d}"))
+            mi += 1
+            if mi > 12:
+                ai, mi = ai + 1, 1
+        return fatias
+
+    descartadas = 0
+
     async def rodar(armazenamento) -> tuple[int, int, list[str]]:
+        nonlocal descartadas
         novas = conhecidas = 0
         saturadas = []
+        termos = args.termo or [""]
         async with Cliente(config) as cliente:
-            for termo in args.termo:
-                referencias, total = await descobrir(
-                    cliente, termo, municipio=args.municipio,
-                    ano_min=args.ano_min, ano_max=args.ano_max,
-                )
-                n, c = armazenamento.registrar_descobertos(referencias)
-                novas += n
-                conhecidas += c
-                marca = " (NO TETO — recorte incompleto)" if total >= TETO else ""
-                print(f"  {termo}: {total} no servidor, {len(referencias)} lidos, "
-                      f"{n} novos{marca}", flush=True)
-                if total >= TETO:
-                    saturadas.append(termo)
+            excluidas = None
+            if args.sem_pessoal:
+                excluidas = await naturezas_de_pessoal(cliente)
+                if not excluidas:
+                    # Sem o catálogo o filtro vira silêncio: a busca voltaria
+                    # completa e ninguém saberia que o recorte não se aplicou.
+                    raise SystemExit(
+                        "--sem-pessoal pediu o catálogo de naturezas e ele não "
+                        "veio. Abortado: sem ele a coleta traria tudo, e o "
+                        "resultado pareceria filtrado.")
+                print(f"  excluindo {len(excluidas)} naturezas de pessoal",
+                      flush=True)
+            for desde, ate in _fatias():
+                for termo in termos:
+                    referencias, total = await descobrir(
+                        cliente, termo, municipio=args.municipio,
+                        ano_min=args.ano_min, ano_max=args.ano_max,
+                        desde=desde, ate=ate,
+                        naturezas_excluidas=excluidas,
+                    )
+                    if args.sem_atos_de_pessoal:
+                        antes = len(referencias)
+                        referencias = [r for r in referencias
+                                       if not e_ato_de_pessoal(r.natureza)]
+                        descartadas += antes - len(referencias)
+                    n, c = armazenamento.registrar_descobertos(referencias)
+                    novas += n
+                    conhecidas += c
+                    marca = " (NO TETO — recorte incompleto)" if total >= TETO else ""
+                    rotulo = (desde[:7] if desde else "tudo") + (
+                        f" {termo}" if termo else "")
+                    print(f"  {rotulo}: {total} no servidor, "
+                          f"{len(referencias)} lidos, {n} novos{marca}", flush=True)
+                    if total >= TETO:
+                        saturadas.append(rotulo)
         return novas, conhecidas, saturadas
 
     with Armazenamento(banco) as armazenamento:
@@ -384,9 +428,26 @@ def construir_parser() -> argparse.ArgumentParser:
         help="acha acórdãos pela Pesquisa Textual, além da curadoria do "
              "Serviço de Jurisprudência",
     )
-    p.add_argument("--termo", action="append", required=True,
+    p.add_argument("--termo", action="append",
                    help="expressão a procurar. Pode repetir. Aspas fazem busca "
-                        "exata; ' E ', ' OU ' e ' -- ' são os operadores.")
+                        "exata; ' E ', ' OU ' e ' -- ' são os operadores. "
+                        "Omitido, varre o recorte inteiro sem filtrar palavra.")
+    p.add_argument("--desde", help="data ISO da sessão mais antiga (2026-01-01)")
+    p.add_argument("--ate", help="data ISO da sessão mais recente (2026-12-31)")
+    p.add_argument("--sem-atos-de-pessoal", action="store_true",
+                   help="descarta aposentadoria, pensão, admissão e afins. "
+                        "São ~90% do que o Tribunal julga, não firmam tese, e "
+                        "trazem nome de servidor com matrícula e proventos "
+                        "para um acervo que existe para citar precedente.")
+    p.add_argument("--sem-pessoal", action="store_true",
+                   help="exclui registro de ato de pessoal (aposentadoria, "
+                        "pensão, contratação por prazo determinado e afins). "
+                        "Em 2026 são 91% dos acórdãos, sem tese para citar e "
+                        "com nome e proventos de servidor no texto.")
+    p.add_argument("--por-mes", action="store_true",
+                   help="fatia o intervalo mês a mês. Um ano inteiro passa do "
+                        "teto de 10.000 e volta truncado sem avisar; por mês, "
+                        "a soma das fatias é demonstravelmente o conjunto.")
     p.add_argument("--municipio", type=int,
                    help="id do ente federativo (ex.: 93 = Mesquita)")
     p.add_argument("--ano-min", type=int, help="ano de sessão mais antigo")
