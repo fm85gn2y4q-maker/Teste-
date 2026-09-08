@@ -254,6 +254,31 @@ Numa operação irreversível, a pergunta não é "quantos vão sair" — é "mo
 o que vai sair". E a correção foi amarrar a espécie no SQL mais uma asserção de
 que todo id começa com `acordao-`, para o erro não poder voltar calado.
 
+
+## 14. A conferência que a conta não faz
+
+Duas vezes nesta base montei um conjunto de exclusão por aritmética e o
+conjunto veio errado — e nas duas o erro só apareceu porque, antes de executar,
+listei a **natureza documento a documento** do que sairia.
+
+Primeira: `com_texto − nao_pessoal − curados` levava junto trinta Respostas a
+Consulta, porque os ids delas não estavam na lista de não-pessoal, que só tinha
+`acordao-*`. Segunda: cinco acórdãos decisórios — tomada de contas, relatórios
+de acompanhamento de contrato, representação em face de licitação, auditoria
+governamental — que a classificação da própria API não devolveu como
+não-pessoal.
+
+A conta acertava a cardinalidade e errava o conteúdo. **Numa operação
+irreversível, "quantos vão sair" não é a pergunta; "mostre-me o que vai sair"
+é.** E a amostra não basta: os cinco intrusos eram 0,03% de 15.830, e nenhuma
+amostra de vinte os pegaria.
+
+Um detalhe mede o resto: 12,8% dos documentos ficaram sem natureza legível
+porque minha expressão esperava `3 INTERESSADO` e o documento trazia
+`3 - INTERESSADO`. Um hífen. Se eu tivesse tratado "não identificado" como
+"provavelmente é o mesmo que o resto", teria acertado por sorte — e a sorte não
+se audita.
+
 ---
 
 ## Erros que cometi, e o que cada um ensina
