@@ -5,7 +5,7 @@ Janeiro, e os serve a assistentes de IA pelo protocolo MCP:
 
 | | |
 |---|---|
-| **Jurisprudência** | 1.671 ementas e o inteiro teor de **25.561 acórdãos** e **555 respostas a consulta** — 576.741 páginas |
+| **Jurisprudência** | 1.696 ementas e o inteiro teor de **26.947 acórdãos** e **561 respostas a consulta** — 596.427 páginas |
 | **Normas** | **973 atos** — deliberações, resoluções, atos normativos, portarias, notas técnicas e o Regimento Interno |
 
 Bancos SQLite com busca textual, exportáveis para JSONL e CSV. O coletor das
@@ -22,7 +22,7 @@ ponta:
 
 | Base | Endpoint | Registros |
 |---|---|---|
-| Jurisprudência Selecionada (ementas de acórdãos) | `POST /liana-processo-webapi/consulta/pagina/{pagina}/tamanhoPagina/{tamanho}` | 1.067 |
+| Jurisprudência Selecionada (ementas de acórdãos) | `POST /liana-processo-webapi/consulta/pagina/{pagina}/tamanhoPagina/{tamanho}` | 1.089 |
 | Respostas às Consultas | `POST /cadastro-publicacoes-webapi/api/Consulta/listar` | 572 |
 | Súmulas | `GET /cadastro-publicacoes-webapi/api/Sumula` | 28 |
 | Questões de Ordem | `POST /liana-processo-webapi/questaoordem/consulta/pagina/{pagina}/tamanhoPagina/{tamanho}` | 4 |

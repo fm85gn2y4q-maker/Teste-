@@ -50,11 +50,40 @@ interpretador.
 
 | | |
 |---|---|
-| Ementas | **1.671** (1.067 acórdãos, 572 respostas a consulta, 28 súmulas, 4 questões de ordem) |
-| Acórdãos com inteiro teor | **25.561** |
-| Respostas a Consulta com inteiro teor | **555** de 572 |
-| Páginas | **576.741** (1,32 bilhão de caracteres) |
+| Ementas | **1.696** (1.089 acórdãos, 575 respostas a consulta, 28 súmulas, 4 questões de ordem) |
+| Documentos com inteiro teor | **27.508** |
+| Respostas a Consulta com inteiro teor | **561** de 575 |
+| Páginas | **596.427** |
 | Período do corpus textual dos acórdãos | **2021–2026**, nas duas origens |
+| Acórdãos de 2026 com conteúdo decisório | **2.020** de 2.025 |
+| Registro de ato de pessoal, sem texto | **21.988** (`fora_do_recorte`) |
+### O recorte de 2026, e o que ficou deliberadamente de fora
+
+A varredura de 2026 usou recorte **mensal** (`--por-mes`), e não anual: o ano
+inteiro tem 24.019 acórdãos e bate no teto de 10.000 da Pesquisa Textual, que
+trunca **sem avisar**. Por mês, o maior é março com 6.899, e a soma das oito
+fatias é demonstravelmente o conjunto — cada uma leu exatamente o total que o
+servidor informou.
+
+Dos 24.019, **21.994 (91%) são registro de ato de pessoal**: aposentadoria,
+pensão, contratação por prazo determinado, concurso público. Três páginas,
+texto padronizado, "julgar legal o ato". Não há tese para citar, e trazê-los
+significaria indexar nome, matrícula e proventos de milhares de servidores num
+acervo cuja função é pesquisar jurisprudência.
+
+Eles ficam no banco como **referência sem texto** (`status_coleta =
+'fora_do_recorte'`): o acórdão consta com número, ano e processo, e dá para
+responder "este ato foi apreciado?" sem ter o dado pessoal indexado.
+
+O grupo 284 — *suspensão de direito de licitar e contratar* — **não** entra na
+exclusão: é sanção, tem conteúdo decisório, e só apareceu na peneira inicial
+por acidente de expressão regular.
+
+**Anos anteriores ainda têm ato de pessoal com texto**: 15.977 acórdãos de
+2021 a 2025, herdados da coleta original, que não usava esse filtro. A base é,
+nesse ponto, inconsistente consigo mesma — e vale saber disso antes de medir
+qualquer coisa sobre composição do acervo.
+
 
 **Resposta a Consulta tem inteiro teor desde 05/08/2026.** O `arquivoId`
 sempre esteve no payload guardado; o acervo declarava "só acórdãos têm inteiro
@@ -245,7 +274,7 @@ código não é o mesmo que o que muda no mundo**. Todos os requisitos declaram
 **Cache do conector.** Ao mudar ferramentas ou instruções, Claude e ChatGPT
 continuam com a versão antiga. Desligar e religar não basta — é preciso
 **remover e recriar** o conector. Confirme com `cobertura_do_acervo`: têm de
-vir **25.561** acórdãos com inteiro teor e **17 ferramentas**.
+vir **27.508** documentos com inteiro teor e **17 ferramentas**.
 
 **Serviços órfãos no Render.** Serviço removido do `render.yaml` não é apagado:
 fica no painel e continua tentando construir a cada push. O Render também

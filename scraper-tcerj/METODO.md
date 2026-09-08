@@ -176,7 +176,7 @@ build falha em vez de subir um acervo diferente do declarado.
 
 ## 10. Teste de aceitação é comportamental, não automatizado
 
-174 testes automatizados não medem se o modelo pesquisa como um advogado
+167 testes automatizados não medem se o modelo pesquisa como um advogado
 cuidadoso. Para isso, cinco perguntas reais, em chat limpo, sem palavra-chave e
 sem intervenção — *o erro é o dado*.
 
@@ -211,6 +211,48 @@ A saída foi o padrão já validado para súmula: busca literal, e devolução d
 não do silêncio do índice. Vale sempre que o universo couber numa leitura — 28
 súmulas, 10 notas — e deixa de valer nos 25.561 acórdãos, onde ranquear é a
 única opção e por isso o acervo declara os limites em vez de escondê-los.
+
+
+## 12. O teto silencioso, e o filtro que finge ter funcionado
+
+Dois modos de falhar aparecidos na varredura de 2026, e os dois devolvem
+resultado com cara de certo.
+
+**O teto não se anuncia.** A Pesquisa Textual devolve no máximo 10.000, e 2026
+tem 24.019 acórdãos. Pedindo o ano inteiro vêm 10.000 e nada no retorno diz que
+faltam 14.019 — nem código de erro, nem campo, nem aviso. A defesa foi trocar o
+recorte por mês e **verificar cada fatia**: `lidos` tem de bater com o total
+informado, e nenhuma pode encostar no teto. Aí a soma das fatias é o conjunto,
+e isso se demonstra em vez de se supor.
+
+**O filtro que aceita e não filtra.** `naturezasExcluidas` desserializa para
+uma entidade do domínio. Mandar id inteiro devolve 400 — erro honesto, fácil de
+achar. Mandar um objeto reduzido devolve **200 e não filtra nada**: a busca
+volta completa e parece filtrada. Só o objeto do catálogo, inteiro, funciona.
+
+O que separou um do outro não foi ler documentação — foi **medir a partição**:
+junho sem filtro 3.596, excluindo aposentadoria 2.358, só aposentadoria 1.238.
+Soma fechada. Um filtro que não filtra não produz partição.
+
+Por isso o comando **aborta** quando o catálogo não vem, em vez de coletar tudo
+achando que filtrou. Falhar alto é melhor que acertar por acidente.
+
+## 13. Aritmética de conjuntos apaga o que você não olhou
+
+Ao remover os atos de pessoal já baixados, montei o conjunto como
+`com_texto_de_2026 − nao_pessoal − curados`. A conta estava certa e o conjunto,
+errado: os ids de **Resposta a Consulta** não estavam na lista de não-pessoal
+— que só continha `acordao-*` — e caíram no complemento. Trinta respostas a
+consulta de 2026 e uma prestação de contas de governo municipal iam ser
+apagadas.
+
+Só apareceu porque, antes de executar, conferi a **natureza documento a
+documento** do que sairia, em vez de confiar na cardinalidade. A conta dizia
+13.785; a conferência mostrou 31 intrusos e o número certo, 13.754.
+
+Numa operação irreversível, a pergunta não é "quantos vão sair" — é "mostre-me
+o que vai sair". E a correção foi amarrar a espécie no SQL mais uma asserção de
+que todo id começa com `acordao-`, para o erro não poder voltar calado.
 
 ---
 
