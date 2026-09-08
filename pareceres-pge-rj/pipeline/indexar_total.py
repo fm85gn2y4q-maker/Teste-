@@ -72,12 +72,20 @@ def ficha(r, recorte):
     orgaos = [m.get("nome", "") for m in (r.get("membros") or [])
               if m.get("tipo_relacao") == 10]
     assuntos = " | ".join(a.get("nome", "") for a in (r.get("assuntos") or []))
-    _, eixos, criterio = avalia(r)
+    tematico, eixos, criterio = avalia(r)
     linha = (
         cod, r.get("tipo_nome"), r.get("titulo"), r.get("numero"), r.get("datadoc"),
         r.get("anodoc"), " | ".join(procs), " | ".join(setores), " | ".join(orgaos),
         r.get("processo"), r.get("ementa"), assuntos, "; ".join(eixos), criterio,
-        1 if cod in recorte else 0,
+        # O recorte era decidido SO por pertencer a selecionados.jsonl, congelado
+        # nas 14.420 linhas da primeira coleta. Documento novo era classificado
+        # certo -- ganhava eixo tematico -- e mesmo assim entrava com
+        # no_recorte=0: o filtro parava de crescer, calado, e ficaria mais
+        # defasado a cada coleta. Medido antes de mudar: a lista de julho e
+        # subconjunto exato do que `avalia` reconhece hoje (14.420 de 14.420),
+        # entao somar os dois nao revisa decisao antiga, so deixa entrar quem
+        # chegou depois.
+        1 if (tematico or cod in recorte) else 0,
         (r.get("precedentes") or "").replace("\n", " "),
         UP % ax[0]["cod_anexo"] if ax else "", FICHA % cod)
     return linha, (cod, r.get("titulo"), r.get("ementa"), assuntos), bool(eixos)

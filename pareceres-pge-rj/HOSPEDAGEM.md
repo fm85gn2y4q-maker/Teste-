@@ -68,8 +68,8 @@ mesma forma por todo serviço. Menos lugares onde errar.
 O acervo atualmente declarado no `Dockerfile`:
 
 ```
-pareceres-pge-rj-v2.1.0   coleta de 23/08/2026   506 MB comprimidos
-sha256  b8f1055699f7b32bed5a49a7e2cd57ed3aefa3e6f34550f5fd7d3dc13306d795
+pareceres-pge-rj-v2.1.1   coleta de 23/08/2026   506 MB comprimidos
+sha256  7391b08616ce6f8274802b3dfa4bd8971e41aaaef3c49cf3862793a85a8fd664
 ```
 
 Publicado. A construção confere o hash e falha se não bater, que é o

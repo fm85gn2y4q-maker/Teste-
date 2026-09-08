@@ -22,8 +22,8 @@ COPY pareceres/ ./pareceres/
 # construção do serviço: nem todo serviço repassa argumentos de build, e
 # depender disso deixa a imagem sem acervo por um motivo invisível.
 # Publicar acervo novo é trocar estas duas linhas.
-ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/pareceres-pge-rj-v2.1.0/pge-rj-pareceres-v2.1.0.db.gz
-ARG ACERVO_SHA256=b8f1055699f7b32bed5a49a7e2cd57ed3aefa3e6f34550f5fd7d3dc13306d795
+ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/pareceres-pge-rj-v2.1.1/pge-rj-pareceres-v2.1.1.db.gz
+ARG ACERVO_SHA256=7391b08616ce6f8274802b3dfa4bd8971e41aaaef3c49cf3862793a85a8fd664
 COPY baixar_acervo.py ./
 RUN python baixar_acervo.py "$ACERVO_URL" dados/pge_rj_pareceres.db "$ACERVO_SHA256"
 

@@ -34,3 +34,8 @@ PDFS = os.path.join(BASE, "PDFs")
 # como backup -- nao como o arquivo de trabalho.
 BANCO_RAIZ = os.path.expanduser("~/Documents/PGE-RJ_Pareceres_Contratacoes")
 DB = os.environ.get("PARECERES_BANCO", os.path.join(BANCO_RAIZ, "pge_rj_pareceres.db"))
+
+# Os exports (CSV e JSONL do catalogo) sao registros que a pessoa abre e le.
+# Ficam com o banco, nao com os PDFs: o HD externo e arquivo morto, e abrir
+# planilha de 36 MB de la e sofrimento sem motivo.
+REGISTROS = BANCO_RAIZ
