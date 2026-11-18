@@ -5,7 +5,7 @@ Janeiro, e os serve a assistentes de IA pelo protocolo MCP:
 
 | | |
 |---|---|
-| **Jurisprudência** | 1.696 ementas e o inteiro teor de **11.122 acórdãos** e **561 respostas a consulta** — 189.275 páginas |
+| **Jurisprudência** | 1.758 ementas e o inteiro teor de **12.052 acórdãos** e **573 respostas a consulta** — 205.015 páginas |
 | **Normas** | **973 atos** — deliberações, resoluções, atos normativos, portarias, notas técnicas e o Regimento Interno |
 
 Bancos SQLite com busca textual, exportáveis para JSONL e CSV. O coletor das

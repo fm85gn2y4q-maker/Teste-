@@ -279,6 +279,58 @@ porque minha expressão esperava `3 INTERESSADO` e o documento trazia
 "provavelmente é o mesmo que o resto", teria acertado por sorte — e a sorte não
 se audita.
 
+
+## 15. `lidos == informado` é indício, não prova
+
+A varredura de 2026 passou nessa verificação em todas as oito fatias mensais, e
+isso me deu confiança indevida: passei a tratá-la como demonstração de
+cobertura. Agosto de 2026 mostrou o limite — a fonte informa
+`quantidadeTotal: 249` e entrega 247, paginando até o fim, e nenhum dos
+registros devolvidos carece da chave do acórdão.
+
+Dois caminhos se abriam: a coleta perdeu dois, ou o contador da fonte mente.
+Para decidir, varri o mês **por semana** e comparei a união com o mensal:
+
+    01-07   112 informado   112 lidos
+    08-14    55 informado    54 lidos   <-- discorda
+    15-21    25 informado    24 lidos   <-- discorda
+    22-28    31 informado    31 lidos
+    29-31    26 informado    26 lidos
+    ------------------------------------
+    união das semanas .... 247
+    mensal entregou ...... 247
+
+A união bate o mensal, e a discordância reaparece nas mesmas duas semanas. Os
+dois registros são **fantasmas do contador**: contados e nunca entregues em
+nenhuma granularidade. Nada se perdeu.
+
+O que fica é o método. Comparar a entrega com a contagem **da mesma consulta**
+só detecta erro de paginação, e confia no número que a fonte publica. O que
+prova cobertura é a **concordância entre recortes independentes** — fatias de
+tamanho diferente que, somadas, dão o mesmo conjunto. Uma consulta só não se
+audita; duas, sim.
+
+## 16. Dependência que falta não grita, erra de nome
+
+A coleta de novembro/2026 terminou com código de saída 0 e
+`Novas: 0 | páginas: 0 | falhas: 25`. Indistinguível, para quem lê a última
+linha, de "não havia nada novo". A causa real estava no log de erro, repetida
+972 vezes: `No module named 'fitz'` — o PyMuPDF não estava no venv, depois de
+uma troca de interpretador para o Python 3.13.
+
+O coletor reportou isso como falha de documento, não como falha de ambiente, e
+marcou tudo como `erro_temporario`. Nada no comportamento apontava para a
+dependência.
+
+Duas consequências práticas:
+
+- **Conferir o ambiente antes da coleta longa, não depois.** Uma extração de
+  teste num PDF conhecido custa segundos e teria poupado uma passada inteira.
+- **Não confiar na instalação.** O pip trouxe PyMuPDF **2.1**, salto de major
+  sobre a 1.x contra a qual o coletor foi escrito; a API podia ter mudado.
+  Testei a extração antes de disparar os 1.035 documentos — funcionou, mas a
+  verificação não era dispensável por ter dado certo.
+
 ---
 
 ## Erros que cometi, e o que cada um ensina

@@ -26,8 +26,8 @@ COPY ementario/ ./ementario/
 # construção do serviço de hospedagem: nem todo serviço repassa argumentos de
 # build, e depender disso deixava a imagem sem acervo por um motivo invisível.
 # Publicar um acervo novo é trocar estas duas linhas.
-ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/acervo-v3.3.0/ementario-tcerj-v3.3.0.db.gz
-ARG ACERVO_SHA256=4787da94522ab71da99d501125e83e29b23effe7706dfed5622d9ebc01d8e0f2
+ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/Teste-/releases/download/acervo-v3.4.0/ementario-tcerj-v3.4.0.db.gz
+ARG ACERVO_SHA256=e75ca1062defdb5e0c8257274a655f0663f0d9a7848bbaa02d704ff882da5359
 COPY baixar_acervo.py ./
 RUN python baixar_acervo.py "$ACERVO_URL" dados/tcerj.sqlite "$ACERVO_SHA256"
 

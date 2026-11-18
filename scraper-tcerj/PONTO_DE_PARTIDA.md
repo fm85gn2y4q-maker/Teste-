@@ -50,10 +50,10 @@ interpretador.
 
 | | |
 |---|---|
-| Ementas | **1.696** (1.089 acórdãos, 575 respostas a consulta, 28 súmulas, 4 questões de ordem) |
-| Documentos com inteiro teor | **11.683** |
+| Ementas | **1.758** (1.137 acórdãos, 589 respostas a consulta, 28 súmulas, 4 questões de ordem) |
+| Documentos com inteiro teor | **12.642** |
 | Respostas a Consulta com inteiro teor | **561** de 575 |
-| Páginas | **189.275** |
+| Páginas | **205.015** |
 | Período do corpus textual dos acórdãos | **2021–2026**, nas duas origens |
 | Acórdãos de 2026 com conteúdo decisório | **2.020** de 2.025 |
 | Registro de ato de pessoal, sem texto | **37.813** (`fora_do_recorte`) |
@@ -278,7 +278,7 @@ código não é o mesmo que o que muda no mundo**. Todos os requisitos declaram
 **Cache do conector.** Ao mudar ferramentas ou instruções, Claude e ChatGPT
 continuam com a versão antiga. Desligar e religar não basta — é preciso
 **remover e recriar** o conector. Confirme com `cobertura_do_acervo`: têm de
-vir **11.683** documentos com inteiro teor e **17 ferramentas**.
+vir **12.642** documentos com inteiro teor e **17 ferramentas**.
 
 **Serviços órfãos no Render.** Serviço removido do `render.yaml` não é apagado:
 fica no painel e continua tentando construir a cada push. O Render também
