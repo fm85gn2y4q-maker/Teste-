@@ -30,7 +30,7 @@ DESTINO = RAIZ / "dist" / "pareceres-pge-rj.mcpb"
 # O acervo é artefato de dados e mora fora do repositório.
 BANCO = Path(os.environ.get(
     "PARECERES_BANCO",
-    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres_enxuto.db"))
+    r"C:\Users\Matheus Menegatti\Documents\PGE-RJ_Pareceres_Contratacoes\pge_rj_pareceres.db"))
 
 # O Claude Desktop não usa o interpretador do projeto: pega o primeiro `python`
 # do PATH dele. Como `pydantic_core` é binário compilado, um .pyd de cp312 não
@@ -95,6 +95,7 @@ FERRAMENTAS = [
     ("conclusoes_sobre", "Só as conclusões dos pareceres que casam com a busca."),
     ("quem_citou", "Quem cita uma norma, súmula, acórdão ou parecer interno."),
     ("listar_documentos", "Varredura por ano, procurador, órgão, eixo ou regime."),
+    ("situacao_da_norma", "O que os pareceres declararam sobre uma norma: revogação, inconstitucionalidade, suspensão."),
     ("cobertura_do_acervo", "Volumes, período, recorte, autoridade e limites."),
 ]
 
@@ -104,14 +105,12 @@ MANIFESTO = {
     "display_name": "Pareceres PGE-RJ",
     "version": "0.1.0",
     "description": "Pareceres da PGE-RJ em contratações, acordos e parcerias.",
-    "long_description": (
-        "Acervo consultivo da Procuradoria-Geral do Estado do Rio de Janeiro sobre "
-        "licitação, contratação direta, contrato administrativo, convênio, terceiro "
-        "setor, concessão e uso de bem público. 14.420 documentos, 8.559 com inteiro "
-        "teor, 177.156 páginas, de 1961 a 2026. Cada resultado traz a página para "
-        "citação, a seção do parecer, o grau de transcrição de terceiro e o regime "
-        "de vigência."
-    ),
+    # Os volumes entram em `montar_manifesto`, contados do banco que vai dentro
+    # do pacote. Eram literais aqui e anunciavam 14.420 documentos, 8.559 com
+    # inteiro teor e 177.156 páginas — números da época em que o acervo era só
+    # o recorte temático, dois marcos antes do atual. Quem lesse a descrição da
+    # extensão veria um acervo três vezes menor que o instalado.
+    "long_description": "@DESCRICAO@",
     "author": {"name": "Matheus Menegatti"},
     "server": {
         "type": "python",
@@ -128,6 +127,35 @@ MANIFESTO = {
     # `compatibility` fica de fora de propósito: é opcional, e no projeto irmão
     # foi o único ponto que o Claude Desktop recusou na instalação.
 }
+
+
+def volumes(banco: Path) -> str:
+    """A frase de volumes, medida no banco que vai dentro do pacote."""
+    import sqlite3
+    con = sqlite3.connect("file:%s?mode=ro" % banco.as_posix(), uri=True)
+    g = lambda s: con.execute(s).fetchone()[0]
+    br = lambda n: "{:,}".format(n).replace(",", ".")
+    frase = ("%s documentos, %s com inteiro teor, %s páginas, de %s a %s"
+             % (br(g("SELECT COUNT(*) FROM documentos")),
+                br(g("SELECT COUNT(*) FROM documentos WHERE paginas>0")),
+                br(g("SELECT COUNT(*) FROM paginas")),
+                g("SELECT MIN(ano) FROM documentos WHERE ano>1900"),
+                g("SELECT MAX(ano) FROM documentos")))
+    con.close()
+    return frase
+
+
+def montar_manifesto(banco: Path) -> dict:
+    """O manifesto com os volumes do banco, não com os de uma coleta antiga."""
+    import copy
+    m = copy.deepcopy(MANIFESTO)
+    m["long_description"] = (
+        "Acervo consultivo da Procuradoria-Geral do Estado do Rio de Janeiro sobre "
+        "licitação, contratação direta, contrato administrativo, convênio, terceiro "
+        "setor, concessão e uso de bem público. " + volumes(banco) + ". Cada "
+        "resultado traz a página para citação, a seção do parecer, o grau de "
+        "transcrição de terceiro e o regime de vigência.")
+    return m
 
 
 def validar(pasta: Path) -> bool:
@@ -249,8 +277,13 @@ def empacotar(python: str | None = None) -> int:
     (CONSTRUCAO / "dados").mkdir()
     shutil.copy2(BANCO, CONSTRUCAO / "dados" / "pge_rj_pareceres.db")
 
+    # O manifesto e montado AQUI, depois de o acervo estar copiado: os volumes
+    # sao contados do banco que foi dentro do pacote, nao de um numero escrito
+    # a mao meses atras.
+    manifesto = montar_manifesto(CONSTRUCAO / "dados" / "pge_rj_pareceres.db")
+    print("  descricao: ..." + manifesto["long_description"][-110:])
     (CONSTRUCAO / "manifest.json").write_text(
-        json.dumps(MANIFESTO, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        json.dumps(manifesto, ensure_ascii=False, indent=2) + chr(10), encoding="utf-8")
 
     print("Validando o manifesto…")
     if not validar(CONSTRUCAO):

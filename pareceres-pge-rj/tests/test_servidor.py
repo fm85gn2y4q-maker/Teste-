@@ -202,3 +202,19 @@ def test_instrucoes_contam_em_vez_de_afirmar(servidor, acervo):
         "SELECT COUNT(*) FROM documentos WHERE paginas=0").fetchone()[0]
     for n in (docs, teor, pags, so_ficha):
         assert br(n) in texto, "instrucoes nao anunciam %s" % br(n)
+
+
+def test_manifesto_do_mcpb_lista_as_mesmas_ferramentas(servidor):
+    """A lista do manifesto da extensao e mantida a mao, e foi assim que a
+    `situacao_da_norma` ficou de fora: o pacote instalava dez ferramentas e
+    anunciava nove. Quem instala le o manifesto, nao o codigo."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    import empacotar_mcpb
+
+    do_manifesto = {n for n, _ in empacotar_mcpb.FERRAMENTAS}
+    do_servidor = {t.name for t in asyncio.run(servidor.list_tools())}
+    assert do_manifesto == do_servidor, (
+        "manifesto e servidor divergem: so no servidor %s | so no manifesto %s"
+        % (sorted(do_servidor - do_manifesto), sorted(do_manifesto - do_servidor)))
