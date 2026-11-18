@@ -10,3 +10,4 @@ dist/
 *.db.gz
 *.jsonl
 *.html
+.venv_quebrado/
